@@ -1,0 +1,81 @@
+#rate_library.csv
+Element,Unit,BaseRate,Location,Year
+# --- PRELIMINARIES ---
+Site Establishment,Item,500000,Kaduna,2025
+Temporary Works,Item,300000,Kaduna,2025
+Site Management,Item,400000,Kaduna,2025
+
+# --- SUBSTRUCTURE WORKS ---
+Site Clearance,m2,1500,Kaduna,2025
+Excavation,m3,2000,Kaduna,2025
+Earthworks,m3,2500,Kaduna,2025
+Foundations,m3,30000,Kaduna,2025
+Basement,m3,50000,Kaduna,2025
+Ground Floor Slab,m2,35000,Kaduna,2025
+
+# --- SUPERSTRUCTURE WORKS ---
+Concrete,m3,30000,Kaduna,2025
+Reinforced Concrete,m3,40000,Kaduna,2025
+Masonry,m2,8000,Kaduna,2025
+Blockwork,m2,7000,Kaduna,2025
+Partition Walls,m2,6000,Kaduna,2025
+Steelwork,tonne,50000,Kaduna,2025
+Structural Steel,tonne,55000,Kaduna,2025
+Roof Trusses,m2,20000,Kaduna,2025
+Roof Structure,m2,25000,Kaduna,2025
+Roof Coverings,m2,20000,Kaduna,2025
+Carpentry,m2,15000,Kaduna,2025
+Joinery,m2,12000,Kaduna,2025
+Doors,No.,45000,Kaduna,2025
+Windows,No.,40000,Kaduna,2025
+Frames,m,10000,Kaduna,2025
+Skirting,m,2500,Kaduna,2025
+
+# --- FINISHES ---
+Plastering,m2,12000,Kaduna,2025
+Screeding,m2,11000,Kaduna,2025
+Tiling,m2,15000,Kaduna,2025
+Painting,m2,8000,Kaduna,2025
+Decoration,m2,10000,Kaduna,2025
+Floor Finish,m2,15000,Kaduna,2025
+Wall Finish,m2,12000,Kaduna,2025
+Ceiling Finish,m2,10000,Kaduna,2025
+
+# --- FITTINGS & FIXTURES ---
+Ironmongery,Item,5000,Kaduna,2025
+Cabinets,No.,80000,Kaduna,2025
+Wardrobes,No.,100000,Kaduna,2025
+Shelves,No.,15000,Kaduna,2025
+Sanitary Fittings,No.,60000,Kaduna,2025
+Kitchen Fittings,Set,120000,Kaduna,2025
+
+# --- MECHANICAL & ELECTRICAL WORKS ---
+Plumbing,Point,20000,Kaduna,2025
+Drainage,Point,15000,Kaduna,2025
+Sanitary Installations,Item,50000,Kaduna,2025
+HVAC,Unit,300000,Kaduna,2025
+Fire Protection,Item,100000,Kaduna,2025
+Power Supply,Panel,80000,Kaduna,2025
+Lighting,Point,5000,Kaduna,2025
+Small Power,Point,4000,Kaduna,2025
+Data,Point,6000,Kaduna,2025
+Telecom,Point,8000,Kaduna,2025
+CCTV,Camera,15000,Kaduna,2025
+Alarms,Point,20000,Kaduna,2025
+Lightning Protection,System,50000,Kaduna,2025
+
+# --- EXTERNAL WORKS ---
+Paving,m2,12000,Kaduna,2025
+Driveways,m2,15000,Kaduna,2025
+Car Parks,m2,14000,Kaduna,2025
+Boundary Walls,m2,20000,Kaduna,2025
+Gates,No.,80000,Kaduna,2025
+Landscaping,m2,1000,Kaduna,2025
+Surface Water Drainage,m,5000,Kaduna,2025
+External Services,Item,50000,Kaduna,2025
+
+# --- PROVISIONAL & PRIME COST SUMS ---
+Specialized Works,Item,1000000,Kaduna,2025
+Contingencies,Item,500000,Kaduna,2025
+
+

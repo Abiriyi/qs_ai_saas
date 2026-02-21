@@ -1,0 +1,10 @@
+# measurement_context.yaml
+
+scale: 0.01
+storey_height: 3.0
+wall_thickness: 0.225
+slab_thickness: 0.15
+
+confirmed: true
+confirmed_by: "QS C. ABIRIYI"
+date: "2026-01-07"
