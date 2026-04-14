@@ -2,7 +2,6 @@ import uuid
 from django.db import models
 from users.middleware import get_current_org
 
-
 # -----------------------
 # Base Tenant Model
 # -----------------------

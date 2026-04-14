@@ -54,14 +54,15 @@ class Organization(models.Model):
 # User Manager
 # -----------------------
 class UserManager(BaseUserManager):
-    def create_user(self, email, organization, password=None, **extra_fields):
+    def create_user(self, email, organization=None, password=None, **extra_fields):
         if not email:
             raise ValueError("Users must have an email address")
 
-        if not organization:
-            raise ValueError("User must belong to an organization")
-
         email = self.normalize_email(email)
+
+        # Allow system-level creation (e.g. superuser setup)
+        if not organization and not extra_fields.get("is_superuser", False):
+            raise ValueError("User must belong to an organization")
 
         user = self.model(
             email=email,
@@ -72,6 +73,7 @@ class UserManager(BaseUserManager):
         user.set_password(password)
         user.save(using=self._db)
         return user
+
 
     def create_superuser(self, email, organization, password=None, **extra_fields):
         extra_fields.setdefault("is_staff", True)
