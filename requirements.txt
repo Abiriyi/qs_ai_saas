@@ -4,16 +4,26 @@ charset-normalizer==3.4.4
 cryptography==46.0.5
 Django==5.2.11
 et_xmlfile==2.0.0
+iniconfig==2.3.0
 numpy==2.4.2
 openpyxl==3.1.5
+packaging==26.0
 pandas==3.0.1
 pdfminer.six==20251230
 pdfplumber==0.11.9
 pillow==12.1.1
+pluggy==1.6.0
+psycopg==3.3.3
+psycopg-binary==3.3.3
 pycparser==3.0
+Pygments==2.19.2
 PyPDF2==3.0.1
 pypdfium2==5.5.0
+pytest==9.0.2
 python-dateutil==2.9.0.post0
+python-dotenv==1.2.2
+-e git+ssh://git@github.com/Abiriyi/qs_ai_project.git@6429f9d58b865cff515100a59574b02213e65859#egg=qs_ai
 reportlab==4.4.10
 six==1.17.0
 sqlparse==0.5.5
+typing_extensions==4.15.0
