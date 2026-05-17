@@ -19,6 +19,7 @@ class TenantMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
+
         user = getattr(request, "user", None)
 
         org = None
@@ -26,15 +27,20 @@ class TenantMiddleware:
         if user and user.is_authenticated:
             org = user.organization
 
-        # Store in Python context (safe for services)
+        # Store in Python context
         _current_org.set(org)
 
-        # Store in PostgreSQL session (for RLS later)
-        if org:
-            with connection.cursor() as cursor:
+        # Store in PostgreSQL session
+        with connection.cursor() as cursor:
+
+            if org:
                 cursor.execute(
                     "SET app.current_org = %s",
                     [str(org.id)]
+                )
+            else:
+                cursor.execute(
+                    "RESET app.current_org"
                 )
 
         response = self.get_response(request)
