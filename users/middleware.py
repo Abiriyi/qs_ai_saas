@@ -20,29 +20,18 @@ class TenantMiddleware:
 
     def __call__(self, request):
 
-        user = getattr(request, "user", None)
+    user = getattr(request, "user", None)
 
-        org = None
+    org = None
 
-        if user and user.is_authenticated:
-            org = user.organization
+    if user and user.is_authenticated:
+        org = user.organization
 
-        # Store in Python context
-        _current_org.set(org)
+    token = _current_org.set(org)
 
-        # Store in PostgreSQL session
-        with connection.cursor() as cursor:
-
-            if org:
-                cursor.execute(
-                    "SET app.current_org = %s",
-                    [str(org.id)]
-                )
-            else:
-                cursor.execute(
-                    "RESET app.current_org"
-                )
-
+    try:
         response = self.get_response(request)
+    finally:
+        _current_org.reset(token)
 
-        return response
+    return response

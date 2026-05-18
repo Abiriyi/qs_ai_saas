@@ -1,7 +1,6 @@
 import uuid
 from django.db import models
-from users.middleware import get_current_org
-
+from core.middleware import get_current_org
 # -----------------------
 # Base Tenant Model
 # -----------------------
@@ -53,7 +52,11 @@ class TenantQuerySet(models.QuerySet):
 # -----------------------
 class TenantManager(models.Manager):
     def get_queryset(self):
+        qs = super().get_queryset()
+
         org = get_current_org()
+
         if org:
-            return super().get_queryset().filter(organization=org)
-        return super().get_queryset().none()
+            return qs.filter(organization=org)
+
+        return qs
