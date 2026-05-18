@@ -44,6 +44,10 @@ class BaseTenantModel(models.Model):
 
         super().save(*args, **kwargs)
 
+     def soft_delete(self):
+        self.deleted_at = timezone.now()
+        self.save(update_fields=["deleted_at"])   
+
 
 # -----------------------
 # Tenant QuerySet

@@ -1,5 +1,7 @@
 import sys
 import os
+from django.core.cache import cache
+from core.cache import tenant_cache_key
 
 # Get absolute path to /home/vboxcasi
 CURRENT_DIR = os.path.dirname(__file__)
@@ -13,13 +15,24 @@ if BASE_DIR not in sys.path:
 from qs_ai_project.main import generate_boq_from_pdfs
 
 def run_boq_generation(project):
-    pdf_paths = [doc.file.path for doc in project.documents.all()]
 
-    output_path = generate_boq_from_pdfs(
-        pdf_files=pdf_paths,
-        location=project.organization.name
+    cache_key = tenant_cache_key(
+        f"boq_engine:{project.id}"
     )
 
-    return output_path
+    cached = cache.get(cache_key)
+
+    if cached:
+        return cached
+
+    data = expensive_pdf_ai_pipeline(project)
+
+    cache.set(
+        cache_key,
+        data,
+        timeout=3600
+    )
+
+    return data
 
 
