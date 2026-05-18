@@ -1,37 +1,30 @@
-from django.db import connection
-from contextvars import ContextVar
-
-# Global request-scoped tenant context
-_current_org = ContextVar("current_org", default=None)
-
-
-def get_current_org():
-    return _current_org.get()
+from core.tenant import (
+    set_current_org,
+    reset_current_org,
+)
 
 
 class TenantMiddleware:
-    """
-    Attaches organization context to every request.
-    Enforces multi-tenancy at request level.
-    """
 
     def __init__(self, get_response):
         self.get_response = get_response
 
     def __call__(self, request):
 
-    user = getattr(request, "user", None)
+        user = getattr(request, "user", None)
 
-    org = None
+        org = (
+            getattr(user, "organization", None)
+            if user and user.is_authenticated
+            else None
+        )
 
-    if user and user.is_authenticated:
-        org = user.organization
+        token = set_current_org(org)
 
-    token = _current_org.set(org)
+        try:
+            response = self.get_response(request)
 
-    try:
-        response = self.get_response(request)
-    finally:
-        _current_org.reset(token)
+        finally:
+            reset_current_org(token)
 
-    return response
+        return response

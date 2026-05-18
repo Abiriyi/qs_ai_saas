@@ -1,25 +1,34 @@
 import uuid
 from django.db import models
 from core.middleware import get_current_org
+from django.utils import timezone
+
 # -----------------------
 # Base Tenant Model
 # -----------------------
 class BaseTenantModel(models.Model):
-    """
-    Abstract base model that enforces organization ownership.
-    All tenant-aware models MUST inherit this.
-    """
 
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    id = models.UUIDField(
+        primary_key=True,
+        default=uuid.uuid4,
+        editable=False
+    )
 
     organization = models.ForeignKey(
         "users.Organization",
         on_delete=models.CASCADE,
-        related_name="%(class)s_set",
+    )
+
+    deleted_at = models.DateTimeField(
+        null=True,
+        blank=True
     )
 
     created_at = models.DateTimeField(auto_now_add=True)
+
     updated_at = models.DateTimeField(auto_now=True)
+
+    objects = TenantManager()
 
     class Meta:
         abstract = True
@@ -51,8 +60,12 @@ class TenantQuerySet(models.QuerySet):
 # Tenant Manager
 # -----------------------
 class TenantManager(models.Manager):
+
     def get_queryset(self):
-        qs = super().get_queryset()
+
+        qs = super().get_queryset().filter(
+            deleted_at__isnull=True
+        )
 
         org = get_current_org()
 
