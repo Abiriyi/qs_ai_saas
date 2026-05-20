@@ -1,11 +1,23 @@
 import uuid
 from django.db import models
-from core.middleware import get_current_org
+from core.tenant import get_current_org
 from django.utils import timezone
 
-# -----------------------
-# Base Tenant Model
-# -----------------------
+class TenantManager(models.Manager):
+
+    def get_queryset(self):
+
+        qs = super().get_queryset().filter(
+            deleted_at__isnull=True
+        )
+
+        org = get_current_org()
+
+        if org:
+            return qs.filter(organization=org)
+
+        return qs
+        
 class BaseTenantModel(models.Model):
 
     id = models.UUIDField(
@@ -39,15 +51,15 @@ class BaseTenantModel(models.Model):
         """
         if not self.organization_id:
             org = get_current_org()
+
             if org:
                 self.organization = org
 
         super().save(*args, **kwargs)
 
-     def soft_delete(self):
+    def soft_delete(self):
         self.deleted_at = timezone.now()
         self.save(update_fields=["deleted_at"])   
-
 
 # -----------------------
 # Tenant QuerySet
@@ -60,20 +72,4 @@ class TenantQuerySet(models.QuerySet):
         return self.none()
 
 
-# -----------------------
-# Tenant Manager
-# -----------------------
-class TenantManager(models.Manager):
 
-    def get_queryset(self):
-
-        qs = super().get_queryset().filter(
-            deleted_at__isnull=True
-        )
-
-        org = get_current_org()
-
-        if org:
-            return qs.filter(organization=org)
-
-        return qs

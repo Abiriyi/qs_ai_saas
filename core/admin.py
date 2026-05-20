@@ -1,3 +1,5 @@
+from django.contrib import admin
+
 class TenantAdmin(admin.ModelAdmin):
 
     def get_queryset(self, request):
