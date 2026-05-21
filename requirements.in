@@ -1,0 +1,8 @@
+Django
+djangorestframework
+psycopg[binary]
+django-redis
+redis
+celery
+openai
+pandas
