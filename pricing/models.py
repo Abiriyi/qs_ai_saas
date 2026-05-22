@@ -5,6 +5,7 @@ from projects.models import Project
 from users.models import User
 from django.conf import settings
 from django.utils import timezone
+import uuid
 
 
 class RateLibrary(BaseTenantModel):
@@ -93,22 +94,11 @@ class RateAudit(models.Model):
         ("verified", "Verified"),
     ]
 
-    id = models.UUIDField(
-        primary_key=True,
-        default=uuid.uuid4,
-        editable=False,
-    )
+    id = models.UUIDField(default=uuid.uuid4, primary_key=True)
 
-    rate = models.ForeignKey(
-        RateLibrary,
-        on_delete=models.CASCADE,
-        related_name="audits",
-    )
+    rate = models.DecimalField(max_digits=18, decimal_places=2, null=True, blank=True)
 
-    action = models.CharField(
-        max_length=30,
-        choices=ACTION_CHOICES,
-    )
+    action = models.CharField(max_length=30, null=True, blank=True)
 
     previous_rate = models.DecimalField(
         max_digits=18,
@@ -117,10 +107,7 @@ class RateAudit(models.Model):
         blank=True,
     )
 
-    new_rate = models.DecimalField(
-        max_digits=18,
-        decimal_places=2,
-    )
+    new_rate = models.DecimalField(max_digits=18, decimal_places=2, null=True, blank=True)
 
     performed_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
