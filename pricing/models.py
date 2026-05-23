@@ -141,8 +141,6 @@ class RateAudit(models.Model):
     action = models.CharField(
         max_length=20,
         choices=ACTION_CHOICES,
-        null=True,
-        blank=True
     )
 
     source = models.CharField(
