@@ -36,9 +36,7 @@ class RateLibrary(BaseTenantModel):
     )
 
     element = models.CharField(max_length=255)
-
     description = models.TextField(blank=True)
-
     unit = models.CharField(max_length=50)
 
     location = models.CharField(
@@ -48,12 +46,12 @@ class RateLibrary(BaseTenantModel):
 
     base_rate = models.DecimalField(
         max_digits=14,
-        decimal_places=2
+        decimal_places=2,
+        null=True,
+        blank=True
     )
 
-    confidence_score = models.FloatField(
-        default=0.0
-    )
+    confidence_score = models.FloatField(default=0.0)
 
     source = models.CharField(
         max_length=20,
@@ -75,10 +73,7 @@ class RateLibrary(BaseTenantModel):
         related_name="reviewed_rates"
     )
 
-    reviewed_at = models.DateTimeField(
-        null=True,
-        blank=True
-    )
+    reviewed_at = models.DateTimeField(null=True, blank=True)
 
     is_active = models.BooleanField(default=True)
 
@@ -92,7 +87,6 @@ class RateLibrary(BaseTenantModel):
 
     def __str__(self):
         return f"{self.element} - {self.base_rate}"
-
 
 class RateAudit(models.Model):
 
@@ -112,7 +106,9 @@ class RateAudit(models.Model):
 
     organization = models.ForeignKey(
         "users.Organization",
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True
     )
 
     project = models.ForeignKey(
@@ -137,12 +133,16 @@ class RateAudit(models.Model):
 
     new_rate = models.DecimalField(
         max_digits=14,
-        decimal_places=2
+        decimal_places=2,
+        null=True,   # ✅ FIX
+        blank=True
     )
 
     action = models.CharField(
         max_length=20,
-        choices=ACTION_CHOICES
+        choices=ACTION_CHOICES,
+        null=True,
+        blank=True
     )
 
     source = models.CharField(
