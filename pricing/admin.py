@@ -11,23 +11,30 @@ class RateLibraryAdmin(admin.ModelAdmin):
 
     list_display = (
         "element",
+        "unit",
         "location",
         "base_rate",
         "source",
-        "is_verified",
+        "review_status",
         "organization",
-    )
-
-    search_fields = (
-        "element",
-        "location",
+        "project",
+        "is_active",
     )
 
     list_filter = (
         "source",
-        "is_verified",
+        "review_status",
+        "location",
+        "is_active",
+    )
+
+    search_fields = (
+        "element",
+        "description",
         "location",
     )
+
+    ordering = ("-created_at",)
 
 
 @admin.register(RateAudit)
@@ -37,6 +44,19 @@ class RateAuditAdmin(admin.ModelAdmin):
         "rate",
         "action",
         "new_rate",
-        "performed_by",
+        "source",
+        "created_by",
         "created_at",
     )
+
+    list_filter = (
+        "action",
+        "source",
+    )
+
+    search_fields = (
+        "rate__element",
+        "rate__unit",
+    )
+
+    ordering = ("-created_at",)

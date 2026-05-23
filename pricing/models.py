@@ -1,3 +1,4 @@
+import uuid
 from django.db import models
 from core.models import BaseTenantModel
 from boq.models import BoQItem
@@ -5,83 +6,92 @@ from projects.models import Project
 from users.models import User
 from django.conf import settings
 from django.utils import timezone
-import uuid
-
 
 class RateLibrary(BaseTenantModel):
 
     SOURCE_CHOICES = [
         ("manual", "Manual"),
-        ("csv", "CSV Import"),
         ("ai", "AI Generated"),
+        ("imported", "Imported"),
     ]
+
+    STATUS_CHOICES = [
+        ("draft", "Draft"),
+        ("approved", "Approved"),
+        ("rejected", "Rejected"),
+    ]
+
+    id = models.UUIDField(
+        primary_key=True,
+        default=uuid.uuid4,
+        editable=False
+    )
 
     project = models.ForeignKey(
         "projects.Project",
+        on_delete=models.CASCADE,
         null=True,
         blank=True,
-        on_delete=models.CASCADE,
-        related_name="rate_library",
+        related_name="rate_library"
     )
 
     element = models.CharField(max_length=255)
 
+    description = models.TextField(blank=True)
+
     unit = models.CharField(max_length=50)
 
-    location = models.CharField(max_length=100)
+    location = models.CharField(
+        max_length=100,
+        default="Kaduna"
+    )
 
     base_rate = models.DecimalField(
-        max_digits=18,
-        decimal_places=2,
+        max_digits=14,
+        decimal_places=2
+    )
+
+    confidence_score = models.FloatField(
+        default=0.0
     )
 
     source = models.CharField(
         max_length=20,
         choices=SOURCE_CHOICES,
-        default="manual",
+        default="manual"
     )
 
-    confidence_score = models.FloatField(
+    review_status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default="draft"
+    )
+
+    reviewed_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
         null=True,
         blank=True,
+        related_name="reviewed_rates"
     )
 
-    ai_model = models.CharField(
-        max_length=100,
+    reviewed_at = models.DateTimeField(
         null=True,
-        blank=True,
+        blank=True
     )
 
-    is_verified = models.BooleanField(default=False)
-
-    year = models.PositiveIntegerField(default=2026)
-
-    deleted_at = models.DateTimeField(
-        null=True,
-        blank=True,
-    )
+    is_active = models.BooleanField(default=True)
 
     class Meta:
         indexes = [
-            models.Index(
-                fields=[
-                    "organization",
-                    "project",
-                    "location",
-                    "element",
-                    "unit",
-                ]
-            )
+            models.Index(fields=["organization"]),
+            models.Index(fields=["project"]),
+            models.Index(fields=["element"]),
+            models.Index(fields=["location"]),
         ]
 
-    def soft_delete(self):
-        self.deleted_at = timezone.now()
-        self.save(update_fields=["deleted_at"])
-
     def __str__(self):
-        return (
-            f"{self.element} - {self.location} - {self.base_rate}"
-        )
+        return f"{self.element} - {self.base_rate}"
 
 
 class RateAudit(models.Model):
@@ -89,39 +99,62 @@ class RateAudit(models.Model):
     ACTION_CHOICES = [
         ("created", "Created"),
         ("updated", "Updated"),
-        ("deleted", "Deleted"),
-        ("ai_generated", "AI Generated"),
-        ("verified", "Verified"),
+        ("approved", "Approved"),
+        ("rejected", "Rejected"),
+        ("ai_generate", "AI Generated"),
     ]
 
-    id = models.UUIDField(default=uuid.uuid4, primary_key=True)
+    id = models.UUIDField(
+        primary_key=True,
+        default=uuid.uuid4,
+        editable=False
+    )
 
-    rate = models.DecimalField(max_digits=18, decimal_places=2, null=True, blank=True)
+    organization = models.ForeignKey(
+        "users.Organization",
+        on_delete=models.CASCADE
+    )
 
-    action = models.CharField(max_length=30, null=True, blank=True)
+    project = models.ForeignKey(
+        "projects.Project",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True
+    )
 
-    previous_rate = models.DecimalField(
-        max_digits=18,
+    rate = models.ForeignKey(
+        RateLibrary,
+        on_delete=models.CASCADE,
+        related_name="audits"
+    )
+
+    old_rate = models.DecimalField(
+        max_digits=14,
         decimal_places=2,
         null=True,
-        blank=True,
+        blank=True
     )
 
-    new_rate = models.DecimalField(max_digits=18, decimal_places=2, null=True, blank=True)
-
-    performed_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        null=True,
-        blank=True,
-        on_delete=models.SET_NULL,
+    new_rate = models.DecimalField(
+        max_digits=14,
+        decimal_places=2
     )
 
-    metadata = models.JSONField(
-        default=dict,
-        blank=True,
+    action = models.CharField(
+        max_length=20,
+        choices=ACTION_CHOICES
+    )
+
+    source = models.CharField(
+        max_length=50,
+        default="manual"
     )
 
     created_at = models.DateTimeField(auto_now_add=True)
 
-    def __str__(self):
-        return f"{self.action} - {self.rate.element}"
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
