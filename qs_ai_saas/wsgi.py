@@ -11,6 +11,9 @@ import os
 
 from django.core.wsgi import get_wsgi_application
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'qs_ai_saas.settings')
+os.environ.setdefault(
+    'DJANGO_SETTINGS_MODULE',
+    'qs_ai_saas.settings.production'
+)
 
 application = get_wsgi_application()
