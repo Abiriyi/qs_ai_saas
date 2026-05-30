@@ -1,14 +1,27 @@
+import logging
+
 from celery import shared_task
 
 from core.tasks import TenantAwareTask
 
 from documents.models import UploadedDocument
-
 from documents.enums import DocumentStatus
 
 from documents.services.pipeline import (
     DocumentProcessingPipeline
 )
+
+logger = logging.getLogger(__name__)
+
+
+@shared_task
+def test_task():
+
+    logger.info(
+        "Document processing started"
+    )
+
+    return "success"
 
 
 @shared_task(
@@ -28,6 +41,10 @@ def process_document_task(
     )
 
     try:
+
+        logger.info(
+            f"Processing document: {document.id}"
+        )
 
         document.status = (
             DocumentStatus.PROCESSING
@@ -49,7 +66,15 @@ def process_document_task(
 
         document.save()
 
+        logger.info(
+            f"Document completed: {document.id}"
+        )
+
     except Exception as exc:
+
+        logger.exception(
+            f"Document failed: {document.id}"
+        )
 
         document.status = (
             DocumentStatus.FAILED
@@ -59,4 +84,4 @@ def process_document_task(
 
         document.save()
 
-        raise exc
+        raise

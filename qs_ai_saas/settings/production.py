@@ -28,3 +28,5 @@ STATICFILES_STORAGE = (
     "django.contrib.staticfiles.storage."
     "ManifestStaticFilesStorage"
 )
+
+LOGGING["root"]["level"] = "ERROR"

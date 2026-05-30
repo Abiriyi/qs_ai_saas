@@ -5,7 +5,7 @@ from documents.services.pdf_extractor import (
 )
 
 from boq.services.boq_builder import (
-    build_boq_from_text
+    build_boq_from_engine
 )
 
 from pricing.services.pricing_pipeline import (
@@ -45,7 +45,7 @@ class DocumentProcessingPipeline:
 
         self.document.save()
 
-        boq_items = build_boq_from_text(
+        boq_items = build_boq_from_engine(
             extracted_text
         )
 
