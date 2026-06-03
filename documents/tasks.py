@@ -36,6 +36,10 @@ def process_document_task(
     document_id,
 ):
 
+    logger.info(
+        f"Looking for document_id={document_id}"
+    )
+    
     document = UploadedDocument.objects.get(
         id=document_id
     )
