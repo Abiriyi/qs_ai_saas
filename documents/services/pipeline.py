@@ -21,20 +21,16 @@ class DocumentProcessingPipeline:
 
     def process(self):
 
-        self.document.status = (
-            DocumentStatus.EXTRACTING
-        )
-
-        self.document.save()
-
-        extracted_text = (
+        text = (
             PDFExtractorService.extract_text(
-                self.document.file.path
+                self.document.file
             )
         )
 
-        self.document.extracted_text = (
-            extracted_text
+        self.document.extracted_text = text
+
+        self.document.save(
+            update_fields=["extracted_text"]
         )
 
         self.document.save()

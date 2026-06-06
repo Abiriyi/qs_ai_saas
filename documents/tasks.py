@@ -31,24 +31,17 @@ def test_task():
     retry_backoff=True,
     max_retries=3,
 )
+
 def process_document_task(
     self,
     document_id,
 ):
 
-    logger.info(
-        f"Looking for document_id={document_id}"
-    )
-    
     document = UploadedDocument.objects.get(
         id=document_id
     )
 
     try:
-
-        logger.info(
-            f"Processing document: {document.id}"
-        )
 
         document.status = (
             DocumentStatus.PROCESSING
@@ -70,15 +63,7 @@ def process_document_task(
 
         document.save()
 
-        logger.info(
-            f"Document completed: {document.id}"
-        )
-
     except Exception as exc:
-
-        logger.exception(
-            f"Document failed: {document.id}"
-        )
 
         document.status = (
             DocumentStatus.FAILED
