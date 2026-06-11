@@ -150,3 +150,16 @@ Upload PDF
 → Confidence Scoring
 → Audit Trail
 → Results API
+
+## Current Blocking Issue
+
+Migrating UploadedDocument processing
+from local filesystem storage to
+Tigris object storage.
+
+Need:
+- S3Boto3Storage configuration
+- DocumentUploadView
+- Serializer
+- Safe Celery download pipeline
+- PDF extraction from object storage
