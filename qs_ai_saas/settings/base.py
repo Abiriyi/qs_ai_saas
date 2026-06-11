@@ -320,7 +320,7 @@ AWS_SECRET_ACCESS_KEY = env("TIGRIS_SECRET_KEY")
 
 AWS_STORAGE_BUCKET_NAME = env("TIGRIS_BUCKET")
 
-AWS_S3_ENDPOINT_URL = "https://fly.storage.tigris.dev"
+AWS_S3_ENDPOINT_URL = "https://t3.storage.dev"
 
 AWS_S3_REGION_NAME = "auto"
 
