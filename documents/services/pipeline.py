@@ -1,8 +1,11 @@
+# documents/services/pipeline.py
+
 from documents.enums import DocumentStatus
 
 from documents.services.pdf_extractor import (
     PDFExtractorService
 )
+
 
 from boq.services.boq_builder import (
     build_boq_from_engine
@@ -11,7 +14,6 @@ from boq.services.boq_builder import (
 from pricing.services.pricing_pipeline import (
     PricingPipeline
 )
-
 
 class DocumentProcessingPipeline:
 
@@ -29,10 +31,6 @@ class DocumentProcessingPipeline:
 
         self.document.extracted_text = text
 
-        self.document.save(
-            update_fields=["extracted_text"]
-        )
-
         self.document.save()
 
         self.document.status = (
@@ -42,7 +40,7 @@ class DocumentProcessingPipeline:
         self.document.save()
 
         boq_items = build_boq_from_engine(
-            extracted_text
+            text
         )
 
         self.document.status = (

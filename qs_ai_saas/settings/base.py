@@ -1,3 +1,5 @@
+# settings/base.py
+
 from pathlib import Path
 
 import os
@@ -43,6 +45,7 @@ DJANGO_APPS = [
 THIRD_PARTY_APPS = [
     'django_redis',
     "storages",
+    "rest_framework",
 ]
 
 LOCAL_APPS = [
@@ -216,7 +219,16 @@ MEDIA_ROOT = BASE_DIR / "media"
 # DEFAULT PK
 # --------------------------------------------------
 
-DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
+STORAGES = {
+    "default": {
+        "BACKEND": "storages.backends.s3.S3Storage",
+    },
+    "staticfiles": {
+        "BACKEND": (
+            "django.contrib.staticfiles.storage.StaticFilesStorage"
+        ),
+    },
+}
 
 DEFAULT_AUTO_FIELD = (
     'django.db.models.BigAutoField'
@@ -315,12 +327,14 @@ LOGGING = {
     },
 }
 
-AWS_ACCESS_KEY_ID = env("TIGRIS_ACCESS_KEY")
-AWS_SECRET_ACCESS_KEY = env("TIGRIS_SECRET_KEY")
+AWS_ACCESS_KEY_ID = os.getenv("TIGRIS_ACCESS_KEY")
+AWS_SECRET_ACCESS_KEY = os.getenv("TIGRIS_SECRET_KEY")
 
-AWS_STORAGE_BUCKET_NAME = env("TIGRIS_BUCKET")
+AWS_STORAGE_BUCKET_NAME = os.getenv("TIGRIS_BUCKET")
 
 AWS_S3_ENDPOINT_URL = "https://t3.storage.dev"
+
+AWS_S3_SIGNATURE_VERSION = "s3v4"
 
 AWS_S3_REGION_NAME = "auto"
 

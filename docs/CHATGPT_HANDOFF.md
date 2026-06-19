@@ -1,4 +1,8 @@
-# QS AI SaaS Handoff
+I am continuing development of my QS AI SaaS.
+
+Below is the current project handoff.
+
+"# QS AI SaaS Handoff
 
 ## Current Stack
 
@@ -162,4 +166,6 @@ Need:
 - DocumentUploadView
 - Serializer
 - Safe Celery download pipeline
-- PDF extraction from object storage
+- PDF extraction from object storage"
+
+Continue from the Tigris integration stage.

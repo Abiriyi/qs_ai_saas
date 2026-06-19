@@ -1,3 +1,5 @@
+# documents/services/storage_service.py
+
 from django.core.files.storage import default_storage
 
 class StorageService:

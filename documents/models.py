@@ -1,11 +1,10 @@
+# documents/models.py
+
 import uuid
-
 from django.db import models
-
 from core.models import BaseTenantModel
-
 from documents.enums import DocumentStatus
-
+from projects.models import Project
 
 class UploadedDocument(BaseTenantModel):
 
@@ -17,6 +16,14 @@ class UploadedDocument(BaseTenantModel):
 
     file = models.FileField(
         upload_to="uploaded_documents/"
+    )
+
+    project = models.ForeignKey(
+        Project,
+        on_delete=models.CASCADE,
+        related_name="documents",
+        null=True,
+        blank=True,
     )
 
     original_filename = models.CharField(

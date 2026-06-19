@@ -1,31 +1,36 @@
-from django.core.files.storage import default_storage
+# documents/services/pdf_extractor.py
+
 import fitz
-import tempfile
 import logging
 
 logger = logging.getLogger(__name__)
 
+
 class PDFExtractorService:
 
     @staticmethod
-    def extract_text(uploaded_file):
+    def extract_text(file_field):
 
-        with tempfile.NamedTemporaryFile(
-            delete=False
-        ) as tmp:
+        file_field.open("rb")
 
-            for chunk in uploaded_file.chunks():
-                tmp.write(chunk)
+        pdf_bytes = file_field.read()
 
-            tmp_path = tmp.name
+        pdf = fitz.open(
+            stream=pdf_bytes,
+            filetype="pdf"
+        )
 
-        pdf = fitz.open(tmp_path)
+        try:
 
-        text = ""
+            text = ""
 
-        for page in pdf:
-            text += page.get_text()
+            for page in pdf:
+                text += page.get_text()
 
-        pdf.close()
+            return text
 
-        return text
+        finally:
+
+            pdf.close()
+
+            file_field.close()
