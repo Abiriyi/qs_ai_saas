@@ -15,6 +15,10 @@ from pricing.services.pricing_pipeline import (
     PricingPipeline
 )
 
+from boq.services.ai_generator import (
+            BoQAIGenerator
+        )
+
 class DocumentProcessingPipeline:
 
     def __init__(self, document):
@@ -23,55 +27,42 @@ class DocumentProcessingPipeline:
 
     def process(self):
 
-        text = (
-            PDFExtractorService.extract_text(
-                self.document.file
-            )
+        text = PDFExtractorService.extract_text(
+            self.document.file
         )
 
         self.document.extracted_text = text
+        self.document.save(update_fields=["extracted_text"])
 
-        self.document.save()
+        self.document.status = DocumentStatus.STRUCTURING
+        self.document.save(update_fields=["status"])
 
-        self.document.status = (
-            DocumentStatus.STRUCTURING
+        generator = BoQAIGenerator()
+
+        structured_data = generator.generate(text)
+
+        boq = build_boq_from_engine(
+            data=structured_data,
+            project=self.document.project,
         )
 
-        self.document.save()
-
-        boq_items = build_boq_from_engine(
-            text
-        )
-
-        self.document.status = (
-            DocumentStatus.PRICING
-        )
-
-        self.document.save()
+        self.document.status = DocumentStatus.PRICING
+        self.document.save(update_fields=["status"])
 
         pricing_pipeline = PricingPipeline(
             project=self.document.project
         )
 
-        priced_items = []
+        for section in boq.sections.all():
+            for item in section.items.all():
 
-        for item in boq_items:
+                pricing = pricing_pipeline.price_item(item)
 
-            pricing_data = (
-                pricing_pipeline.price_item(
-                    item
-                )
-            )
+                item.rate = pricing["rate"]
 
-            priced_items.append({
-                **item,
-                **pricing_data,
-            })
+                item.save(update_fields=["rate"])
 
-        self.document.status = (
-            DocumentStatus.REVIEW_PENDING
-        )
+        self.document.status = DocumentStatus.REVIEW_PENDING
+        self.document.save(update_fields=["status"])
 
-        self.document.save()
-
-        return priced_items
+        return boq

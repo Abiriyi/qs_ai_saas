@@ -1,7 +1,6 @@
 from boq.models import BoQ, BoQSection, BoQItem
 
-
-def build_boq_from_engine(data, project, user):
+def build_boq_from_engine(data, project):
     boq = BoQ.objects.create(
         project=project,
         name="Generated BoQ",
