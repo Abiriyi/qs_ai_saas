@@ -1,9 +1,12 @@
 # boq/services/ai_generator.py
 
 import json
-from openai import OpenAI
+import logging
 
+from openai import OpenAI
 from django.conf import settings
+
+logger = logging.getLogger(__name__)
 
 
 class BoQAIGenerator:
@@ -15,43 +18,81 @@ class BoQAIGenerator:
 
     def generate(self, text: str):
 
-        prompt = f"""
+        SYSTEM_PROMPT = """
 You are an expert Quantity Surveyor.
 
-Read the following construction document.
+Your task is to convert construction documents into a structured Bill of Quantities.
 
-Produce ONLY valid JSON.
+Return ONLY valid JSON.
 
-Required schema:
+Do not include markdown.
 
-{{
+Do not include explanations.
+
+Do not wrap the JSON in code fences.
+
+The JSON MUST follow exactly this schema:
+
+{
     "sections":[
-        {{
+        {
             "name":"",
             "items":[
-                {{
+                {
                     "item_no":"",
                     "description":"",
                     "unit":"",
                     "quantity":0,
                     "rate":0,
                     "confidence":0.0
-                }}
+                }
             ]
-        }}
+        }
     ]
-}}
-
-Document:
-
-{text}
+}
 """
 
-        response = self.client.responses.create(
-            model="gpt-5",
-            input=prompt,
-        )
+        try:
 
-        return json.loads(
-            response.output_text
-        )
+            response = self.client.responses.create(
+                model=settings.OPENAI_MODEL,
+                input=[
+                    {
+                        "role": "system",
+                        "content": SYSTEM_PROMPT,
+                    },
+                    {
+                        "role": "user",
+                        "content": text,
+                    },
+                ],
+            )
+
+            logger.info("OpenAI response:")
+            logger.info(response.output_text)
+
+        except Exception as exc:
+
+            raise RuntimeError(
+                f"OpenAI request failed: {exc}"
+            ) from exc
+
+        try:
+
+            data = json.loads(
+                response.output_text
+            )
+
+        except json.JSONDecodeError as exc:
+
+            raise ValueError(
+                "AI returned invalid JSON."
+            ) from exc
+
+        if "sections" not in data:
+
+            raise ValueError(
+                "AI response missing 'sections'."
+            )
+
+        return data       
