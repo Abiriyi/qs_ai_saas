@@ -9,32 +9,20 @@ from boq.services.generation_service import (
 
 class DocumentProcessingPipeline:
 
-    def __init__(self, document):
-
-        self.document = document
-
     def process(self):
 
-        self.document.status = (
-            DocumentStatus.STRUCTURING
-        )
+        text = extractor.extract(...)
 
-        self.document.save(
-            update_fields=["status"]
-        )
+        ai_data = generator.generate(text)
 
-        generator = BoQGenerationService(
-            self.document
-        )
+        validated = pydantic_validator.validate(ai_data)
 
-        boq = generator.generate()
+        business_validator.validate(validated)
 
-        self.document.status = (
-            DocumentStatus.REVIEW_PENDING
-        )
+        confidence = confidence_service.calculate(validated)
 
-        self.document.save(
-            update_fields=["status"]
-        )
+        draft_boq = boq_builder.build(...)
 
-        return boq
+        audit.log_generation(...)
+
+        return draft_boq
