@@ -5,6 +5,8 @@ from boq.services.validators.schemas import (
     BoQSchema,
 )
 
+from boq.constants.units import VALID_UNITS
+
 logger = logging.getLogger(__name__)
 
 
@@ -35,18 +37,6 @@ class BusinessValidator:
     This validator checks whether the BoQ
     makes sense from a QS perspective.
     """
-
-    VALID_UNITS = {
-        "m",
-        "m²",
-        "m³",
-        "kg",
-        "ton",
-        "No",
-        "Item",
-        "Lot",
-        "L.S",
-    }
 
     @classmethod
     def validate(
@@ -110,7 +100,7 @@ class BusinessValidator:
                 # Unit
                 # -------------------------
 
-                if item.unit not in cls.VALID_UNITS:
+                if item.unit not in VALID_UNITS:
 
                     report.warnings.append(
                         f'Item "{item.item_no}" '
