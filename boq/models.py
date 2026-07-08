@@ -4,32 +4,148 @@ from core.models import BaseTenantModel
 from projects.models import Project
 from django.conf import settings
 
+class BoQStatus(models.TextChoices):
 
-class BoQ(BaseTenantModel):
-    STATUS_CHOICES = [
-        ("draft", "Draft"),
-        ("generated", "Generated"),
-        ("finalized", "Finalized"),
-        ("sealed", "Sealed"),  # tribunal-ready
-    ]
-
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-
-    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="boqs")
-
-    name = models.CharField(max_length=255)
-
-    status = models.CharField(
-        max_length=20,
-        choices=STATUS_CHOICES,
-        default="draft",
+    DRAFT = (
+        "draft",
+        "Draft"
     )
 
-    total_amount = models.DecimalField(max_digits=15, decimal_places=2, default=0)
+    VALIDATING = (
+        "validating",
+        "Validating"
+    )
 
-    is_frozen = models.BooleanField(default=False)  # tribunal lock
+    REVIEW_PENDING = (
+        "review_pending",
+        "Review Pending"
+    )
 
-    created_at = models.DateTimeField(auto_now_add=True)
+    APPROVED = (
+        "approved",
+        "Approved"
+    )
+
+    REJECTED = (
+        "rejected",
+        "Rejected"
+    )
+
+    PRICED = (
+        "priced",
+        "Priced"
+    )
+
+    SEALED = (
+        "sealed",
+        "Sealed"
+    )
+
+class BoQ(BaseTenantModel):
+
+    id = models.UUIDField(
+        primary_key=True,
+        default=uuid.uuid4,
+        editable=False
+    )
+
+    project = models.ForeignKey(
+        Project,
+        on_delete=models.CASCADE,
+        related_name="boqs"
+    )
+
+    name = models.CharField(
+        max_length=255
+    )
+
+    status = models.CharField(
+        max_length=30,
+        choices=BoQStatus.choices,
+        default=BoQStatus.DRAFT,
+    )
+
+    total_amount = models.DecimalField(
+        max_digits=15,
+        decimal_places=2,
+        default=0
+    )
+
+    # AI metadata
+
+    ai_confidence_score = models.FloatField(
+        default=0.0
+    )
+
+    ai_model = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True
+    )
+
+    generation_time = models.FloatField(
+        null=True,
+        blank=True
+    )
+
+    validation_summary = models.JSONField(
+        default=dict,
+        blank=True
+    )
+
+    # QS review workflow
+
+    reviewed_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="reviewed_boqs",
+    )
+
+    reviewed_at = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+
+    # Approval workflow
+
+    approved_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="approved_boqs",
+    )
+
+    approved_at = models.DateTimeField(
+        null=True,
+        blank=True,
+    )
+
+
+    rejection_reason = models.TextField(
+        null=True,
+        blank=True
+    )
+
+
+    is_frozen = models.BooleanField(
+        default=False
+    )
+
+    updated_at = models.DateTimeField(
+        auto_now=True
+    )
+
+
+    class Meta:
+        indexes = [
+            models.Index(
+                fields=["status"]
+            ),
+        ]
+
 
     def __str__(self):
         return self.name

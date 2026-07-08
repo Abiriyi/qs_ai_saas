@@ -1,10 +1,10 @@
-from boq.models import BoQ, BoQSection, BoQItem
+from boq.models import BoQ, BoQSection, BoQItem, BoQStatus
 
 def build_boq_from_engine(data, project):
     boq = BoQ.objects.create(
         project=project,
         name="Generated BoQ",
-        status="generated",
+        status=BoQStatus.DRAFT,
         organization=project.organization,
     )
 
