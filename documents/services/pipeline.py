@@ -1,6 +1,7 @@
 # documents/services/pipeline.py
 
 from documents.enums import DocumentStatus
+from documents.services.pdf_extractor import PDFExtractorService
 
 from boq.services.generation_service import (
     BoQGenerationService,
@@ -9,20 +10,41 @@ from boq.services.generation_service import (
 
 class DocumentProcessingPipeline:
 
+    def __init__(self, document):
+        self.document = document
+
     def process(self):
 
-        text = extractor.extract(...)
+        #
+        # Extract PDF
+        #
 
-        ai_data = generator.generate(text)
+        text = PDFExtractorService.extract_text(
+            self.document.file
+        )
 
-        validated = pydantic_validator.validate(ai_data)
+        self.document.extracted_text = text
+        self.document.status = DocumentStatus.STRUCTURING
+        self.document.save()
 
-        business_validator.validate(validated)
+        #
+        # Generate Draft BoQ
+        #
 
-        confidence = confidence_service.calculate(validated)
+        result = BoQGenerationService.generate(
+            text=text,
+            project=self.document.project,
+            user=self.document.project.created_by,
+        )
 
-        draft_boq = boq_builder.build(...)
+        #
+        # Update status
+        #
 
-        audit.log_generation(...)
+        self.document.status = (
+            DocumentStatus.REVIEW_PENDING
+        )
 
-        return draft_boq
+        self.document.save()
+
+        return result
