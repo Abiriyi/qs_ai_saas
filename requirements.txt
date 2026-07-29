@@ -57,8 +57,6 @@ python-dateutil==2.9.0.post0
 python-dotenv==1.2.2
 python-magic==0.4.27
 pytz==2026.2
-# Editable install with no version control (qs-ai==0.1.0)
--e /home/vboxcasi/qs_ai_project
 redis==6.2.0
 reportlab==4.4.10
 s3transfer==0.18.0
