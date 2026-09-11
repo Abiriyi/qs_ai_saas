@@ -167,6 +167,14 @@ class BoQGenerationService:
             data=validated_schema.model_dump(),
             project=project,
             user=user,
+            confidence_score=confidence_report.overall_score,
+            ai_model=settings.OPENAI_MODEL,
+            generation_time=processing_time,
+            validation_summary={
+                "valid": validation_report.valid,
+                "errors": list(validation_report.errors),
+                "warnings": list(validation_report.warnings),
+            },
         )
 
         processing_time = (

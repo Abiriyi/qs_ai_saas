@@ -1,11 +1,33 @@
 from boq.models import BoQ, BoQSection, BoQItem, BoQStatus
 
-def build_boq_from_engine(data, project):
+
+def build_boq_from_engine(
+    data,
+    project,
+    user=None,
+    confidence_score=0.0,
+    ai_model=None,
+    generation_time=None,
+    validation_summary=None,
+):
+    normalized_validation_summary = validation_summary or {}
+
+    if hasattr(validation_summary, "valid"):
+        normalized_validation_summary = {
+            "valid": validation_summary.valid,
+            "errors": list(validation_summary.errors),
+            "warnings": list(validation_summary.warnings),
+        }
+
     boq = BoQ.objects.create(
         project=project,
         name="Generated BoQ",
         status=BoQStatus.DRAFT,
         organization=project.organization,
+        ai_confidence_score=confidence_score,
+        ai_model=ai_model,
+        generation_time=generation_time,
+        validation_summary=normalized_validation_summary,
     )
 
     for i, section_data in enumerate(data.get("sections", [])):

@@ -4,15 +4,16 @@ from pathlib import Path
 
 import os
 
-
 from dotenv import load_dotenv
 
-load_dotenv()
 # --------------------------------------------------
 # BASE DIRECTORY
 # --------------------------------------------------
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
+
+# Prefer the repository .env file when present.
+load_dotenv(dotenv_path=BASE_DIR / ".env")
 
 
 # --------------------------------------------------
@@ -339,4 +340,5 @@ AWS_DEFAULT_ACL = None
 AWS_S3_FILE_OVERWRITE = False
 AWS_QUERYSTRING_AUTH = False
 
-OPENAI_MODEL = "gpt-4.1"
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
+OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4.1")
