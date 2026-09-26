@@ -330,7 +330,10 @@ AWS_SECRET_ACCESS_KEY = os.getenv("TIGRIS_SECRET_KEY")
 
 AWS_STORAGE_BUCKET_NAME = os.getenv("TIGRIS_BUCKET")
 
-AWS_S3_ENDPOINT_URL = "https://t3.storage.dev"
+AWS_S3_ENDPOINT_URL = os.getenv(
+    "TIGRIS_ENDPOINT_URL",
+    "https://fly.storage.tigris.dev",
+)
 
 AWS_S3_SIGNATURE_VERSION = "s3v4"
 

@@ -169,7 +169,7 @@ class BoQGenerationService:
             user=user,
             confidence_score=confidence_report.overall_score,
             ai_model=settings.OPENAI_MODEL,
-            generation_time=processing_time,
+            generation_time=None,
             validation_summary={
                 "valid": validation_report.valid,
                 "errors": list(validation_report.errors),
@@ -179,6 +179,13 @@ class BoQGenerationService:
 
         processing_time = (
             time.perf_counter() - start
+        )
+        boq.generation_time = processing_time
+        boq.save(
+            update_fields=[
+                "generation_time",
+                "updated_at",
+            ]
         )
 
         logger.info(

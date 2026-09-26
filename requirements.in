@@ -1,5 +1,6 @@
 Django
 djangorestframework
+django-storages[s3]
 psycopg[binary]
 django-redis
 redis
