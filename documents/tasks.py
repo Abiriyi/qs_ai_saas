@@ -59,12 +59,6 @@ def process_document_task(
 
         pipeline.process()
 
-        document.status = (
-            DocumentStatus.COMPLETED
-        )
-
-        document.save()
-
     except Exception as exc:
 
         document.status = (
