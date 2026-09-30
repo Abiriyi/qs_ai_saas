@@ -13,9 +13,10 @@ from documents.models import UploadedDocument
 from documents.tasks import process_document_task
 from django.shortcuts import get_object_or_404
 from projects.models import Project
+from core.drf import TenantAPIViewMixin
 
 
-class DocumentUploadView(APIView):
+class DocumentUploadView(TenantAPIViewMixin, APIView):
     permission_classes = [IsAuthenticated]
     parser_classes = [
         MultiPartParser,

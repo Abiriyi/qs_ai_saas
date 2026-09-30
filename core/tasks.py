@@ -14,51 +14,30 @@ class TenantTask(Task):
     abstract = True
 
     def __call__(self, *args, **kwargs):
-
         org_id = kwargs.pop("org_id", None)
-
-        token = None
-
-        if org_id:
-            org = Organization.objects.get(id=org_id)
-            token = set_current_org(org)
-
+        token = set_current_org(None)
         try:
+            if org_id:
+                org = Organization.objects.get(id=org_id)
+                set_current_org(org)
             return self.run(*args, **kwargs)
-
         finally:
-            if token:
-                reset_current_org(token)
+            reset_current_org(token)
 
 class TenantAwareTask(Task):
 
     abstract = True
 
     def __call__(self, *args, **kwargs):
-
         org_id = kwargs.pop("org_id", None)
-
-        token = None
-
-        if org_id:
-
-            organization = Organization.objects.get(
-                id=org_id
-            )
-
-            token = set_current_org(
-                organization
-            )
-
+        token = set_current_org(None)
         try:
-
+            if org_id:
+                organization = Organization.objects.get(id=org_id)
+                set_current_org(organization)
             return super().__call__(
                 *args,
                 **kwargs
             )
-
         finally:
-
-            if token:
-
-                reset_current_org(token)                
+            reset_current_org(token)
