@@ -37,6 +37,7 @@ def test_task():
 def process_document_task(
     self,
     document_id,
+    org_id=None,
 ):
 
     document = UploadedDocument.objects.get(

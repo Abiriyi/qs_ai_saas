@@ -1,78 +1,97 @@
 # documents/api/views.py
+from pathlib import Path
+from uuid import UUID
+
+from django.conf import settings
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.parsers import MultiPartParser
+from rest_framework import status
+from rest_framework.parsers import FormParser, MultiPartParser
+from rest_framework.permissions import IsAuthenticated
+
 from documents.models import UploadedDocument
 from documents.tasks import process_document_task
 from django.shortcuts import get_object_or_404
 from projects.models import Project
-from rest_framework.parsers import MultiPartParser, FormParser
 
-import logging
-
-logger = logging.getLogger(__name__)
 
 class DocumentUploadView(APIView):
+    permission_classes = [IsAuthenticated]
     parser_classes = [
         MultiPartParser,
-        FormParser
+        FormParser,
     ]
 
     def post(self, request):
-
-        logger.info(f"user = {request.user}")
-        logger.info(f"authenticated = {request.user.is_authenticated}")
-
-        file = request.FILES.get("file")
-
-        logger.info(f"File received: {file}")
-
-        if not file:
+        uploaded_file = request.FILES.get("file")
+        if not uploaded_file:
             return Response(
                 {"error": "file is required"},
-                status=400
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
-        project_id = request.data.get("project_id")
+        max_upload_size = getattr(
+            settings,
+            "DOCUMENT_MAX_UPLOAD_SIZE",
+            25 * 1024 * 1024,
+        )
+        if uploaded_file.size > max_upload_size:
+            return Response(
+                {"error": "file exceeds the maximum allowed size"},
+                status=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            )
 
+        if Path(uploaded_file.name).suffix.lower() != ".pdf":
+            return Response(
+                {"error": "only PDF files are allowed"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if b"%PDF-" not in uploaded_file.read(1024):
+            return Response(
+                {"error": "uploaded file is not a valid PDF"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        uploaded_file.seek(0)
+
+        project_id = request.data.get("project_id")
         if not project_id:
             return Response(
                 {"error": "project_id is required"},
-                status=400
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            project_id = UUID(str(project_id))
+        except (TypeError, ValueError, AttributeError):
+            return Response(
+                {"error": "project_id must be a valid UUID"},
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
         project = get_object_or_404(
-            Project,
-            id=project_id
+            Project.objects.filter(
+                organization_id=request.user.organization_id,
+            ),
+            id=project_id,
         )
 
         doc = UploadedDocument.objects.create(
             organization=project.organization,
             project=project,
-            original_filename=file.name,
-            file=file,
+            original_filename=uploaded_file.name,
+            file=uploaded_file,
         )
-
-        logger.info(f"Document upload initiated for document: {doc.id}")
 
         process_document_task.delay(
             str(doc.id),
-            org_id=str(doc.organization.id)
+            org_id=str(doc.organization_id),
         )
 
-        logger.info(f"Document processing initiated for document: {doc.id}")
-
-        return Response({
-            "document_id": str(doc.id),
-            "status": "uploaded"
-        })
-
-    def get(self, request):
-        logger.info(f"user = {request.user}")
-        logger.info(f"authenticated = {request.user.is_authenticated}")
         return Response(
             {
-                "project_id":
-                "183020d7-f8d2-4e41-8f08-a2650206daf9"
-            }
+                "document_id": str(doc.id),
+                "status": "uploaded",
+            },
+            status=status.HTTP_202_ACCEPTED,
         )    
