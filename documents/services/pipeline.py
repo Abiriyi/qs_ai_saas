@@ -15,21 +15,32 @@ class DocumentProcessingPipeline:
 
     def process(self):
 
-        #
-        # Extract PDF
-        #
+        try:
+            text = PDFExtractorService.extract_text(
+                self.document.file
+            )
+        except Exception as exc:
+            self.document.status = DocumentStatus.FAILED
+            self.document.processing_error = str(exc)
+            self.document.save(
+                update_fields=["status", "processing_error", "updated_at"]
+            )
+            raise
 
-        text = PDFExtractorService.extract_text(
-            self.document.file
-        )
+        if not text or not text.strip():
+            msg = "No readable text could be extracted from the uploaded PDF."
+            self.document.status = DocumentStatus.FAILED
+            self.document.processing_error = msg
+            self.document.save(
+                update_fields=["status", "processing_error", "updated_at"]
+            )
+            raise ValueError(msg)
 
         self.document.extracted_text = text
         self.document.status = DocumentStatus.STRUCTURING
-        self.document.save()
-
-        #
-        # Generate Draft BoQ
-        #
+        self.document.save(
+            update_fields=["extracted_text", "status", "updated_at"]
+        )
 
         result = BoQGenerationService.generate(
             text=text,
@@ -37,14 +48,11 @@ class DocumentProcessingPipeline:
             user=self.document.project.created_by,
         )
 
-        #
-        # Update status
-        #
-
         self.document.status = (
             DocumentStatus.REVIEW_PENDING
         )
-
-        self.document.save()
+        self.document.save(
+            update_fields=["status", "updated_at"]
+        )
 
         return result
