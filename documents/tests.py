@@ -215,6 +215,23 @@ class DocumentUploadAPITest(TestCase):
 
         self.assertIsNone(get_current_org())
 
+    def test_task_with_invalid_org_id_fails_closed(self):
+        token = set_current_org(self.organization)
+        try:
+            document = UploadedDocument.objects.create(
+                organization=self.organization,
+                project=self.project,
+                original_filename="plan.pdf",
+            )
+            with self.assertRaises(ValidationError):
+                DocumentLookupTask()(
+                    str(document.id),
+                    org_id="00000000-0000-0000-0000-000000000000",
+                )
+            self.assertEqual(get_current_org(), self.organization)
+        finally:
+            reset_current_org(token)
+
     def test_tenant_manager_returns_no_rows_without_context(self):
         token = set_current_org(self.organization)
         try:
