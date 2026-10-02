@@ -42,7 +42,7 @@ class DocumentProcessingPipeline:
             update_fields=["extracted_text", "status", "updated_at"]
         )
 
-        result = BoQGenerationService.generate(
+        result = BoQGenerationService.finish_safely(
             text=text,
             project=self.document.project,
             user=self.document.project.created_by,

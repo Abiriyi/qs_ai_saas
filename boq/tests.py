@@ -72,3 +72,41 @@ class BoQGenerationServiceTest(SimpleTestCase):
         self.assertIsNone(
             build_boq.call_args.kwargs["generation_time"]
         )
+
+    def test_finish_safely_submits_generation_for_review(self):
+        project = Mock()
+        project.id = "project-id"
+        user = Mock()
+        boq = Mock()
+        boq.status = "draft"
+        result = SimpleNamespace(
+            boq=boq,
+            validation_report=SimpleNamespace(valid=False, errors=["bad"], warnings=[]),
+            confidence_report=SimpleNamespace(overall_score=55.0),
+        )
+
+        with (
+            patch.object(
+                BoQGenerationService,
+                "generate",
+                return_value=result,
+            ) as generate_mock,
+            patch(
+                "boq.services.generation_service.BoQWorkflowService.submit_for_review",
+                return_value=boq,
+            ) as submit_review_mock,
+        ):
+            safe_result = BoQGenerationService.finish_safely(
+                text="source text",
+                project=project,
+                user=user,
+            )
+
+        self.assertEqual(safe_result["status"], "review_pending")
+        self.assertFalse(safe_result["auto_approved"])
+        generate_mock.assert_called_once_with(
+            text="source text",
+            project=project,
+            user=user,
+        )
+        submit_review_mock.assert_called_once_with(boq)

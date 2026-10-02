@@ -7,7 +7,7 @@ from dataclasses import dataclass
 
 import logging
 
-from boq.models import BoQ
+from boq.models import BoQ, BoQStatus
 
 from boq.services.ai_generator import (
     BoQAIGenerator,
@@ -30,6 +30,7 @@ from boq.services.confidence.confidence_service import (
     ConfidenceService,
     ConfidenceResult,
 )
+from boq.services.workflow import BoQWorkflowService
 
 logger = logging.getLogger(__name__)
 
@@ -203,5 +204,48 @@ class BoQGenerationService:
             ai_model=settings.OPENAI_MODEL,
             ai_tokens=None,
         )
+
+    @classmethod
+    def finish_safely(
+        cls,
+        *,
+        text: str,
+        project,
+        user,
+    ) -> dict:
+        """
+        Generate a BoQ, apply the validation/confidence gate, and then
+        submit the draft to QS review. This prevents unsafe auto-approval.
+        """
+        result = cls.generate(
+            text=text,
+            project=project,
+            user=user,
+        )
+
+        boq = BoQWorkflowService.submit_for_review(result.boq)
+        if getattr(boq, "status", None) != BoQStatus.REVIEW_PENDING:
+            boq.status = BoQStatus.REVIEW_PENDING
+
+        safe_result = {
+            "boq_id": str(boq.id),
+            "status": boq.status,
+            "review_required": True,
+            "auto_approved": False,
+            "validation_valid": result.validation_report.valid,
+            "confidence_score": result.confidence_report.overall_score,
+            "errors": list(result.validation_report.errors),
+            "warnings": list(result.validation_report.warnings),
+        }
+
+        logger.info(
+            "Safe BoQ finish completed for project %s: status=%s, confidence=%.2f, valid=%s",
+            project.id,
+            boq.status,
+            result.confidence_report.overall_score,
+            result.validation_report.valid,
+        )
+
+        return safe_result
 
         
