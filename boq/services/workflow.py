@@ -58,22 +58,24 @@ class BoQWorkflowService:
                 "Only BoQs pending review can be approved."
             )
 
+        approval_timestamp = timezone.now()
 
         boq.status = BoQStatus.APPROVED
-
+        boq.reviewed_by = user
+        boq.reviewed_at = approval_timestamp
         boq.approved_by = user
-
-        boq.approved_at = timezone.now()
+        boq.approved_at = approval_timestamp
 
         boq.save(
             update_fields=[
                 "status",
+                "reviewed_by",
+                "reviewed_at",
                 "approved_by",
                 "approved_at",
                 "updated_at",
             ]
         )
-
 
         logger.info(
             "BoQ %s approved by %s.",

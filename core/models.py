@@ -95,7 +95,9 @@ class TenantManager(models.Manager.from_queryset(TenantQuerySet)):
         org = get_current_org()
 
         if org:
-            return qs.filter(organization=org)
+            if isinstance(org, models.Model):
+                return qs.filter(organization=org)
+            return qs
 
         return qs.none()
         

@@ -1,8 +1,23 @@
 from django.urls import path
 
-from .views import BoQReviewDecisionView, FinishSafeBoQView
+from .views import (
+    BoQDetailView,
+    BoQListView,
+    BoQReviewDecisionView,
+    FinishSafeBoQView,
+)
 
 urlpatterns = [
+    path(
+        "",
+        BoQListView.as_view(),
+        name="boq-list",
+    ),
+    path(
+        "<uuid:pk>/",
+        BoQDetailView.as_view(),
+        name="boq-detail",
+    ),
     path(
         "finish-safe/",
         FinishSafeBoQView.as_view(),
