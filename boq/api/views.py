@@ -16,7 +16,7 @@ from projects.models import Project
 
 
 def get_tenant_queryset(model_cls, request):
-    queryset = model_cls.objects.all()
+    queryset = model_cls.objects.filter()
     org_id = getattr(request.user, "organization_id", None)
     if org_id is None:
         return queryset
