@@ -55,7 +55,7 @@ def _load_rate_library(location="local"):
     if _RATE_LOCATION == location and _RATE_LIBRARY is not None:
         return  # Already loaded
 
-    base_path = os.getcwd()
+    base_path = os.path.dirname(os.path.abspath(__file__))
     loc_file = os.path.join(base_path, f"rate_library_{location.lower()}.csv")
     default_file = os.path.join(base_path, "rate_library.csv")
 
@@ -110,10 +110,10 @@ def get_rate_from_library(element, description="", unit="", location="local"):
 
     # Fuzzy fallback
     for _, row in _RATE_LIBRARY.iterrows():
-        if element_key in row["Element"]:
+        if element_key in str(row["Element"]):
             try:
-                return float(row["Rate"])
-            except ValueError:
+                return float(row["BaseRate"])
+            except (TypeError, ValueError, KeyError):
                 continue
 
     return None
