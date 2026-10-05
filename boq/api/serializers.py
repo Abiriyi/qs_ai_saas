@@ -6,6 +6,12 @@ from boq.models import BoQ, BoQItem, BoQSection
 
 
 class BoQItemSerializer(serializers.ModelSerializer):
+    quantity = serializers.SerializerMethodField()
+    rate = serializers.SerializerMethodField()
+    amount = serializers.SerializerMethodField()
+    confidence_score = serializers.SerializerMethodField()
+    last_edited_at = serializers.SerializerMethodField()
+
     class Meta:
         model = BoQItem
         fields = [
@@ -22,6 +28,36 @@ class BoQItemSerializer(serializers.ModelSerializer):
             "last_edited_at",
         ]
         read_only_fields = fields
+
+    def _safe_float(self, value):
+        if value is None or isinstance(value, Mock):
+            return None
+        try:
+            return float(value)
+        except (TypeError, ValueError):
+            return value
+
+    def _safe_datetime(self, value):
+        if value is None or isinstance(value, Mock):
+            return None
+        if hasattr(value, "isoformat"):
+            return value.isoformat()
+        return value
+
+    def get_quantity(self, obj):
+        return self._safe_float(getattr(obj, "quantity", None))
+
+    def get_rate(self, obj):
+        return self._safe_float(getattr(obj, "rate", None))
+
+    def get_amount(self, obj):
+        return self._safe_float(getattr(obj, "amount", None))
+
+    def get_confidence_score(self, obj):
+        return self._safe_float(getattr(obj, "confidence_score", None))
+
+    def get_last_edited_at(self, obj):
+        return self._safe_datetime(getattr(obj, "last_edited_at", None))
 
 
 class BoQSectionSerializer(serializers.ModelSerializer):

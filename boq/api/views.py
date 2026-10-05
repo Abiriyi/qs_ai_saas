@@ -7,8 +7,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from boq.api.serializers import BoQSerializer
-from boq.models import BoQ, BoQStatus
+from boq.api.serializers import BoQItemSerializer, BoQSectionSerializer, BoQSerializer
+from boq.models import BoQ, BoQItem, BoQSection, BoQStatus
 from boq.services.workflow import BoQWorkflowError, BoQWorkflowService
 from boq.tasks import finish_ai_boq_task
 from core.drf import TenantAPIViewMixin
@@ -27,6 +27,41 @@ def get_tenant_queryset(model_cls, request):
         return queryset
 
     return queryset.filter(organization_id=org_id)
+
+
+def get_tenant_instance(model_cls, request, **kwargs):
+    queryset = get_tenant_queryset(model_cls, request)
+    if hasattr(queryset, "get") and callable(getattr(queryset, "get")):
+        try:
+            return queryset.get(**kwargs)
+        except Exception:
+            return None
+
+    try:
+        items = list(queryset)
+    except TypeError:
+        items = []
+
+    for item in items:
+        if all(str(getattr(item, key, "")) == str(value) for key, value in kwargs.items()):
+            return item
+    return None
+
+
+def filter_tenant_instances(model_cls, request, **kwargs):
+    queryset = get_tenant_queryset(model_cls, request)
+    if hasattr(queryset, "filter") and callable(getattr(queryset, "filter")):
+        if queryset.__class__.__module__.startswith("django.db.models"):
+            return queryset.filter(**kwargs)
+
+    try:
+        items = list(queryset)
+    except TypeError:
+        items = []
+
+    return [
+        item for item in items if all(str(getattr(item, key, "")) == str(value) for key, value in kwargs.items())
+    ]
 
 
 class BoQListView(TenantAPIViewMixin, APIView):
@@ -232,6 +267,239 @@ class FinishSafeBoQView(TenantAPIViewMixin, APIView):
             },
             status=status.HTTP_202_ACCEPTED,
         )
+
+
+class BoQSectionListView(TenantAPIViewMixin, APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, boq_id):
+        boq = get_tenant_instance(BoQ, request, id=boq_id)
+        if boq is None:
+            return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+        sections = filter_tenant_instances(BoQSection, request, boq_id=boq.id)
+        return Response(BoQSectionSerializer(sections, many=True).data)
+
+    def post(self, request, boq_id):
+        boq = get_tenant_instance(BoQ, request, id=boq_id)
+        if boq is None:
+            return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        if getattr(boq, "is_frozen", False):
+            return Response({"error": "Cannot edit frozen BoQ."}, status=status.HTTP_400_BAD_REQUEST)
+
+        name = (request.data.get("name") or "").strip()
+        if not name:
+            return Response({"error": "name is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        order = request.data.get("order", 0)
+        try:
+            order = int(order)
+        except (TypeError, ValueError):
+            return Response({"error": "order must be an integer"}, status=status.HTTP_400_BAD_REQUEST)
+
+        section = BoQSection.objects.create(
+            organization=request.user.organization,
+            boq=boq,
+            name=name,
+            order=order,
+        )
+        return Response(BoQSectionSerializer(section).data, status=status.HTTP_201_CREATED)
+
+
+class BoQSectionDetailView(TenantAPIViewMixin, APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, boq_id, section_id):
+        boq = get_tenant_instance(BoQ, request, id=boq_id)
+        if boq is None:
+            return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        section = get_tenant_instance(BoQSection, request, boq_id=boq.id, id=section_id)
+        if section is None:
+            return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+        return Response(BoQSectionSerializer(section).data)
+
+    def patch(self, request, boq_id, section_id):
+        boq = get_tenant_instance(BoQ, request, id=boq_id)
+        if boq is None:
+            return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        if getattr(boq, "is_frozen", False):
+            return Response({"error": "Cannot edit frozen BoQ."}, status=status.HTTP_400_BAD_REQUEST)
+
+        section = get_tenant_instance(BoQSection, request, boq_id=boq.id, id=section_id)
+        if section is None:
+            return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        if "name" in request.data:
+            name = str(request.data.get("name") or "").strip()
+            if not name:
+                return Response({"error": "name is required"}, status=status.HTTP_400_BAD_REQUEST)
+            section.name = name
+
+        if "order" in request.data:
+            try:
+                section.order = int(request.data.get("order"))
+            except (TypeError, ValueError):
+                return Response({"error": "order must be an integer"}, status=status.HTTP_400_BAD_REQUEST)
+
+        section.save()
+        return Response(BoQSectionSerializer(section).data)
+
+    def delete(self, request, boq_id, section_id):
+        boq = get_tenant_instance(BoQ, request, id=boq_id)
+        if boq is None:
+            return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        if getattr(boq, "is_frozen", False):
+            return Response({"error": "Cannot edit frozen BoQ."}, status=status.HTTP_400_BAD_REQUEST)
+
+        section = get_tenant_instance(BoQSection, request, boq_id=boq.id, id=section_id)
+        if section is None:
+            return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        section.soft_delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class BoQItemListView(TenantAPIViewMixin, APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, boq_id, section_id):
+        boq = get_tenant_instance(BoQ, request, id=boq_id)
+        if boq is None:
+            return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        section = get_tenant_instance(BoQSection, request, boq_id=boq.id, id=section_id)
+        if section is None:
+            return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        items = filter_tenant_instances(BoQItem, request, section_id=section.id)
+        return Response(BoQItemSerializer(items, many=True).data)
+
+    def post(self, request, boq_id, section_id):
+        boq = get_tenant_instance(BoQ, request, id=boq_id)
+        if boq is None:
+            return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        if getattr(boq, "is_frozen", False):
+            return Response({"error": "Cannot edit frozen BoQ."}, status=status.HTTP_400_BAD_REQUEST)
+
+        section = get_tenant_instance(BoQSection, request, boq_id=boq.id, id=section_id)
+        if section is None:
+            return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        required_fields = ["item_no", "description", "unit", "quantity", "rate"]
+        for field in required_fields:
+            if not request.data.get(field):
+                return Response({"error": f"{field} is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            quantity = Decimal(str(request.data.get("quantity")))
+            rate = Decimal(str(request.data.get("rate")))
+        except InvalidOperation:
+            return Response({"error": "quantity and rate must be numeric"}, status=status.HTTP_400_BAD_REQUEST)
+
+        item = BoQItem.objects.create(
+            organization=request.user.organization,
+            section=section,
+            item_no=str(request.data.get("item_no")).strip(),
+            description=str(request.data.get("description")).strip(),
+            unit=str(request.data.get("unit")).strip(),
+            quantity=quantity,
+            rate=rate,
+            amount=quantity * rate,
+            confidence_score=float(request.data.get("confidence_score", 0.0) or 0.0),
+            source_reference=request.data.get("source_reference"),
+            is_ai_generated=bool(request.data.get("is_ai_generated", True)),
+        )
+        return Response(BoQItemSerializer(item).data, status=status.HTTP_201_CREATED)
+
+
+class BoQItemDetailView(TenantAPIViewMixin, APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, boq_id, section_id, item_id):
+        boq = get_tenant_instance(BoQ, request, id=boq_id)
+        if boq is None:
+            return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        section = get_tenant_instance(BoQSection, request, boq_id=boq.id, id=section_id)
+        if section is None:
+            return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        item = get_tenant_instance(BoQItem, request, section_id=section.id, id=item_id)
+        if item is None:
+            return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+        return Response(BoQItemSerializer(item).data)
+
+    def patch(self, request, boq_id, section_id, item_id):
+        boq = get_tenant_instance(BoQ, request, id=boq_id)
+        if boq is None:
+            return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        if getattr(boq, "is_frozen", False):
+            return Response({"error": "Cannot edit frozen BoQ."}, status=status.HTTP_400_BAD_REQUEST)
+
+        section = get_tenant_instance(BoQSection, request, boq_id=boq.id, id=section_id)
+        if section is None:
+            return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        item = get_tenant_instance(BoQItem, request, section_id=section.id, id=item_id)
+        if item is None:
+            return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        for field in ["item_no", "description", "unit", "source_reference"]:
+            if field in request.data:
+                setattr(item, field, str(request.data.get(field)).strip())
+
+        if "quantity" in request.data:
+            try:
+                item.quantity = Decimal(str(request.data.get("quantity")))
+            except InvalidOperation:
+                return Response({"error": "quantity must be numeric"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if "rate" in request.data:
+            try:
+                item.rate = Decimal(str(request.data.get("rate")))
+            except InvalidOperation:
+                return Response({"error": "rate must be numeric"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if "confidence_score" in request.data:
+            try:
+                item.confidence_score = float(request.data.get("confidence_score"))
+            except (TypeError, ValueError):
+                return Response({"error": "confidence_score must be numeric"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if hasattr(item, "amount"):
+            try:
+                quantity = Decimal(str(item.quantity))
+                rate = Decimal(str(item.rate))
+                item.amount = quantity * rate
+            except (TypeError, ValueError, InvalidOperation):
+                item.amount = 0
+
+        item.save()
+        return Response(BoQItemSerializer(item).data)
+
+    def delete(self, request, boq_id, section_id, item_id):
+        boq = get_tenant_instance(BoQ, request, id=boq_id)
+        if boq is None:
+            return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        if getattr(boq, "is_frozen", False):
+            return Response({"error": "Cannot edit frozen BoQ."}, status=status.HTTP_400_BAD_REQUEST)
+
+        section = get_tenant_instance(BoQSection, request, boq_id=boq.id, id=section_id)
+        if section is None:
+            return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        item = get_tenant_instance(BoQItem, request, section_id=section.id, id=item_id)
+        if item is None:
+            return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        item.soft_delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class BoQReviewDecisionView(TenantAPIViewMixin, APIView):

@@ -5,7 +5,14 @@ from django.test import SimpleTestCase
 from django.conf import settings
 from rest_framework.test import APIRequestFactory
 
-from boq.api.views import BoQDetailView, BoQListView
+from boq.api.views import (
+    BoQDetailView,
+    BoQItemDetailView,
+    BoQItemListView,
+    BoQListView,
+    BoQSectionDetailView,
+    BoQSectionListView,
+)
 from boq.services.generation_service import BoQGenerationService
 from boq.services.workflow import BoQWorkflowService
 
@@ -284,3 +291,121 @@ class BoQAPITest(SimpleTestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data["id"], str(boq.id))
+
+
+class BoQSectionItemAPITest(SimpleTestCase):
+    def test_create_section_view_creates_section(self):
+        boq = Mock()
+        boq.id = "123e4567-e89b-12d3-a456-426614174010"
+        boq.is_frozen = False
+
+        section = Mock()
+        section.id = "123e4567-e89b-12d3-a456-426614174011"
+        section.name = "Substructure"
+        section.order = 1
+        section.items = []
+
+        request = APIRequestFactory().post(
+            "/api/boq/123e4567-e89b-12d3-a456-426614174010/sections/",
+            {"name": "Substructure", "order": 1},
+        )
+        request.user = Mock(organization_id="org-123")
+
+        queryset = Mock()
+        queryset.get.return_value = boq
+
+        with (
+            patch("boq.api.views.get_tenant_queryset", return_value=queryset),
+            patch("boq.api.views.BoQSection.objects.create", return_value=section) as create_mock,
+        ):
+            response = BoQSectionListView.as_view()(request, boq_id=str(boq.id))
+
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.data["name"], "Substructure")
+        create_mock.assert_called_once()
+
+    def test_create_item_view_creates_item(self):
+        boq = Mock()
+        boq.id = "123e4567-e89b-12d3-a456-426614174010"
+        boq.is_frozen = False
+
+        section = Mock()
+        section.id = "123e4567-e89b-12d3-a456-426614174011"
+        section.boq = boq
+        section.name = "Substructure"
+        section.order = 1
+
+        item = Mock()
+        item.id = "123e4567-e89b-12d3-a456-426614174012"
+        item.item_no = "1"
+        item.description = "Excavation"
+        item.unit = "m3"
+        item.quantity = "10"
+        item.rate = "200"
+        item.amount = "2000"
+        item.confidence_score = 0.9
+        item.source_reference = "pdf:1"
+        item.is_ai_generated = True
+        item.last_edited_at = None
+
+        request = APIRequestFactory().post(
+            "/api/boq/123e4567-e89b-12d3-a456-426614174010/sections/123e4567-e89b-12d3-a456-426614174011/items/",
+            {
+                "item_no": "1",
+                "description": "Excavation",
+                "unit": "m3",
+                "quantity": "10",
+                "rate": "200",
+                "source_reference": "pdf:1",
+            },
+        )
+        request.user = Mock(organization_id="org-123")
+
+        section_queryset = Mock()
+        section_queryset.get.return_value = section
+
+        with (
+            patch("boq.api.views.get_tenant_queryset", side_effect=[Mock(get=Mock(return_value=boq)), section_queryset]),
+            patch("boq.api.views.BoQItem.objects.create", return_value=item) as create_mock,
+        ):
+            response = BoQItemListView.as_view()(request, boq_id=str(boq.id), section_id=str(section.id))
+
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.data["description"], "Excavation")
+        create_mock.assert_called_once()
+
+    def test_update_item_view_updates_item(self):
+        boq = Mock()
+        boq.id = "123e4567-e89b-12d3-a456-426614174010"
+        boq.is_frozen = False
+
+        section = Mock()
+        section.id = "123e4567-e89b-12d3-a456-426614174011"
+        section.boq = boq
+
+        item = Mock()
+        item.id = "123e4567-e89b-12d3-a456-426614174012"
+        item.section = section
+        item.description = "Excavation"
+        item.quantity = "10"
+        item.rate = "200"
+        item.amount = "2000"
+        item.save = Mock()
+
+        request = APIRequestFactory().patch(
+            "/api/boq/123e4567-e89b-12d3-a456-426614174010/sections/123e4567-e89b-12d3-a456-426614174011/items/123e4567-e89b-12d3-a456-426614174012/",
+            {"description": "Concrete", "quantity": "12"},
+        )
+        request.user = Mock(organization_id="org-123")
+
+        item_queryset = Mock()
+        item_queryset.get.return_value = item
+
+        with (
+            patch("boq.api.views.get_tenant_queryset", side_effect=[Mock(get=Mock(return_value=boq)), Mock(get=Mock(return_value=section)), item_queryset]),
+        ):
+            response = BoQItemDetailView.as_view()(request, boq_id=str(boq.id), section_id=str(section.id), item_id=str(item.id))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(item.description, "Concrete")
+        item.save.assert_called_once()
