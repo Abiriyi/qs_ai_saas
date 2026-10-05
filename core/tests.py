@@ -1,0 +1,140 @@
+from django.core.exceptions import ValidationError
+from django.test import TestCase
+
+from core.models import BaseTenantModel
+from core.tenant import get_current_org, reset_current_org, set_current_org
+from projects.models import Project
+from users.models import Organization, User
+
+
+class TenantContextTests(TestCase):
+    def setUp(self):
+        self.organization = Organization.objects.create(
+            name="Tenant context org",
+            type="firm",
+        )
+
+    def test_set_and_reset_current_org_round_trip(self):
+        token = set_current_org(self.organization)
+
+        self.assertIs(get_current_org(), self.organization)
+
+        reset_current_org(token)
+        self.assertIsNone(get_current_org())
+
+    def test_queryset_requires_context_for_writes(self):
+        user = User.objects.create_user(
+            email="tenant-user@example.com",
+            organization=self.organization,
+            password="strong-pass-123",
+        )
+        token = set_current_org(self.organization)
+        try:
+            project = Project.objects.create(
+                organization=self.organization,
+                created_by=user,
+                name="Context validated project",
+            )
+        finally:
+            reset_current_org(token)
+
+        reset_current_org(set_current_org(None))
+        with self.assertRaises(ValidationError):
+            Project.objects.filter(pk=project.pk).update(name="Changed without tenant")
+
+    def test_base_tenant_model_rejects_cross_organization_write(self):
+        other_org = Organization.objects.create(
+            name="Other org",
+            type="firm",
+        )
+        user = User.objects.create_user(
+            email="owner@example.com",
+            organization=self.organization,
+            password="strong-pass-123",
+        )
+        token = set_current_org(self.organization)
+        try:
+            project = Project.objects.create(
+                organization=self.organization,
+                created_by=user,
+                name="Original project",
+            )
+        finally:
+            reset_current_org(token)
+
+        token = set_current_org(other_org)
+        try:
+            project.organization = self.organization
+            with self.assertRaises(ValidationError):
+                project.save()
+        finally:
+            reset_current_org(token)
+
+
+class TenantModelBehaviorTests(TestCase):
+    def test_project_created_with_current_org_is_scoped_to_org(self):
+        organization = Organization.objects.create(
+            name="Scoped org",
+            type="firm",
+        )
+        user = User.objects.create_user(
+            email="scoped@example.com",
+            organization=organization,
+            password="strong-pass-123",
+        )
+        token = set_current_org(organization)
+        try:
+            project = Project.objects.create(
+                organization=organization,
+                created_by=user,
+                name="Scoped project",
+            )
+        finally:
+            reset_current_org(token)
+
+        self.assertEqual(project.status, "draft")
+        self.assertFalse(project.is_frozen)
+        self.assertEqual(str(project), "Scoped project")
+
+    def test_for_current_org_filters_queryset_to_active_tenant(self):
+        org_one = Organization.objects.create(name="Org one", type="firm")
+        org_two = Organization.objects.create(name="Org two", type="firm")
+        user_one = User.objects.create_user(
+            email="one@example.com",
+            organization=org_one,
+            password="strong-pass-123",
+        )
+        user_two = User.objects.create_user(
+            email="two@example.com",
+            organization=org_two,
+            password="strong-pass-123",
+        )
+
+        token = set_current_org(org_one)
+        try:
+            project_one = Project.objects.create(
+                organization=org_one,
+                created_by=user_one,
+                name="Org one project",
+            )
+        finally:
+            reset_current_org(token)
+
+        token = set_current_org(org_two)
+        try:
+            Project.objects.create(
+                organization=org_two,
+                created_by=user_two,
+                name="Should not be visible",
+            )
+        finally:
+            reset_current_org(token)
+
+        token = set_current_org(org_one)
+        try:
+            queryset = Project.objects.for_current_org()
+        finally:
+            reset_current_org(token)
+
+        ids = set(queryset.values_list("id", flat=True))
+        self.assertEqual({project_one.id}, ids)

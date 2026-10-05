@@ -29,6 +29,9 @@ class TenantTask(Task):
                         f"Unknown organization id for tenant task: {org_id}"
                     ) from exc
                 set_current_org(org)
+
+            if getattr(self, "request_stack", None) is not None:
+                return super().__call__(*args, **kwargs)
             return self.run(*args, **kwargs)
         finally:
             reset_current_org(token)
@@ -55,6 +58,9 @@ class TenantAwareTask(Task):
                         f"Unknown organization id for tenant task: {org_id}"
                     ) from exc
                 set_current_org(organization)
-            return super().__call__(*args, **kwargs)
+
+            if getattr(self, "request_stack", None) is not None:
+                return super().__call__(*args, **kwargs)
+            return self.run(*args, **kwargs)
         finally:
             reset_current_org(token)
