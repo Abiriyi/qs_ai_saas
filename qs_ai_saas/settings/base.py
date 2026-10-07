@@ -21,8 +21,7 @@ load_dotenv(dotenv_path=BASE_DIR / ".env")
 # --------------------------------------------------
 
 SECRET_KEY = os.getenv(
-    "DJANGO_SECRET_KEY",
-    "django-insecure-dev-key"
+    "DJANGO_SECRET_KEY"
 )
 
 DEBUG = False
@@ -141,8 +140,7 @@ DATABASES = {
             "qs_ai_user"
         ),
         "PASSWORD": os.getenv(
-            "POSTGRES_PASSWORD",
-            "qs_pw%#user"
+            "POSTGRES_PASSWORD"
         ),
         "HOST": os.getenv(
             "POSTGRES_HOST",
