@@ -1,0 +1,167 @@
+{% extends 'base.html' %}
+
+{% block title %}QS AI SaaS | AI pricing and BoQ automation{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <div class="container hero-grid">
+    <div class="hero-copy">
+      <p class="eyebrow">Construction intelligence platform</p>
+      <h1>Turn project documents into estimations your team can trust.</h1>
+      <p class="lead">
+        QS AI brings document processing, AI pricing, and audit-friendly workflows into one secure SaaS platform.
+      </p>
+      <div class="cta-row">
+        <a href="#pricing" class="btn btn-primary">Start free trial</a>
+        <a href="#workflow" class="btn btn-secondary">See workflow</a>
+      </div>
+
+      <ul class="trust-points" aria-label="Key platform points">
+        <li>Document parsing</li>
+        <li>BoQ generation</li>
+        <li>Pricing confidence</li>
+      </ul>
+    </div>
+
+    <div class="hero-panel" aria-label="Platform summary">
+      <div class="panel-card">
+        <div class="panel-header">
+          <span class="status-dot"></span>
+          <span>Live project status</span>
+        </div>
+
+        <div class="project-summary">
+          <div>
+            <p class="label">Current estimate</p>
+            <h3>$2.84M</h3>
+          </div>
+          <span class="chip success">+12.4% confidence</span>
+        </div>
+
+        <div class="mini-metrics">
+          <div>
+            <span>BoQ items</span>
+            <strong>1,486</strong>
+          </div>
+          <div>
+            <span>Audit score</span>
+            <strong>98.9</strong>
+          </div>
+          <div>
+            <span>Turnaround</span>
+            <strong>3.4x faster</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="stats-bar">
+  <div class="container stats-grid">
+    {% for stat in stats %}
+      <div class="stat-item">
+        <strong>{{ stat.value }}</strong>
+        <span>{{ stat.label }}</span>
+      </div>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="feature-section" id="features">
+  <div class="container">
+    <div class="section-heading">
+      <p class="eyebrow">Why teams choose QS AI</p>
+      <h2>Built for fast quantity surveying and pricing workflows.</h2>
+    </div>
+
+    <div class="feature-grid">
+      {% for feature in features %}
+        <article class="feature-card">
+          <div class="icon-wrap" aria-hidden="true">✦</div>
+          <h3>{{ feature.title }}</h3>
+          <p>{{ feature.description }}</p>
+        </article>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="workflow-section" id="workflow">
+  <div class="container">
+    <div class="section-heading narrow">
+      <p class="eyebrow">Workflow</p>
+      <h2>From document upload to final estimate in a few steps.</h2>
+    </div>
+
+    <div class="timeline">
+      <div class="timeline-step">
+        <span>01</span>
+        <div>
+          <h3>Upload project files</h3>
+          <p>Bring in PDF plans, spreadsheets, and supporting documents.</p>
+        </div>
+      </div>
+      <div class="timeline-step">
+        <span>02</span>
+        <div>
+          <h3>Extract and structure</h3>
+          <p>AI interprets the files and converts them into traceable cost data.</p>
+        </div>
+      </div>
+      <div class="timeline-step">
+        <span>03</span>
+        <div>
+          <h3>Price and audit</h3>
+          <p>Apply rate libraries, confidence checks, and review decisions automatically.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="pricing-section" id="pricing">
+  <div class="container">
+    <div class="section-heading narrow">
+      <p class="eyebrow">Pricing</p>
+      <h2>Simple plans that scale with your pipeline.</h2>
+    </div>
+
+    <div class="pricing-grid">
+      <article class="price-card">
+        <h3>Starter</h3>
+        <div class="price"><span>$49</span>/mo</div>
+        <ul>
+          <li>Up to 5 active projects</li>
+          <li>Basic document intake</li>
+          <li>Email support</li>
+        </ul>
+        <a href="#contact" class="btn btn-secondary">Get started</a>
+      </article>
+
+      <article class="price-card featured">
+        <div class="badge">Popular</div>
+        <h3>Growth</h3>
+        <div class="price"><span>$149</span>/mo</div>
+        <ul>
+          <li>Unlimited projects</li>
+          <li>AI pricing workflows</li>
+          <li>Audit trail</li>
+        </ul>
+        <a href="#contact" class="btn btn-primary">Book demo</a>
+      </article>
+
+      <article class="price-card">
+        <h3>Enterprise</h3>
+        <div class="price"><span>Custom</span></div>
+        <ul>
+          <li>Tenant isolation</li>
+          <li>Custom rate libraries</li>
+          <li>Dedicated onboarding</li>
+        </ul>
+        <a href="#contact" class="btn btn-secondary">Talk to sales</a>
+      </article>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -138,3 +138,11 @@ class TenantModelBehaviorTests(TestCase):
 
         ids = set(queryset.values_list("id", flat=True))
         self.assertEqual({project_one.id}, ids)
+
+
+class HomePageTests(TestCase):
+    def test_home_page_renders(self):
+        response = self.client.get("/")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "QS AI")
