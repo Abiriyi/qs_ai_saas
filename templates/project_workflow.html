@@ -17,45 +17,52 @@
       <div class="panel form-panel">
         <h2>Project details</h2>
 
-        <form class="stacked-form">
+        <form method="post" enctype="multipart/form-data" class="stacked-form" novalidate>
+          {% csrf_token %}
+          {{ form.non_field_errors }}
+
           <div class="field-row two-col">
             <label class="field">
-              <span>Project name</span>
-              <input type="text" value="North Tower Residences" />
+              <span>{{ form.name.label }}</span>
+              {{ form.name }}
+              {{ form.name.errors }}
             </label>
             <label class="field">
-              <span>Project type</span>
-              <select>
-                {% for type in project_types %}
-                  <option value="{{ type }}">{{ type }}</option>
-                {% endfor %}
-              </select>
+              <span>{{ form.project_type.label }}</span>
+              {{ form.project_type }}
+              {{ form.project_type.errors }}
             </label>
           </div>
 
           <div class="field-row two-col">
             <label class="field">
-              <span>Client</span>
-              <input type="text" value="Urban Crest Developments" />
+              <span>{{ form.client_name.label }}</span>
+              {{ form.client_name }}
+              {{ form.client_name.errors }}
             </label>
             <label class="field">
-              <span>Location</span>
-              <input type="text" value="Manchester, UK" />
+              <span>{{ form.location.label }}</span>
+              {{ form.location }}
+              {{ form.location.errors }}
             </label>
           </div>
 
           <label class="field">
-            <span>Upload project files</span>
+            <span>{{ form.file.label }}</span>
             <div class="upload-dropzone">
-              <input type="file" multiple />
-              <span>Drag and drop PDFs, drawings, or spreadsheets</span>
+              {{ form.file }}
+              <span>Upload PDFs, drawings, or spreadsheets</span>
             </div>
+            {{ form.file.errors }}
           </label>
 
           <label class="field">
-            <span>Project notes</span>
-            <textarea rows="5">High-rise residential build with podium parking and external facade package.</textarea>
+            <span>{{ form.description.label }}</span>
+            {{ form.description }}
+            {{ form.description.errors }}
           </label>
+
+          <button type="submit" class="btn btn-primary full-width">Run pricing workflow</button>
         </form>
       </div>
 
@@ -89,8 +96,6 @@
             <span>Generate audit summary</span>
           </label>
         </div>
-
-        <button type="button" class="btn btn-primary full-width">Run pricing workflow</button>
       </aside>
     </div>
   </div>

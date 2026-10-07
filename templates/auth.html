@@ -27,57 +27,65 @@
 
       {% if mode == 'signup' %}
         <h2>Create your account</h2>
-        <form class="auth-form">
+        <form method="post" class="auth-form" novalidate>
+          {% csrf_token %}
+          {{ signup_form.non_field_errors }}
+
           <div class="field-row two-col">
             <label class="field">
-              <span>First name</span>
-              <input type="text" placeholder="Ava" />
+              <span>{{ signup_form.company.label }}</span>
+              {{ signup_form.company }}
+              {{ signup_form.company.errors }}
             </label>
             <label class="field">
-              <span>Last name</span>
-              <input type="text" placeholder="Patel" />
+              <span>{{ signup_form.email.label }}</span>
+              {{ signup_form.email }}
+              {{ signup_form.email.errors }}
             </label>
           </div>
 
-          <label class="field">
-            <span>Work email</span>
-            <input type="email" placeholder="ava@qsfirm.com" />
-          </label>
+          <div class="field-row two-col">
+            <label class="field">
+              <span>{{ signup_form.password.label }}</span>
+              {{ signup_form.password }}
+              {{ signup_form.password.errors }}
+            </label>
+            <label class="field">
+              <span>{{ signup_form.confirm_password.label }}</span>
+              {{ signup_form.confirm_password }}
+              {{ signup_form.confirm_password.errors }}
+            </label>
+          </div>
 
-          <label class="field">
-            <span>Company</span>
-            <input type="text" placeholder="Northbridge QS" />
-          </label>
-
-          <label class="field">
-            <span>Password</span>
-            <input type="password" placeholder="••••••••" />
-          </label>
-
-          <button type="submit" class="btn btn-primary full-width">Create account</button>
+          <button type="submit" name="signup_submit" value="1" class="btn btn-primary full-width">Create account</button>
         </form>
       {% else %}
         <h2>Welcome back</h2>
-        <form class="auth-form">
+        <form method="post" class="auth-form" novalidate>
+          {% csrf_token %}
+          {{ login_form.non_field_errors }}
+
           <label class="field">
-            <span>Email</span>
-            <input type="email" placeholder="you@company.com" />
+            <span>{{ login_form.username.label }}</span>
+            {{ login_form.username }}
+            {{ login_form.username.errors }}
           </label>
 
           <label class="field">
-            <span>Password</span>
-            <input type="password" placeholder="••••••••" />
+            <span>{{ login_form.password.label }}</span>
+            {{ login_form.password }}
+            {{ login_form.password.errors }}
           </label>
 
           <div class="meta-row">
             <label class="checkbox-row">
-              <input type="checkbox" checked />
+              {{ login_form.remember_me }}
               <span>Remember me</span>
             </label>
             <a href="#">Forgot password?</a>
           </div>
 
-          <button type="submit" class="btn btn-primary full-width">Sign in</button>
+          <button type="submit" name="login_submit" value="1" class="btn btn-primary full-width">Sign in</button>
         </form>
       {% endif %}
 

@@ -1,4 +1,8 @@
-from django.shortcuts import render
+from django.contrib import messages
+from django.contrib.auth import login
+from django.shortcuts import redirect, render
+
+from core.forms import OrganizationSignupForm, ProjectIntakeForm, UserLoginForm
 
 
 def home(request):
@@ -39,12 +43,31 @@ def auth_page(request):
     if mode not in {"login", "signup"}:
         mode = "login"
 
+    login_form = UserLoginForm(request, data=request.POST or None, prefix="login")
+    signup_form = OrganizationSignupForm(request.POST or None, prefix="signup")
+
+    if request.method == "POST" and "login_submit" in request.POST:
+        if login_form.is_valid():
+            user = login_form.get_user()
+            login(request, user)
+            messages.success(request, "Welcome back to QS AI.")
+            return redirect("dashboard")
+
+    if request.method == "POST" and "signup_submit" in request.POST:
+        if signup_form.is_valid():
+            user = signup_form.save()
+            login(request, user)
+            messages.success(request, "Your workspace is ready.")
+            return redirect("dashboard")
+
     return render(
         request,
         "auth.html",
         {
             "page_title": "Sign in | QS AI",
             "mode": mode,
+            "login_form": login_form,
+            "signup_form": signup_form,
         },
     )
 
@@ -75,18 +98,23 @@ def dashboard(request):
 
 
 def project_workflow(request):
-    project_types = [
-        "Residential",
-        "Commercial",
-        "Infrastructure",
-        "Industrial",
-    ]
+    form = ProjectIntakeForm(request.POST or None, request.FILES or None)
+
+    if request.method == "POST":
+        if not request.user.is_authenticated:
+            messages.warning(request, "Please sign in to create a project.")
+            return redirect("login")
+
+        if form.is_valid():
+            project = form.save(request.user)
+            messages.success(request, f"Project '{project.name}' created.")
+            return redirect("dashboard")
 
     return render(
         request,
         "project_workflow.html",
         {
             "page_title": "Project intake | QS AI",
-            "project_types": project_types,
+            "form": form,
         },
     )
