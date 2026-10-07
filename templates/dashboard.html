@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<section class="dashboard-shell">
+  <aside class="dashboard-sidebar">
+    <div class="sidebar-brand">
+      <span class="brand-mark">QS</span>
+      <span>AI</span>
+    </div>
+
+    <nav class="sidebar-nav" aria-label="Dashboard navigation">
+      <a class="active" href="{% url 'dashboard' %}">Overview</a>
+      <a href="{% url 'project_workflow' %}">New project</a>
+      <a href="#">Projects</a>
+      <a href="#">Pricing library</a>
+      <a href="#">Audit trail</a>
+      <a href="#">Settings</a>
+    </nav>
+
+    <div class="sidebar-card">
+      <p class="muted-label">Workspace</p>
+      <strong>Northbridge QS</strong>
+      <span>Enterprise plan</span>
+    </div>
+  </aside>
+
+  <main class="dashboard-main">
+    <header class="dashboard-header">
+      <div>
+        <p class="eyebrow">Workspace</p>
+        <h1>Project overview</h1>
+      </div>
+
+      <div class="header-actions">
+        <button class="btn btn-ghost" type="button">Export</button>
+        <a href="{% url 'project_workflow' %}" class="btn btn-primary">New project</a>
+      </div>
+    </header>
+
+    <div class="summary-grid">
+      {% for card in summary_cards %}
+        <article class="summary-card">
+          <span>{{ card.label }}</span>
+          <strong>{{ card.value }}</strong>
+          <small>{{ card.delta }}</small>
+        </article>
+      {% endfor %}
+    </div>
+
+    <div class="dashboard-grid">
+      <section class="panel panel-large">
+        <div class="panel-header-row">
+          <h2>Recent projects</h2>
+          <a href="#">View all</a>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Project</th>
+                <th>Status</th>
+                <th>Updated</th>
+                <th>Value</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for project in projects %}
+                <tr>
+                  <td>{{ project.name }}</td>
+                  <td>
+                    <span class="status-badge {{ project.status_class }}">{{ project.status }}</span>
+                  </td>
+                  <td>{{ project.last_update }}</td>
+                  <td>{{ project.value }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="panel panel-side">
+        <div class="panel-header-row">
+          <h2>Quick actions</h2>
+        </div>
+
+        <div class="quick-actions">
+          <a href="{% url 'project_workflow' %}" class="action-item">
+            <span class="icon-shell">+</span>
+            <div>
+              <strong>New intake</strong>
+              <small>Upload drawings &amp; pricing documents</small>
+            </div>
+          </a>
+          <a href="#" class="action-item">
+            <span class="icon-shell">↗</span>
+            <div>
+              <strong>Pricing review</strong>
+              <small>Inspect AI rate suggestions</small>
+            </div>
+          </a>
+          <a href="#" class="action-item">
+            <span class="icon-shell">✓</span>
+            <div>
+              <strong>Audit trail</strong>
+              <small>Review rule changes and confidence scores</small>
+            </div>
+          </a>
+        </div>
+      </section>
+    </div>
+  </main>
+</section>
+{% endblock %}

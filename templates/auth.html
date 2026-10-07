@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<section class="auth-screen">
+  <div class="container auth-layout">
+    <div class="auth-copy">
+      <p class="eyebrow">Built for modern quantity surveying</p>
+      <h1>Make faster, smarter pricing decisions.</h1>
+      <p class="lead">
+        Bring together project intake, AI extraction, BoQ generation, benchmark pricing, and audit-ready review in one secure workspace.
+      </p>
+
+      <ul class="feature-list">
+        <li>Live project dashboards</li>
+        <li>Document-to-quantity workflows</li>
+        <li>Confidence-based pricing review</li>
+      </ul>
+    </div>
+
+    <div class="auth-card">
+      <div class="auth-toggle" aria-label="Authentication mode selector">
+        <a href="{% url 'login' %}?mode=login" class="toggle-link {% if mode == 'login' %}active{% endif %}">Login</a>
+        <a href="{% url 'login' %}?mode=signup" class="toggle-link {% if mode == 'signup' %}active{% endif %}">Create account</a>
+      </div>
+
+      {% if mode == 'signup' %}
+        <h2>Create your account</h2>
+        <form class="auth-form">
+          <div class="field-row two-col">
+            <label class="field">
+              <span>First name</span>
+              <input type="text" placeholder="Ava" />
+            </label>
+            <label class="field">
+              <span>Last name</span>
+              <input type="text" placeholder="Patel" />
+            </label>
+          </div>
+
+          <label class="field">
+            <span>Work email</span>
+            <input type="email" placeholder="ava@qsfirm.com" />
+          </label>
+
+          <label class="field">
+            <span>Company</span>
+            <input type="text" placeholder="Northbridge QS" />
+          </label>
+
+          <label class="field">
+            <span>Password</span>
+            <input type="password" placeholder="••••••••" />
+          </label>
+
+          <button type="submit" class="btn btn-primary full-width">Create account</button>
+        </form>
+      {% else %}
+        <h2>Welcome back</h2>
+        <form class="auth-form">
+          <label class="field">
+            <span>Email</span>
+            <input type="email" placeholder="you@company.com" />
+          </label>
+
+          <label class="field">
+            <span>Password</span>
+            <input type="password" placeholder="••••••••" />
+          </label>
+
+          <div class="meta-row">
+            <label class="checkbox-row">
+              <input type="checkbox" checked />
+              <span>Remember me</span>
+            </label>
+            <a href="#">Forgot password?</a>
+          </div>
+
+          <button type="submit" class="btn btn-primary full-width">Sign in</button>
+        </form>
+      {% endif %}
+
+      <p class="signin-hint">
+        Need help? <a href="#">Talk to sales</a>
+      </p>
+    </div>
+  </div>
+</section>
+{% endblock %}

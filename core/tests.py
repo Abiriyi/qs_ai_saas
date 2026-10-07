@@ -146,3 +146,23 @@ class HomePageTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "QS AI")
+
+
+class FrontendPageTests(TestCase):
+    def test_auth_page_renders(self):
+        response = self.client.get("/login/")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Welcome back")
+
+    def test_dashboard_page_renders(self):
+        response = self.client.get("/dashboard/")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Project overview")
+
+    def test_project_workflow_page_renders(self):
+        response = self.client.get("/projects/new/")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Project intake")

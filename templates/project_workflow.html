@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<section class="project-page">
+  <div class="container project-layout">
+    <header class="page-header">
+      <div>
+        <p class="eyebrow">New project</p>
+        <h1>Project intake</h1>
+      </div>
+      <a href="{% url 'dashboard' %}" class="btn btn-ghost">Back to dashboard</a>
+    </header>
+
+    <div class="form-grid">
+      <div class="panel form-panel">
+        <h2>Project details</h2>
+
+        <form class="stacked-form">
+          <div class="field-row two-col">
+            <label class="field">
+              <span>Project name</span>
+              <input type="text" value="North Tower Residences" />
+            </label>
+            <label class="field">
+              <span>Project type</span>
+              <select>
+                {% for type in project_types %}
+                  <option value="{{ type }}">{{ type }}</option>
+                {% endfor %}
+              </select>
+            </label>
+          </div>
+
+          <div class="field-row two-col">
+            <label class="field">
+              <span>Client</span>
+              <input type="text" value="Urban Crest Developments" />
+            </label>
+            <label class="field">
+              <span>Location</span>
+              <input type="text" value="Manchester, UK" />
+            </label>
+          </div>
+
+          <label class="field">
+            <span>Upload project files</span>
+            <div class="upload-dropzone">
+              <input type="file" multiple />
+              <span>Drag and drop PDFs, drawings, or spreadsheets</span>
+            </div>
+          </label>
+
+          <label class="field">
+            <span>Project notes</span>
+            <textarea rows="5">High-rise residential build with podium parking and external facade package.</textarea>
+          </label>
+        </form>
+      </div>
+
+      <aside class="panel side-panel">
+        <h2>Pricing workflow</h2>
+
+        <div class="mini-card">
+          <p class="muted-label">AI extraction</p>
+          <strong>4 files processed</strong>
+          <span>92% text recognition confidence</span>
+        </div>
+
+        <div class="mini-card">
+          <p class="muted-label">Rate library</p>
+          <strong>External works / MEP / concrete</strong>
+          <span>Last sync 1 hour ago</span>
+        </div>
+
+        <div class="mini-card">
+          <p class="muted-label">Assumptions</p>
+          <label class="field checkbox-field">
+            <input type="checkbox" checked />
+            <span>Apply market uplift</span>
+          </label>
+          <label class="field checkbox-field">
+            <input type="checkbox" checked />
+            <span>Include contingency</span>
+          </label>
+          <label class="field checkbox-field">
+            <input type="checkbox" />
+            <span>Generate audit summary</span>
+          </label>
+        </div>
+
+        <button type="button" class="btn btn-primary full-width">Run pricing workflow</button>
+      </aside>
+    </div>
+  </div>
+</section>
+{% endblock %}

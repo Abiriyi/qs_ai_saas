@@ -17,10 +17,13 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
-from core.views import home
+from core.views import auth_page, dashboard, home, project_workflow
 
 urlpatterns = [
     path('', home, name='home'),
+    path('login/', auth_page, name='login'),
+    path('dashboard/', dashboard, name='dashboard'),
+    path('projects/new/', project_workflow, name='project_workflow'),
     path('admin/', admin.site.urls),
 
     path(
