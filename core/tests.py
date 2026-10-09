@@ -362,3 +362,54 @@ class FrontendPageTests(TestCase):
         self.assertContains(response, "Main estimate")
         self.assertContains(response, "Excavation")
         self.assertContains(response, "£15,420.50")
+
+    def test_pricing_review_has_approval_workflow_form(self):
+        organization = Organization.objects.create(name="Approval org", type="firm")
+        user = User.objects.create_user(
+            email="approval-review@example.com",
+            organization=organization,
+            password="strong-pass-123",
+        )
+
+        token = set_current_org(organization)
+        try:
+            project = Project.objects.create(
+                organization=organization,
+                created_by=user,
+                name="Approval project",
+            )
+            boq = BoQ.objects.create(
+                organization=organization,
+                project=project,
+                name="Approval estimate",
+                status="review_pending",
+                total_amount=Decimal("8750.00"),
+                ai_confidence_score=0.91,
+            )
+            section = BoQSection.objects.create(
+                organization=organization,
+                boq=boq,
+                name="Foundations",
+                order=1,
+            )
+            BoQItem.objects.create(
+                organization=organization,
+                section=section,
+                item_no="B2",
+                description="Concrete pour",
+                unit="m3",
+                quantity=Decimal("60"),
+                rate=Decimal("95.25"),
+                amount=Decimal("5715.00"),
+                confidence_score=0.9,
+            )
+        finally:
+            reset_current_org(token)
+
+        self.client.force_login(user)
+        response = self.client.get(f"/projects/{project.id}/pricing/")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Review decision")
+        self.assertContains(response, 'name="decision_action"')
+        self.assertContains(response, 'name="decision_reason"')

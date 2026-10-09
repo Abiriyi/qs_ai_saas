@@ -5,6 +5,7 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 
 from boq.models import BoQ
+from boq.services.workflow import BoQWorkflowError, BoQWorkflowService
 from core.forms import OrganizationSignupForm, ProjectIntakeForm, UserLoginForm
 from projects.models import Project
 
@@ -199,12 +200,37 @@ def project_pricing_review(request, pk):
         .first()
     )
 
+    if request.method == "POST" and boq:
+        action = request.POST.get("decision_action")
+        reason = (request.POST.get("decision_reason") or "").strip()
+
+        if action in {"approve", "reject"}:
+            try:
+                if boq.status == "draft":
+                    BoQWorkflowService.submit_for_review(boq)
+
+                if action == "approve":
+                    BoQWorkflowService.approve(boq, request.user)
+                    messages.success(request, "Estimate approved and ready for pricing.")
+                else:
+                    BoQWorkflowService.reject(
+                        boq,
+                        request.user,
+                        reason or "Changes requested by reviewer.",
+                    )
+                    messages.warning(request, "Estimate returned for changes.")
+            except BoQWorkflowError as exc:
+                messages.error(request, str(exc))
+
+            return redirect("project_pricing_review", pk=project.pk)
+
     sections = []
     if boq:
         sections = list(boq.sections.all().prefetch_related("items").order_by("order"))
 
     summary_total = boq.total_amount if boq else 0
     summary_total_display = f"£{summary_total:,.2f}" if summary_total else "£0.00"
+    status_text = boq.status.replace("_", " ").title() if boq else "Pending"
 
     return render(
         request,
@@ -216,5 +242,6 @@ def project_pricing_review(request, pk):
             "sections": sections,
             "summary_total": summary_total,
             "summary_total_display": summary_total_display,
+            "status_text": status_text,
         },
     )

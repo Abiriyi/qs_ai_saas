@@ -23,7 +23,7 @@
       </article>
       <article class="pricing-summary-card">
         <span>Status</span>
-        <strong>{% if boq %}{{ boq.status|title }}{% else %}Pending{% endif %}</strong>
+        <strong>{% if boq %}{{ status_text }}{% else %}Pending{% endif %}</strong>
       </article>
       <article class="pricing-summary-card">
         <span>Sections</span>
@@ -95,11 +95,18 @@
         </div>
 
         <div class="mini-card">
-          <p class="muted-label">Actions</p>
-          <div class="pricing-actions">
-            <button type="button" class="btn btn-primary">Approve estimate</button>
-            <button type="button" class="btn btn-ghost">Request changes</button>
-          </div>
+          <p class="muted-label">Review decision</p>
+          <form method="post" class="stacked-form">
+            {% csrf_token %}
+            <label class="field">
+              <span>Decision notes</span>
+              <textarea name="decision_reason" rows="4" placeholder="Describe the changes or approval notes for this estimate."></textarea>
+            </label>
+            <div class="pricing-actions">
+              <button type="submit" name="decision_action" value="approve" class="btn btn-primary">Approve estimate</button>
+              <button type="submit" name="decision_action" value="reject" class="btn btn-ghost">Request changes</button>
+            </div>
+          </form>
         </div>
       </aside>
     </div>
