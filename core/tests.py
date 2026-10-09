@@ -221,3 +221,66 @@ class FrontendPageTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Project intake")
+
+    def test_project_detail_requires_login(self):
+        organization = Organization.objects.create(name="Detail QS", type="firm")
+        user = User.objects.create_user(
+            email="detail@example.com",
+            organization=organization,
+            password="strong-pass-123",
+        )
+        token = set_current_org(organization)
+        try:
+            project = Project.objects.create(
+                organization=organization,
+                created_by=user,
+                name="Detail project",
+            )
+        finally:
+            reset_current_org(token)
+
+        response = self.client.get(f"/projects/{project.id}/")
+
+        self.assertEqual(response.status_code, 302)
+        self.assertIn("/login/", response["Location"])
+
+    def test_project_detail_renders_for_current_organization(self):
+        organization = Organization.objects.create(name="Org detail", type="firm")
+        other_org = Organization.objects.create(name="Other org", type="firm")
+        user = User.objects.create_user(
+            email="detail-user@example.com",
+            organization=organization,
+            password="strong-pass-123",
+        )
+        token = set_current_org(organization)
+        try:
+            project = Project.objects.create(
+                organization=organization,
+                created_by=user,
+                name="Current project",
+                description="Project summary",
+            )
+        finally:
+            reset_current_org(token)
+
+        other_token = set_current_org(other_org)
+        try:
+            other_project = Project.objects.create(
+                organization=other_org,
+                created_by=User.objects.create_user(
+                    email="other-user@example.com",
+                    organization=other_org,
+                    password="strong-pass-123",
+                ),
+                name="Other project",
+            )
+        finally:
+            reset_current_org(other_token)
+
+        self.client.force_login(user)
+        response = self.client.get(f"/projects/{project.id}/")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Current project")
+        self.assertContains(response, "Project summary")
+        self.assertNotContains(response, "Other project")

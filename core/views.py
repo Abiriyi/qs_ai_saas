@@ -2,7 +2,7 @@ from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
 
 from core.forms import OrganizationSignupForm, ProjectIntakeForm, UserLoginForm
 from projects.models import Project
@@ -148,5 +148,37 @@ def project_workflow(request):
         {
             "page_title": "Project intake | QS AI",
             "form": form,
+        },
+    )
+
+
+@login_required(login_url="login")
+def project_detail(request, pk):
+    project = get_object_or_404(
+        Project.objects.filter(organization=request.user.organization),
+        pk=pk,
+    )
+
+    status_map = {
+        "draft": ("Draft", "warning"),
+        "processing": ("Processing", "info"),
+        "completed": ("Completed", "success"),
+        "archived": ("Archived", "info"),
+    }
+    status_label, status_class = status_map.get(project.status, ("Draft", "warning"))
+
+    documents = project.documents.select_related("project").order_by("-uploaded_at")
+    boq_summary = project.boqs.order_by("-updated_at").first()
+
+    return render(
+        request,
+        "project_detail.html",
+        {
+            "page_title": f"{project.name} | QS AI",
+            "project": project,
+            "status_label": status_label,
+            "status_class": status_class,
+            "documents": documents,
+            "boq_summary": boq_summary,
         },
     )

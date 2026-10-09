@@ -732,6 +732,87 @@ th {
   padding: 4rem 0 5rem;
 }
 
+.project-detail-page {
+  padding: 4rem 0 5rem;
+}
+
+.project-detail-layout {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.project-detail-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(280px, 0.85fr);
+  gap: 1.5rem;
+}
+
+.project-detail-card,
+.project-detail-side {
+  padding: 1.5rem;
+}
+
+.detail-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+
+.detail-summary-item {
+  background: rgba(15, 29, 48, 0.8);
+  border: 1px solid var(--panel-border);
+  border-radius: 1rem;
+  padding: 1rem 1.1rem;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.detail-summary-item span {
+  color: var(--text-soft);
+}
+
+.detail-summary-item strong {
+  font-size: 1.5rem;
+  letter-spacing: -0.04em;
+}
+
+.document-list,
+.activity-list {
+  display: grid;
+  gap: 0.85rem;
+  margin-top: 1rem;
+}
+
+.document-item,
+.activity-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  background: rgba(148, 163, 184, 0.05);
+  border: 1px solid rgba(148, 163, 184, 0.08);
+  border-radius: 0.85rem;
+  padding: 0.9rem 1rem;
+}
+
+.document-meta,
+.activity-meta {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.document-meta small,
+.activity-meta small,
+.project-detail-empty {
+  color: var(--text-soft);
+}
+
+.project-detail-empty {
+  display: block;
+  padding: 1rem 0;
+}
+
 .project-layout {
   display: grid;
   gap: 1.5rem;

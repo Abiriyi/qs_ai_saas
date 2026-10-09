@@ -70,7 +70,7 @@
               {% if projects %}
                 {% for project in projects %}
                   <tr>
-                    <td>{{ project.name }}</td>
+                    <td><a href="{% url 'project_detail' project.id %}">{{ project.name }}</a></td>
                     <td>
                       <span class="status-badge {{ project.status_class }}">{{ project.status }}</span>
                     </td>

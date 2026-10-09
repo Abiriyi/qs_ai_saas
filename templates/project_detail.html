@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<section class="project-detail-page">
+  <div class="container project-detail-layout">
+    <header class="page-header">
+      <div>
+        <p class="eyebrow">Project overview</p>
+        <h1>{{ project.name }}</h1>
+      </div>
+      <div class="header-actions">
+        <a href="{% url 'dashboard' %}" class="btn btn-ghost">Back to dashboard</a>
+        <a href="{% url 'project_workflow' %}" class="btn btn-primary">New project</a>
+      </div>
+    </header>
+
+    <div class="detail-summary-grid">
+      <article class="detail-summary-item">
+        <span>Status</span>
+        <strong><span class="status-badge {{ status_class }}">{{ status_label }}</span></strong>
+      </article>
+      <article class="detail-summary-item">
+        <span>Documents</span>
+        <strong>{{ documents|length }}</strong>
+      </article>
+      <article class="detail-summary-item">
+        <span>BoQ</span>
+        <strong>{% if boq_summary %}{{ boq_summary.status|title }}{% else %}Pending{% endif %}</strong>
+      </article>
+    </div>
+
+    <div class="project-detail-grid">
+      <section class="panel project-detail-card">
+        <div class="panel-header-row">
+          <h2>Project details</h2>
+        </div>
+
+        <div class="field-list">
+          <div class="field-row two-col">
+            <label class="field">
+              <span>Project name</span>
+              <input type="text" value="{{ project.name }}" readonly />
+            </label>
+            <label class="field">
+              <span>Status</span>
+              <input type="text" value="{{ status_label }}" readonly />
+            </label>
+          </div>
+
+          <label class="field">
+            <span>Description</span>
+            <textarea rows="5" readonly>{% if project.description %}{{ project.description }}{% else %}No project brief provided.{% endif %}</textarea>
+          </label>
+        </div>
+      </section>
+
+      <aside class="panel project-detail-side">
+        <div class="panel-header-row">
+          <h2>Workspace</h2>
+        </div>
+
+        <div class="mini-card">
+          <p class="muted-label">Client</p>
+          <strong>{{ project.created_by.email }}</strong>
+          <span>Owner</span>
+        </div>
+
+        <div class="mini-card">
+          <p class="muted-label">Created</p>
+          <strong>{{ project.created_at|date:"d M Y" }}</strong>
+          <span>Updated {{ project.updated_at|date:"d M Y" }}</span>
+        </div>
+
+        <div class="mini-card">
+          <p class="muted-label">Next step</p>
+          <strong>Review uploaded documents</strong>
+          <span>Run AI extraction and BoQ generation</span>
+        </div>
+      </aside>
+    </div>
+
+    <div class="project-detail-grid">
+      <section class="panel project-detail-card">
+        <div class="panel-header-row">
+          <h2>Uploaded documents</h2>
+        </div>
+
+        {% if documents %}
+          <div class="document-list">
+            {% for document in documents %}
+              <div class="document-item">
+                <div class="document-meta">
+                  <strong>{{ document.original_filename }}</strong>
+                  <small>{{ document.uploaded_at|date:"d M Y, H:i" }}</small>
+                </div>
+                <span class="status-badge {% if document.status == 'processed' %}success{% elif document.status == 'pending' %}warning{% else %}info{% endif %}">{{ document.status|title }}</span>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <span class="project-detail-empty">No documents uploaded for this project yet.</span>
+        {% endif %}
+      </section>
+
+      <section class="panel project-detail-side">
+        <div class="panel-header-row">
+          <h2>BoQ status</h2>
+        </div>
+
+        {% if boq_summary %}
+          <div class="activity-list">
+            <div class="activity-item">
+              <div class="activity-meta">
+                <strong>{{ boq_summary.name }}</strong>
+                <small>{{ boq_summary.status|title }}</small>
+              </div>
+              <span class="status-badge success">£{{ boq_summary.total_amount }}</span>
+            </div>
+          </div>
+        {% else %}
+          <span class="project-detail-empty">No BoQ has been generated for this project yet.</span>
+        {% endif %}
+      </section>
+    </div>
+  </div>
+</section>
+{% endblock %}
