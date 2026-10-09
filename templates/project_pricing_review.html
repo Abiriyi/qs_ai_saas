@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<section class="pricing-review-page">
+  <div class="container project-detail-layout">
+    <header class="page-header">
+      <div>
+        <p class="eyebrow">Pricing review</p>
+        <h1>{{ project.name }}</h1>
+      </div>
+      <div class="header-actions">
+        <a href="{% url 'project_detail' project.id %}" class="btn btn-ghost">Project details</a>
+        <a href="{% url 'dashboard' %}" class="btn btn-primary">Dashboard</a>
+      </div>
+    </header>
+
+    <div class="pricing-summary-grid">
+      <article class="pricing-summary-card">
+        <span>Estimate</span>
+        <strong>{{ summary_total_display }}</strong>
+      </article>
+      <article class="pricing-summary-card">
+        <span>Status</span>
+        <strong>{% if boq %}{{ boq.status|title }}{% else %}Pending{% endif %}</strong>
+      </article>
+      <article class="pricing-summary-card">
+        <span>Sections</span>
+        <strong>{{ sections|length }}</strong>
+      </article>
+    </div>
+
+    <div class="pricing-review-grid">
+      <section class="panel project-detail-card">
+        <div class="panel-header-row">
+          <h2>Estimate breakdown</h2>
+        </div>
+
+        {% if boq and sections %}
+          {% for section in sections %}
+            <div class="section-card">
+              <div class="panel-header-row">
+                <h3>{{ section.name }}</h3>
+              </div>
+
+              <div class="item-table-wrap">
+                <table class="item-table">
+                  <thead>
+                    <tr>
+                      <th>Item</th>
+                      <th>Unit</th>
+                      <th>Qty</th>
+                      <th>Rate</th>
+                      <th>Amount</th>
+                      <th>Confidence</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for item in section.items.all %}
+                      <tr>
+                        <td>{{ item.item_no }} · {{ item.description }}</td>
+                        <td>{{ item.unit }}</td>
+                        <td>{{ item.quantity }}</td>
+                        <td>£{{ item.rate }}</td>
+                        <td>£{{ item.amount }}</td>
+                        <td>{{ item.confidence_score|floatformat:2 }}</td>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          {% endfor %}
+        {% else %}
+          <span class="project-detail-empty">No estimate has been generated for this project yet.</span>
+        {% endif %}
+      </section>
+
+      <aside class="panel project-detail-side">
+        <div class="panel-header-row">
+          <h2>Review controls</h2>
+        </div>
+
+        <div class="mini-card">
+          <p class="muted-label">AI confidence</p>
+          <strong>{% if boq %}{{ boq.ai_confidence_score|floatformat:2 }}{% else %}0.00{% endif %}</strong>
+          <span>Machine confidence score</span>
+        </div>
+
+        <div class="mini-card">
+          <p class="muted-label">BoQ name</p>
+          <strong>{% if boq %}{{ boq.name }}{% else %}Awaiting estimate{% endif %}</strong>
+          <span>{% if boq %}Updated {{ boq.updated_at|date:"d M Y" }}{% else %}No BoQ generated{% endif %}</span>
+        </div>
+
+        <div class="mini-card">
+          <p class="muted-label">Actions</p>
+          <div class="pricing-actions">
+            <button type="button" class="btn btn-primary">Approve estimate</button>
+            <button type="button" class="btn btn-ghost">Request changes</button>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</section>
+{% endblock %}

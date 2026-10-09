@@ -813,6 +813,73 @@ th {
   padding: 1rem 0;
 }
 
+.pricing-review-page {
+  padding: 4rem 0 5rem;
+}
+
+.pricing-review-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.8fr) minmax(280px, 0.8fr);
+  gap: 1.5rem;
+}
+
+.pricing-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+
+.pricing-summary-card {
+  background: rgba(15, 29, 48, 0.8);
+  border: 1px solid var(--panel-border);
+  border-radius: 1rem;
+  padding: 1rem 1.1rem;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.pricing-summary-card span {
+  color: var(--text-soft);
+}
+
+.pricing-summary-card strong {
+  font-size: 1.5rem;
+  letter-spacing: -0.04em;
+}
+
+.section-card {
+  background: rgba(15, 29, 48, 0.8);
+  border: 1px solid var(--panel-border);
+  border-radius: 1rem;
+  padding: 1rem 1.1rem;
+  margin-top: 1rem;
+}
+
+.item-table-wrap {
+  overflow-x: auto;
+}
+
+.item-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.8rem;
+}
+
+.item-table th,
+.item-table td {
+  padding: 0.7rem 0.8rem;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+  text-align: left;
+}
+
+.pricing-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1.2rem;
+}
+
 .project-layout {
   display: grid;
   gap: 1.5rem;

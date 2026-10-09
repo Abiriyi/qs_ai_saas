@@ -17,7 +17,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
-from core.views import auth_page, dashboard, home, project_detail, project_workflow
+from core.views import auth_page, dashboard, home, project_detail, project_pricing_review, project_workflow
 
 urlpatterns = [
     path('', home, name='home'),
@@ -25,6 +25,7 @@ urlpatterns = [
     path('dashboard/', dashboard, name='dashboard'),
     path('projects/new/', project_workflow, name='project_workflow'),
     path('projects/<uuid:pk>/', project_detail, name='project_detail'),
+    path('projects/<uuid:pk>/pricing/', project_pricing_review, name='project_pricing_review'),
     path('admin/', admin.site.urls),
 
     path(

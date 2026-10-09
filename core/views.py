@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 
+from boq.models import BoQ
 from core.forms import OrganizationSignupForm, ProjectIntakeForm, UserLoginForm
 from projects.models import Project
 
@@ -180,5 +181,40 @@ def project_detail(request, pk):
             "status_class": status_class,
             "documents": documents,
             "boq_summary": boq_summary,
+        },
+    )
+
+
+@login_required(login_url="login")
+def project_pricing_review(request, pk):
+    project = get_object_or_404(
+        Project.objects.filter(organization=request.user.organization),
+        pk=pk,
+    )
+
+    boq = (
+        project.boqs.select_related("project")
+        .prefetch_related("sections__items")
+        .order_by("-updated_at")
+        .first()
+    )
+
+    sections = []
+    if boq:
+        sections = list(boq.sections.all().prefetch_related("items").order_by("order"))
+
+    summary_total = boq.total_amount if boq else 0
+    summary_total_display = f"£{summary_total:,.2f}" if summary_total else "£0.00"
+
+    return render(
+        request,
+        "project_pricing_review.html",
+        {
+            "page_title": f"Pricing review | {project.name}",
+            "project": project,
+            "boq": boq,
+            "sections": sections,
+            "summary_total": summary_total,
+            "summary_total_display": summary_total_display,
         },
     )
