@@ -1,8 +1,11 @@
 from django.contrib import messages
 from django.contrib.auth import login
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
 from django.shortcuts import redirect, render
 
 from core.forms import OrganizationSignupForm, ProjectIntakeForm, UserLoginForm
+from projects.models import Project
 
 
 def home(request):
@@ -72,18 +75,41 @@ def auth_page(request):
     )
 
 
+@login_required(login_url="login")
 def dashboard(request):
-    summary_cards = [
-        {"label": "Open projects", "value": "12", "delta": "+3 this week"},
-        {"label": "AI estimate accuracy", "value": "96.4%", "delta": "+1.8% vs last month"},
-        {"label": "Pending reviews", "value": "4", "delta": "2 ready for signoff"},
-        {"label": "Monthly spend", "value": "$24.8K", "delta": "Within budget"},
-    ]
+    projects = (
+        Project.objects.filter(organization=request.user.organization)
+        .order_by("-updated_at")
+        .only("id", "name", "status", "updated_at", "created_at")
+    )
 
-    projects = [
-        {"name": "North Tower Residences", "status": "In review", "status_class": "warning", "last_update": "2 hours ago", "value": "$1.42M"},
-        {"name": "Harbor Logistics Hub", "status": "Approved", "status_class": "success", "last_update": "Today", "value": "$2.18M"},
-        {"name": "Market Street Retail", "status": "Processing", "status_class": "info", "last_update": "5 hours ago", "value": "$890K"},
+    status_map = {
+        "draft": ("Draft", "warning"),
+        "processing": ("Processing", "info"),
+        "completed": ("Completed", "success"),
+        "archived": ("Archived", "info"),
+    }
+    project_rows = []
+    for project in projects:
+        label, css_class = status_map.get(project.status, ("Draft", "warning"))
+        project_rows.append(
+            {
+                "id": project.id,
+                "name": project.name,
+                "status": label,
+                "status_class": css_class,
+                "last_update": project.updated_at.strftime("%d %b %Y"),
+                "value": "$0",
+            }
+        )
+
+    open_projects = projects.filter(status__in=["draft", "processing"]).count()
+    completed_projects = projects.filter(status="completed").count()
+    summary_cards = [
+        {"label": "Open projects", "value": str(open_projects), "delta": f"{completed_projects} completed"},
+        {"label": "Workspace", "value": request.user.organization.name[:18], "delta": request.user.organization.subscription_plan.title()},
+        {"label": "Recent reviews", "value": str(min(4, len(project_rows))), "delta": "Ready for signoff"},
+        {"label": "Projects", "value": str(projects.count()), "delta": "Across this tenant"},
     ]
 
     return render(
@@ -92,21 +118,27 @@ def dashboard(request):
         {
             "page_title": "Dashboard | QS AI",
             "summary_cards": summary_cards,
-            "projects": projects,
+            "projects": project_rows,
+            "workspace_name": request.user.organization.name,
         },
     )
 
 
+@login_required(login_url="login")
 def project_workflow(request):
     form = ProjectIntakeForm(request.POST or None, request.FILES or None)
 
     if request.method == "POST":
-        if not request.user.is_authenticated:
-            messages.warning(request, "Please sign in to create a project.")
-            return redirect("login")
-
         if form.is_valid():
             project = form.save(request.user)
+            if request.headers.get("x-requested-with") == "XMLHttpRequest":
+                return JsonResponse(
+                    {
+                        "success": True,
+                        "project_id": str(project.id),
+                        "project_name": project.name,
+                    }
+                )
             messages.success(request, f"Project '{project.name}' created.")
             return redirect("dashboard")
 

@@ -21,8 +21,8 @@
 
     <div class="sidebar-card">
       <p class="muted-label">Workspace</p>
-      <strong>Northbridge QS</strong>
-      <span>Enterprise plan</span>
+      <strong>{{ workspace_name|default:user.organization.name }}</strong>
+      <span>{{ user.organization.subscription_plan|title }} plan</span>
     </div>
   </aside>
 
@@ -67,16 +67,24 @@
               </tr>
             </thead>
             <tbody>
-              {% for project in projects %}
+              {% if projects %}
+                {% for project in projects %}
+                  <tr>
+                    <td>{{ project.name }}</td>
+                    <td>
+                      <span class="status-badge {{ project.status_class }}">{{ project.status }}</span>
+                    </td>
+                    <td>{{ project.last_update }}</td>
+                    <td>{{ project.value }}</td>
+                  </tr>
+                {% endfor %}
+              {% else %}
                 <tr>
-                  <td>{{ project.name }}</td>
-                  <td>
-                    <span class="status-badge {{ project.status_class }}">{{ project.status }}</span>
+                  <td colspan="4" class="empty-state-cell">
+                    No projects yet for this workspace. <a href="{% url 'project_workflow' %}">Create the first project</a>.
                   </td>
-                  <td>{{ project.last_update }}</td>
-                  <td>{{ project.value }}</td>
                 </tr>
-              {% endfor %}
+              {% endif %}
             </tbody>
           </table>
         </div>

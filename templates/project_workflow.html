@@ -17,9 +17,10 @@
       <div class="panel form-panel">
         <h2>Project details</h2>
 
-        <form method="post" enctype="multipart/form-data" class="stacked-form" novalidate>
+        <form id="project-workflow-form" method="post" enctype="multipart/form-data" class="stacked-form" novalidate>
           {% csrf_token %}
           {{ form.non_field_errors }}
+          <div id="project-flow-status" class="form-status" aria-live="polite"></div>
 
           <div class="field-row two-col">
             <label class="field">

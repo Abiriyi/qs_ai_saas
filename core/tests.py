@@ -155,13 +155,68 @@ class FrontendPageTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Welcome back")
 
-    def test_dashboard_page_renders(self):
+    def test_dashboard_requires_login(self):
+        response = self.client.get("/dashboard/")
+
+        self.assertEqual(response.status_code, 302)
+        self.assertIn("/login/", response["Location"])
+
+    def test_dashboard_lists_only_current_organization_projects(self):
+        organization = Organization.objects.create(name="Alpha QS", type="firm")
+        other_org = Organization.objects.create(name="Beta QS", type="firm")
+        user = User.objects.create_user(
+            email="alpha@example.com",
+            organization=organization,
+            password="strong-pass-123",
+        )
+        other_user = User.objects.create_user(
+            email="beta@example.com",
+            organization=other_org,
+            password="strong-pass-123",
+        )
+
+        token = set_current_org(organization)
+        try:
+            Project.objects.create(
+                organization=organization,
+                created_by=user,
+                name="Alpha project one",
+            )
+        finally:
+            reset_current_org(token)
+
+        token = set_current_org(other_org)
+        try:
+            Project.objects.create(
+                organization=other_org,
+                created_by=other_user,
+                name="Beta project one",
+            )
+        finally:
+            reset_current_org(token)
+
+        self.client.force_login(user)
         response = self.client.get("/dashboard/")
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Project overview")
+        self.assertContains(response, "Alpha project one")
+        self.assertNotContains(response, "Beta project one")
 
-    def test_project_workflow_page_renders(self):
+    def test_project_workflow_requires_login(self):
+        response = self.client.get("/projects/new/")
+
+        self.assertEqual(response.status_code, 302)
+        self.assertIn("/login/", response["Location"])
+
+    def test_project_workflow_page_renders_for_authenticated_user(self):
+        organization = Organization.objects.create(name="Workflow QS", type="firm")
+        user = User.objects.create_user(
+            email="workflow@example.com",
+            organization=organization,
+            password="strong-pass-123",
+        )
+
+        self.client.force_login(user)
         response = self.client.get("/projects/new/")
 
         self.assertEqual(response.status_code, 200)
