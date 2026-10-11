@@ -4,6 +4,7 @@ from .views import (
     BoQDetailView,
     BoQItemDetailView,
     BoQItemListView,
+    BoQItemReviewDecisionView,
     BoQListView,
     BoQReviewDecisionView,
     BoQSectionDetailView,
@@ -31,6 +32,11 @@ urlpatterns = [
         "<uuid:boq_id>/sections/<uuid:section_id>/items/",
         BoQItemListView.as_view(),
         name="boq-item-list",
+    ),
+    path(
+        "<uuid:boq_id>/sections/<uuid:section_id>/items/<uuid:item_id>/review/",
+        BoQItemReviewDecisionView.as_view(),
+        name="boq-item-review-decision",
     ),
     path(
         "<uuid:boq_id>/sections/<uuid:section_id>/items/<uuid:item_id>/",

@@ -8,7 +8,9 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from boq.api.serializers import BoQItemSerializer, BoQSectionSerializer, BoQSerializer
-from boq.models import BoQ, BoQItem, BoQSection, BoQStatus
+from django.utils import timezone
+
+from boq.models import BoQ, BoQItem, BoQItemReviewStatus, BoQSection, BoQStatus
 from boq.services.workflow import BoQWorkflowError, BoQWorkflowService
 from boq.tasks import finish_ai_boq_task
 from core.drf import TenantAPIViewMixin
@@ -449,6 +451,11 @@ class BoQItemDetailView(TenantAPIViewMixin, APIView):
         if item is None:
             return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
 
+        is_edit = any(
+            field in request.data
+            for field in ["item_no", "description", "unit", "source_reference", "quantity", "rate", "confidence_score"]
+        )
+
         for field in ["item_no", "description", "unit", "source_reference"]:
             if field in request.data:
                 setattr(item, field, str(request.data.get(field)).strip())
@@ -470,6 +477,20 @@ class BoQItemDetailView(TenantAPIViewMixin, APIView):
                 item.confidence_score = float(request.data.get("confidence_score"))
             except (TypeError, ValueError):
                 return Response({"error": "confidence_score must be numeric"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if "review_status" in request.data:
+            item.review_status = str(request.data.get("review_status")).lower()
+
+        if is_edit:
+            item.last_edited_by = request.user
+            item.last_edited_at = timezone.now()
+            if item.review_status in {
+                BoQItemReviewStatus.APPROVED,
+                BoQItemReviewStatus.PENDING_REVIEW,
+            }:
+                item.review_status = BoQItemReviewStatus.NEEDS_REVISION
+                item.rejection_reason = "Item updated after review and requires re-approval."
+                item.record_audit_event("edited", actor=request.user, item_id=str(item.id), reason=item.rejection_reason)
 
         if hasattr(item, "amount"):
             try:
@@ -541,4 +562,51 @@ class BoQReviewDecisionView(TenantAPIViewMixin, APIView):
                 "rejection_reason": boq.rejection_reason,
             },
             status=response_status,
+        )
+
+
+class BoQItemReviewDecisionView(TenantAPIViewMixin, APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, boq_id, section_id, item_id):
+        action = str(request.data.get("action", "")).lower()
+        boq = get_tenant_instance(BoQ, request, id=boq_id)
+        if boq is None:
+            return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        section = get_tenant_instance(BoQSection, request, boq_id=boq.id, id=section_id)
+        if section is None:
+            return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        item = get_tenant_instance(BoQItem, request, section_id=section.id, id=item_id)
+        if item is None:
+            return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        try:
+            if action == "approve":
+                item = BoQWorkflowService.approve_item(item, request.user)
+            elif action == "reject":
+                reason = request.data.get("reason") or "Rejected during item review."
+                item = BoQWorkflowService.reject_item(item, request.user, reason)
+            elif action == "needs_revision":
+                reason = request.data.get("reason") or "Item requires revision."
+                item = BoQWorkflowService.request_item_revision(item, request.user, reason)
+            else:
+                return Response(
+                    {"error": "action must be 'approve', 'reject', or 'needs_revision'"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+        except BoQWorkflowError as exc:
+            return Response({"error": str(exc)}, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response(
+            {
+                "id": str(item.id),
+                "review_status": item.review_status,
+                "reviewed_by": str(item.reviewed_by.id) if item.reviewed_by else None,
+                "reviewed_at": item.reviewed_at.isoformat() if item.reviewed_at else None,
+                "rejection_reason": item.rejection_reason,
+                "audit_trail": item.audit_trail,
+            },
+            status=status.HTTP_200_OK,
         )

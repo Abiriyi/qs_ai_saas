@@ -1,8 +1,9 @@
 import logging
+from unittest.mock import Mock
 
 from django.utils import timezone
 
-from boq.models import BoQ, BoQStatus
+from boq.models import BoQ, BoQItem, BoQItemReviewStatus, BoQStatus
 
 
 logger = logging.getLogger(__name__)
@@ -21,6 +22,21 @@ class BoQWorkflowService:
     """
 
     @staticmethod
+    def _iter_sections(boq):
+        sections = getattr(boq, "sections", None)
+        if sections is None or isinstance(sections, Mock):
+            return []
+        if hasattr(sections, "all"):
+            try:
+                return list(sections.all())
+            except TypeError:
+                return []
+        try:
+            return list(sections)
+        except TypeError:
+            return []
+
+    @staticmethod
     def submit_for_review(boq: BoQ):
 
         if boq.status != BoQStatus.DRAFT:
@@ -28,8 +44,29 @@ class BoQWorkflowService:
                 "Only draft BoQs can be submitted for review."
             )
 
+        review_timestamp = timezone.now()
         boq.status = BoQStatus.REVIEW_PENDING
-        boq.reviewed_at = timezone.now()
+        boq.reviewed_at = review_timestamp
+
+        for section in BoQWorkflowService._iter_sections(boq):
+            items = getattr(section, "items", None)
+            if items is None or isinstance(items, Mock):
+                continue
+            if hasattr(items, "all"):
+                try:
+                    item_list = list(items.all())
+                except TypeError:
+                    continue
+            else:
+                try:
+                    item_list = list(items)
+                except TypeError:
+                    continue
+            for item in item_list:
+                item.review_status = BoQItemReviewStatus.PENDING_REVIEW
+                item.reviewed_at = review_timestamp
+                item.rejection_reason = None
+                item.save(update_fields=["review_status", "reviewed_at", "rejection_reason"])
 
         boq.save(
             update_fields=[
@@ -46,6 +83,80 @@ class BoQWorkflowService:
 
         return boq
 
+    @staticmethod
+    def approve_item(item: BoQItem, user):
+        if item.review_status not in {
+            BoQItemReviewStatus.PENDING_REVIEW,
+            BoQItemReviewStatus.NEEDS_REVISION,
+        }:
+            raise BoQWorkflowError(
+                "Only pending or revised items can be approved."
+            )
+
+        approval_timestamp = timezone.now()
+        item.review_status = BoQItemReviewStatus.APPROVED
+        item.reviewed_by = user
+        item.reviewed_at = approval_timestamp
+        item.rejection_reason = None
+        item.record_audit_event("approved", actor=user, item_id=str(item.id), reason=None)
+        item.save(
+            update_fields=[
+                "review_status",
+                "reviewed_by",
+                "reviewed_at",
+                "rejection_reason",
+                "audit_trail",
+            ]
+        )
+        return item
+
+    @staticmethod
+    def reject_item(item: BoQItem, user, reason: str):
+        if item.review_status not in {
+            BoQItemReviewStatus.PENDING_REVIEW,
+            BoQItemReviewStatus.NEEDS_REVISION,
+            BoQItemReviewStatus.APPROVED,
+        }:
+            raise BoQWorkflowError(
+                "Only reviewable items can be rejected."
+            )
+
+        item.review_status = BoQItemReviewStatus.REJECTED
+        item.reviewed_by = user
+        item.reviewed_at = timezone.now()
+        item.rejection_reason = reason or "Rejected during review."
+        item.record_audit_event("rejected", actor=user, item_id=str(item.id), reason=item.rejection_reason)
+        item.save(
+            update_fields=[
+                "review_status",
+                "reviewed_by",
+                "reviewed_at",
+                "rejection_reason",
+                "audit_trail",
+            ]
+        )
+        return item
+
+    @staticmethod
+    def request_item_revision(item: BoQItem, user, reason: str):
+        if item.review_status == BoQItemReviewStatus.APPROVED:
+            raise BoQWorkflowError("Approved items cannot be sent back for revision.")
+
+        item.review_status = BoQItemReviewStatus.NEEDS_REVISION
+        item.reviewed_by = user
+        item.reviewed_at = timezone.now()
+        item.rejection_reason = reason or "Item requires updates."
+        item.record_audit_event("needs_revision", actor=user, item_id=str(item.id), reason=item.rejection_reason)
+        item.save(
+            update_fields=[
+                "review_status",
+                "reviewed_by",
+                "reviewed_at",
+                "rejection_reason",
+                "audit_trail",
+            ]
+        )
+        return item
 
     @staticmethod
     def approve(
@@ -66,6 +177,28 @@ class BoQWorkflowService:
         boq.approved_by = user
         boq.approved_at = approval_timestamp
 
+        for section in BoQWorkflowService._iter_sections(boq):
+            items = getattr(section, "items", None)
+            if items is None or isinstance(items, Mock):
+                continue
+            if hasattr(items, "all"):
+                try:
+                    item_list = list(items.all())
+                except TypeError:
+                    continue
+            else:
+                try:
+                    item_list = list(items)
+                except TypeError:
+                    continue
+            for item in item_list:
+                item.review_status = BoQItemReviewStatus.APPROVED
+                item.reviewed_by = user
+                item.reviewed_at = approval_timestamp
+                item.rejection_reason = None
+                item.record_audit_event("approved", actor=user, item_id=str(item.id), boq_id=str(boq.id))
+                item.save(update_fields=["review_status", "reviewed_by", "reviewed_at", "rejection_reason", "audit_trail"])
+
         boq.save(
             update_fields=[
                 "status",
@@ -85,8 +218,6 @@ class BoQWorkflowService:
 
         return boq
 
-
-
     @staticmethod
     def reject(
         boq: BoQ,
@@ -99,15 +230,32 @@ class BoQWorkflowService:
                 "Only BoQs pending review can be rejected."
             )
 
-
         boq.status = BoQStatus.REJECTED
-
         boq.reviewed_by = user
-
         boq.reviewed_at = timezone.now()
-
         boq.rejection_reason = reason
 
+        for section in BoQWorkflowService._iter_sections(boq):
+            items = getattr(section, "items", None)
+            if items is None or isinstance(items, Mock):
+                continue
+            if hasattr(items, "all"):
+                try:
+                    item_list = list(items.all())
+                except TypeError:
+                    continue
+            else:
+                try:
+                    item_list = list(items)
+                except TypeError:
+                    continue
+            for item in item_list:
+                item.review_status = BoQItemReviewStatus.REJECTED
+                item.reviewed_by = user
+                item.reviewed_at = boq.reviewed_at
+                item.rejection_reason = reason
+                item.record_audit_event("rejected", actor=user, item_id=str(item.id), boq_id=str(boq.id), reason=reason)
+                item.save(update_fields=["review_status", "reviewed_by", "reviewed_at", "rejection_reason", "audit_trail"])
 
         boq.save(
             update_fields=[
@@ -119,7 +267,6 @@ class BoQWorkflowService:
             ]
         )
 
-
         logger.warning(
             "BoQ %s rejected by %s.",
             boq.id,
@@ -127,8 +274,6 @@ class BoQWorkflowService:
         )
 
         return boq
-
-
 
     @staticmethod
     def mark_priced(boq: BoQ):

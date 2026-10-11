@@ -1,7 +1,7 @@
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
-from django.test import SimpleTestCase
+from django.test import SimpleTestCase, TestCase
 from django.conf import settings
 from rest_framework.test import APIRequestFactory
 
@@ -13,8 +13,12 @@ from boq.api.views import (
     BoQSectionDetailView,
     BoQSectionListView,
 )
+from boq.models import BoQ, BoQItem, BoQItemReviewStatus, BoQSection
 from boq.services.generation_service import BoQGenerationService
 from boq.services.workflow import BoQWorkflowService
+from core.tenant import reset_current_org, set_current_org
+from projects.models import Project
+from users.models import Organization, User
 
 
 class OpenAISettingsConfigurationTest(SimpleTestCase):
@@ -291,6 +295,88 @@ class BoQAPITest(SimpleTestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data["id"], str(boq.id))
+
+
+class BoQItemReviewWorkflowTest(TestCase):
+    def setUp(self):
+        self.organization = Organization.objects.create(name="BoQ Review Org", type="firm")
+        self.user = User.objects.create_user(
+            email="reviewer@example.com",
+            organization=self.organization,
+            password="strong-pass-123",
+        )
+        self.token = set_current_org(self.organization)
+        self.project = Project.objects.create(
+            organization=self.organization,
+            created_by=self.user,
+            name="Inspection project",
+        )
+        self.boq = BoQ.objects.create(
+            organization=self.organization,
+            project=self.project,
+            name="Inspection BoQ",
+            status="draft",
+            total_amount=1000,
+        )
+        self.section = BoQSection.objects.create(
+            organization=self.organization,
+            boq=self.boq,
+            name="Substructure",
+            order=1,
+        )
+        self.item = BoQItem.objects.create(
+            organization=self.organization,
+            section=self.section,
+            item_no="1",
+            description="Excavation",
+            unit="m3",
+            quantity=10,
+            rate=100,
+            amount=1000,
+            confidence_score=0.9,
+        )
+
+    def tearDown(self):
+        reset_current_org(self.token)
+
+    def test_submit_for_review_sets_all_items_pending_review(self):
+        BoQWorkflowService.submit_for_review(self.boq)
+        self.item.refresh_from_db()
+        self.assertEqual(self.item.review_status, BoQItemReviewStatus.PENDING_REVIEW)
+
+    def test_approve_item_updates_metadata_and_audit_trail(self):
+        self.item.review_status = BoQItemReviewStatus.PENDING_REVIEW
+        self.item.save(update_fields=["review_status"])
+
+        approved = BoQWorkflowService.approve_item(self.item, self.user)
+
+        self.assertEqual(approved.review_status, BoQItemReviewStatus.APPROVED)
+        self.assertEqual(approved.reviewed_by, self.user)
+        self.assertTrue(approved.audit_trail)
+        self.assertEqual(approved.audit_trail[-1]["action"], "approved")
+
+    def test_patch_item_edit_reopens_review(self):
+        self.item.review_status = BoQItemReviewStatus.APPROVED
+        self.item.save(update_fields=["review_status"])
+
+        request = APIRequestFactory().patch(
+            "/api/boq/item-review/",
+            {"description": "Revised excavation", "quantity": "12"},
+        )
+        request.user = self.user
+
+        response = BoQItemDetailView.as_view()(
+            request,
+            boq_id=str(self.boq.id),
+            section_id=str(self.section.id),
+            item_id=str(self.item.id),
+        )
+
+        self.item.refresh_from_db()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(self.item.review_status, BoQItemReviewStatus.NEEDS_REVISION)
+        self.assertEqual(self.item.last_edited_by, self.user)
+        self.assertIn("Revised excavation", self.item.description)
 
 
 class BoQSectionItemAPITest(SimpleTestCase):

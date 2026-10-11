@@ -1,5 +1,6 @@
 import uuid
 from django.db import models
+from django.utils import timezone
 from core.models import BaseTenantModel
 from projects.models import Project
 from django.conf import settings
@@ -40,6 +41,15 @@ class BoQStatus(models.TextChoices):
         "sealed",
         "Sealed"
     )
+
+
+class BoQItemReviewStatus(models.TextChoices):
+    DRAFT = ("draft", "Draft")
+    PENDING_REVIEW = ("pending_review", "Pending review")
+    APPROVED = ("approved", "Approved")
+    REJECTED = ("rejected", "Rejected")
+    NEEDS_REVISION = ("needs_revision", "Needs revision")
+
 
 class BoQ(BaseTenantModel):
 
@@ -171,6 +181,26 @@ class BoQItem(BaseTenantModel):
 
     source_reference = models.TextField(null=True, blank=True)  # PDF trace
 
+    review_status = models.CharField(
+        max_length=30,
+        choices=BoQItemReviewStatus.choices,
+        default=BoQItemReviewStatus.DRAFT,
+    )
+
+    reviewed_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="reviewed_boq_items",
+    )
+
+    reviewed_at = models.DateTimeField(null=True, blank=True)
+
+    rejection_reason = models.TextField(null=True, blank=True)
+
+    audit_trail = models.JSONField(default=list, blank=True)
+
     created_at = models.DateTimeField(auto_now_add=True)
 
     is_ai_generated = models.BooleanField(default=True)
@@ -184,7 +214,19 @@ class BoQItem(BaseTenantModel):
     )
 
     last_edited_at = models.DateTimeField(null=True, blank=True)
-    
+
+    def record_audit_event(self, action, actor=None, **payload):
+        event = {
+            "action": action,
+            "actor_id": str(actor.id) if actor is not None and hasattr(actor, "id") else None,
+            "timestamp": timezone.now().isoformat(),
+        }
+        event.update(payload)
+        trail = list(self.audit_trail or [])
+        trail.append(event)
+        self.audit_trail = trail
+        return self
+
     def save(self, *args, **kwargs):
         if self.section.boq.is_frozen:
             raise ValueError("Cannot edit frozen BoQ")

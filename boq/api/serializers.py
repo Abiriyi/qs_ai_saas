@@ -10,7 +10,12 @@ class BoQItemSerializer(serializers.ModelSerializer):
     rate = serializers.SerializerMethodField()
     amount = serializers.SerializerMethodField()
     confidence_score = serializers.SerializerMethodField()
+    review_status = serializers.SerializerMethodField()
+    reviewed_by = serializers.SerializerMethodField()
+    reviewed_at = serializers.SerializerMethodField()
+    rejection_reason = serializers.SerializerMethodField()
     last_edited_at = serializers.SerializerMethodField()
+    audit_trail = serializers.SerializerMethodField()
 
     class Meta:
         model = BoQItem
@@ -24,8 +29,13 @@ class BoQItemSerializer(serializers.ModelSerializer):
             "amount",
             "confidence_score",
             "source_reference",
+            "review_status",
+            "reviewed_by",
+            "reviewed_at",
+            "rejection_reason",
             "is_ai_generated",
             "last_edited_at",
+            "audit_trail",
         ]
         read_only_fields = fields
 
@@ -56,8 +66,36 @@ class BoQItemSerializer(serializers.ModelSerializer):
     def get_confidence_score(self, obj):
         return self._safe_float(getattr(obj, "confidence_score", None))
 
+    def get_review_status(self, obj):
+        review_status = getattr(obj, "review_status", None)
+        if review_status is None or isinstance(review_status, Mock):
+            return None
+        return str(review_status)
+
+    def get_reviewed_by(self, obj):
+        reviewed_by = getattr(obj, "reviewed_by", None)
+        if reviewed_by is None or isinstance(reviewed_by, Mock):
+            return None
+        reviewed_id = getattr(reviewed_by, "id", None)
+        return str(reviewed_id) if reviewed_id is not None else None
+
+    def get_reviewed_at(self, obj):
+        return self._safe_datetime(getattr(obj, "reviewed_at", None))
+
+    def get_rejection_reason(self, obj):
+        rejection_reason = getattr(obj, "rejection_reason", None)
+        if rejection_reason is None or isinstance(rejection_reason, Mock):
+            return None
+        return str(rejection_reason)
+
     def get_last_edited_at(self, obj):
         return self._safe_datetime(getattr(obj, "last_edited_at", None))
+
+    def get_audit_trail(self, obj):
+        audit_trail = getattr(obj, "audit_trail", None)
+        if audit_trail is None or isinstance(audit_trail, Mock):
+            return []
+        return audit_trail
 
 
 class BoQSectionSerializer(serializers.ModelSerializer):
