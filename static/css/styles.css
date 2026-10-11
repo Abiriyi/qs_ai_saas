@@ -946,6 +946,127 @@ th {
   color: var(--text-soft);
 }
 
+.review-summary-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  margin: 1rem 0 1.5rem;
+}
+
+.review-summary-pill,
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  padding: 0.38rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+.status-pill.status-draft,
+.review-summary-pill.status-draft {
+  background: rgba(148, 163, 184, 0.12);
+  color: #dfe7f5;
+}
+
+.status-pill.status-pending_review,
+.review-summary-pill.status-pending_review {
+  background: rgba(96, 165, 250, 0.12);
+  color: #bfdbfe;
+}
+
+.status-pill.status-approved,
+.review-summary-pill.status-approved {
+  background: rgba(52, 211, 153, 0.12);
+  color: #a7f3d0;
+}
+
+.status-pill.status-rejected,
+.review-summary-pill.status-rejected {
+  background: rgba(248, 113, 113, 0.12);
+  color: #fecaca;
+}
+
+.status-pill.status-needs_revision,
+.review-summary-pill.status-needs_revision {
+  background: rgba(251, 191, 36, 0.12);
+  color: #fcd34d;
+}
+
+.item-title-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.item-title-block strong {
+  font-size: 0.95rem;
+}
+
+.item-title-block span {
+  color: var(--text-soft);
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+
+.item-review-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  min-width: 220px;
+}
+
+.inline-review-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.btn-mini {
+  padding: 0.42rem 0.65rem;
+  font-size: 0.7rem;
+  border-radius: 0.75rem;
+  border: 1px solid transparent;
+  cursor: pointer;
+  line-height: 1.2;
+}
+
+.btn-success {
+  background: rgba(52, 211, 153, 0.12);
+  color: #a7f3d0;
+  border-color: rgba(52, 211, 153, 0.25);
+}
+
+.btn-warning {
+  background: rgba(251, 191, 36, 0.12);
+  color: #fcd34d;
+  border-color: rgba(251, 191, 36, 0.25);
+}
+
+.btn-danger {
+  background: rgba(248, 113, 113, 0.12);
+  color: #fecaca;
+  border-color: rgba(248, 113, 113, 0.25);
+}
+
+.item-review-form textarea {
+  width: 100%;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  background: rgba(15, 29, 48, 0.45);
+  color: var(--text);
+  padding: 0.75rem 0.8rem;
+  resize: vertical;
+}
+
+.item-review-form textarea::placeholder {
+  color: rgba(183, 195, 217, 0.8);
+}
+
 .checkbox-field {
   display: flex;
   align-items: center;

@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 
-from boq.models import BoQ
+from boq.models import BoQ, BoQItem, BoQItemReviewStatus
 from boq.services.workflow import BoQWorkflowError, BoQWorkflowService
 from core.forms import OrganizationSignupForm, ProjectIntakeForm, UserLoginForm
 from projects.models import Project
@@ -201,6 +201,41 @@ def project_pricing_review(request, pk):
     )
 
     if request.method == "POST" and boq:
+        item_id = request.POST.get("item_id")
+        item_action = request.POST.get("item_action")
+        item_reason = (request.POST.get("item_reason") or "").strip()
+
+        if item_id and item_action:
+            item = (
+                BoQItem.objects.filter(
+                    organization=request.user.organization,
+                    section__boq=boq,
+                    pk=item_id,
+                )
+                .select_related("section")
+                .first()
+            )
+            if item is None:
+                messages.error(request, "Item not found.")
+            else:
+                try:
+                    if item_action == "approve":
+                        BoQWorkflowService.approve_item(item, request.user)
+                        messages.success(request, f"Item {item.item_no} approved.")
+                    elif item_action == "reject":
+                        reason = item_reason or "Rejected during item review."
+                        BoQWorkflowService.reject_item(item, request.user, reason)
+                        messages.warning(request, f"Item {item.item_no} rejected.")
+                    elif item_action == "needs_revision":
+                        reason = item_reason or "Item requires revision."
+                        BoQWorkflowService.request_item_revision(item, request.user, reason)
+                        messages.info(request, f"Item {item.item_no} sent back for revision.")
+                    else:
+                        messages.error(request, "Invalid item action.")
+                except BoQWorkflowError as exc:
+                    messages.error(request, str(exc))
+            return redirect("project_pricing_review", pk=project.pk)
+
         action = request.POST.get("decision_action")
         reason = (request.POST.get("decision_reason") or "").strip()
 
@@ -225,8 +260,19 @@ def project_pricing_review(request, pk):
             return redirect("project_pricing_review", pk=project.pk)
 
     sections = []
+    review_summary = {
+        "draft": 0,
+        "pending_review": 0,
+        "approved": 0,
+        "rejected": 0,
+        "needs_revision": 0,
+    }
+
     if boq:
         sections = list(boq.sections.all().prefetch_related("items").order_by("order"))
+        for section in sections:
+            for item in section.items.all():
+                review_summary[item.review_status] = review_summary.get(item.review_status, 0) + 1
 
     summary_total = boq.total_amount if boq else 0
     summary_total_display = f"£{summary_total:,.2f}" if summary_total else "£0.00"
@@ -243,5 +289,7 @@ def project_pricing_review(request, pk):
             "summary_total": summary_total,
             "summary_total_display": summary_total_display,
             "status_text": status_text,
+            "review_summary": review_summary,
+            "review_status_choices": BoQItemReviewStatus,
         },
     )

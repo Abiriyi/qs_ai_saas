@@ -38,6 +38,15 @@
         </div>
 
         {% if boq and sections %}
+          <div class="review-summary-strip">
+            {% for status_key, count in review_summary.items %}
+              <div class="review-summary-pill status-{{ status_key }}">
+                <span>{{ status_key|cut:"_"|title }}</span>
+                <strong>{{ count }}</strong>
+              </div>
+            {% endfor %}
+          </div>
+
           {% for section in sections %}
             <div class="section-card">
               <div class="panel-header-row">
@@ -53,18 +62,40 @@
                       <th>Qty</th>
                       <th>Rate</th>
                       <th>Amount</th>
-                      <th>Confidence</th>
+                      <th>Status</th>
+                      <th>Review</th>
                     </tr>
                   </thead>
                   <tbody>
                     {% for item in section.items.all %}
                       <tr>
-                        <td>{{ item.item_no }} · {{ item.description }}</td>
+                        <td>
+                          <div class="item-title-block">
+                            <strong>{{ item.item_no }}</strong>
+                            <span>{{ item.description }}</span>
+                          </div>
+                        </td>
                         <td>{{ item.unit }}</td>
                         <td>{{ item.quantity }}</td>
                         <td>£{{ item.rate }}</td>
                         <td>£{{ item.amount }}</td>
-                        <td>{{ item.confidence_score|floatformat:2 }}</td>
+                        <td>
+                          <span class="status-pill status-{{ item.review_status|default:'draft' }}">
+                            {{ item.get_review_status_display|default:"Draft" }}
+                          </span>
+                        </td>
+                        <td>
+                          <form method="post" class="item-review-form">
+                            {% csrf_token %}
+                            <input type="hidden" name="item_id" value="{{ item.id }}" />
+                            <div class="inline-review-actions">
+                              <button type="submit" name="item_action" value="approve" class="btn btn-mini btn-success">Approve</button>
+                              <button type="submit" name="item_action" value="needs_revision" class="btn btn-mini btn-warning">Revise</button>
+                              <button type="submit" name="item_action" value="reject" class="btn btn-mini btn-danger">Reject</button>
+                            </div>
+                            <textarea name="item_reason" rows="2" placeholder="Add a review reason...">{{ item.rejection_reason|default:"" }}</textarea>
+                          </form>
+                        </td>
                       </tr>
                     {% endfor %}
                   </tbody>
