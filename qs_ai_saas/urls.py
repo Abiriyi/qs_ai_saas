@@ -18,11 +18,12 @@ from django.contrib import admin
 from django.urls import path, include
 
 from audit.views import audit_trail
-from core.views import auth_page, dashboard, home, project_detail, project_pricing_review, project_workflow
+from core.views import auth_page, dashboard, healthz, home, project_detail, project_pricing_review, project_workflow
 from tribunal.views import tribunal_case_detail, tribunal_dashboard
 
 urlpatterns = [
     path('', home, name='home'),
+    path('healthz/', healthz, name='healthz'),
     path('login/', auth_page, name='login'),
     path('dashboard/', dashboard, name='dashboard'),
     path('projects/new/', project_workflow, name='project_workflow'),

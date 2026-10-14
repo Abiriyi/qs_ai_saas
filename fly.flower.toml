@@ -1,0 +1,32 @@
+# fly.flower.toml — QS AI SaaS **Flower** (Celery monitoring) app
+#
+# Deploy with: fly deploy -c fly.flower.toml --app qs-ai-flower
+#
+# Flower exposes a web dashboard for the Celery workers. Protect it: either
+# keep it internal-only (recommended) or put it behind Fly.io auth. Set
+# FLOWER_BASIC_AUTH via `fly secrets set` (format: "user:password") to enable
+# built-in basic auth.
+
+app = "qs-ai-flower"
+primary_region = "lhr"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  DJANGO_SETTINGS_MODULE = "qs_ai_saas.settings.production"
+  FLOWER_PORT = "5555"
+
+[processes]
+  flower = "celery -A qs_ai_saas flower --port=${FLOWER_PORT} --url_prefix=flower"
+
+[http_service]
+  internal_port = 5555
+  force_https = true
+  auto_stop_machines = "suspend"
+  auto_start_machines = true
+  min_machines_running = 0
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "256mb"

@@ -1,0 +1,37 @@
+# fly.worker.toml — QS AI SaaS **Celery worker** app
+#
+# Deploy with: fly deploy -c fly.worker.toml --app qs-ai-worker
+#
+# Same Docker image as the web app; only the process command differs. It runs
+# the Celery worker that executes document processing, BoQ generation and
+# pricing tasks. No HTTP service / health checks are exposed.
+
+app = "qs-ai-worker"
+primary_region = "lhr"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  DJANGO_SETTINGS_MODULE = "qs_ai_saas.settings.production"
+  # Single-task prefetch keeps long AI/PDF jobs from being hoarded by one
+  # worker; scale machine count instead of concurrency for throughput.
+  CELERY_CONCURRENCY = "2"
+
+# Override the image's default Gunicorn CMD with the Celery worker.
+[processes]
+  worker = "celery -A qs_ai_saas worker --loglevel=info --concurrency=${CELERY_CONCURRENCY} --without-gossip --without-mingle"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "1gb"
+
+# This app runs a background Celery worker and intentionally defines NO
+# [http_service] / [[services]] block: nothing listens on a port, so Fly.io
+# simply boots the machine and runs the worker process. Machines are not
+# auto-stopped (there is no service to scale-to-zero), so uploaded documents
+# keep getting processed.
+
+[[restart]]
+  policy = "always"
+  retries = 5

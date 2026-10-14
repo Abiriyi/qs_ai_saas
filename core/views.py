@@ -10,6 +10,17 @@ from core.forms import OrganizationSignupForm, ProjectIntakeForm, UserLoginForm
 from projects.models import Project
 
 
+def healthz(request):
+    """
+    Liveness/readiness probe for the load balancer / Fly.io health checks.
+
+    Kept intentionally dependency-free: it never touches the database, cache,
+    or object storage, so it reflects whether the web process is serving
+    requests rather than the health of any downstream service.
+    """
+    return JsonResponse({"status": "ok"})
+
+
 def home(request):
     features = [
         {

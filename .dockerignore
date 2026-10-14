@@ -1,0 +1,36 @@
+# Version control
+.git
+.gitignore
+.github
+
+# Python caches / virtualenvs
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Local secrets & databases — must never enter the image
+.env
+.env.*
+!.env.example
+*.sqlite3
+*.sql
+qs_ai_db_local.sql
+
+# Collected / generated static + media (rebuilt during the image build)
+staticfiles/
+media/
+
+# Editor / OS cruft
+.vscode/
+.idea/
+.DS_Store
+*.log
+
+# Docs & tests (not needed at runtime)
+docs/
+README.md

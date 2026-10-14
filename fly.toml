@@ -1,0 +1,64 @@
+# fly.toml — QS AI SaaS **web/API** app (Gunicorn + Django)
+#
+# Deploy with:   fly deploy --app qs-ai-api
+# Worker:        see fly.worker.toml  (fly deploy -c fly.worker.toml --app qs-ai-worker)
+# Flower:        see fly.flower.toml  (fly deploy -c fly.flower.toml --app qs-ai-flower)
+#
+# Secrets are NOT stored here. Set them once per app with `fly secrets set`:
+#   fly secrets set \
+#     DJANGO_SECRET_KEY=... DJANGO_ALLOWED_HOSTS=qs-ai-api.fly.dev \
+#     POSTGRES_DB=... POSTGRES_USER=... POSTGRES_PASSWORD=... \
+#     POSTGRES_HOST=... POSTGRES_PORT=5432 \
+#     REDIS_URL=... TIGRIS_ACCESS_KEY=... TIGRIS_SECRET_KEY=... \
+#     TIGRIS_BUCKET=... OPENAI_API_KEY=...
+# See docs/SECRET_ROTATION.md for the full runbook.
+
+app = "qs-ai-api"
+primary_region = "lhr"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  PORT = "8000"
+  DJANGO_SETTINGS_MODULE = "qs_ai_saas.settings.production"
+  WEB_CONCURRENCY = "3"
+
+[http_service]
+  internal_port = 8000
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 1
+
+  [http_service.concurrency]
+    type = "requests"
+    soft_limit = 200
+    hard_limit = 250
+
+  [[http_service.checks]]
+    type = "http"
+    method = "GET"
+    path = "/healthz/"
+    interval = "30s"
+    timeout = "5s"
+    grace_period = "20s"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "512mb"
+
+# Run database migrations once, before the new machines go live.
+[deploy]
+  release_command = "python manage.py migrate --noinput"
+
+[[mounts]]
+  # Optional: only needed if you serve MEDIA from local disk. Object storage
+  # (Tigris) is used for uploads, so this can be removed for a fully
+  # stateless web tier.
+  source = "qs_ai_media"
+  destination = "/app/media"
+
+[[restart]]
+  policy = "on-failure"
+  retries = 3

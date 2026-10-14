@@ -24,6 +24,16 @@ SECRET_KEY = os.getenv(
     "DJANGO_SECRET_KEY"
 )
 
+# A missing secret key is a deployment misconfiguration. Fail fast and loudly
+# instead of silently running with ``None`` (which would break sessions/CSRF
+# the moment the app receives traffic).
+if not SECRET_KEY:
+    raise RuntimeError(
+        "DJANGO_SECRET_KEY environment variable is not set. "
+        "Generate one with: python -c \"from django.core.management.utils "
+        "import get_random_secret_key as g; print(g())\""
+    )
+
 DEBUG = False
 
 ALLOWED_HOSTS = []
@@ -71,6 +81,9 @@ INSTALLED_APPS = (
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    # WhiteNoise serves static files directly from the app process so no
+    # separate web server / CDN is required in front of Gunicorn.
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
