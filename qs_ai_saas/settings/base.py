@@ -52,9 +52,11 @@ LOCAL_APPS = [
     'users',
     'projects',
     'core',
+    'documents',
     'boq',
     'pricing',
-    'documents',
+    'tribunal',
+    'audit',
 ]
 
 INSTALLED_APPS = (

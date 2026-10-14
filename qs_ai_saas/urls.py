@@ -17,7 +17,9 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
+from audit.views import audit_trail
 from core.views import auth_page, dashboard, home, project_detail, project_pricing_review, project_workflow
+from tribunal.views import tribunal_case_detail, tribunal_dashboard
 
 urlpatterns = [
     path('', home, name='home'),
@@ -26,6 +28,9 @@ urlpatterns = [
     path('projects/new/', project_workflow, name='project_workflow'),
     path('projects/<uuid:pk>/', project_detail, name='project_detail'),
     path('projects/<uuid:pk>/pricing/', project_pricing_review, name='project_pricing_review'),
+    path('audit/', audit_trail, name='audit_trail'),
+    path('tribunal/', tribunal_dashboard, name='tribunal_dashboard'),
+    path('tribunal/<uuid:pk>/', tribunal_case_detail, name='tribunal_case_detail'),
     path('admin/', admin.site.urls),
 
     path(
@@ -35,5 +40,13 @@ urlpatterns = [
     path(
         "api/boq/",
         include("boq.api.urls")
+    ),
+    path(
+        "api/audit/",
+        include("audit.api.urls")
+    ),
+    path(
+        "api/tribunal/",
+        include("tribunal.api.urls")
     ),
 ]

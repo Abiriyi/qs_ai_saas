@@ -13,9 +13,8 @@
     <nav class="sidebar-nav" aria-label="Dashboard navigation">
       <a class="active" href="{% url 'dashboard' %}">Overview</a>
       <a href="{% url 'project_workflow' %}">New project</a>
-      <a href="#">Projects</a>
-      <a href="#">Pricing library</a>
-      <a href="#">Audit trail</a>
+      <a href="{% url 'audit_trail' %}">Audit trail</a>
+      <a href="{% url 'tribunal_dashboard' %}">Tribunal</a>
       <a href="#">Settings</a>
     </nav>
 
@@ -110,11 +109,18 @@
               <small>Inspect AI rate suggestions</small>
             </div>
           </a>
-          <a href="#" class="action-item">
+          <a href="{% url 'audit_trail' %}" class="action-item">
             <span class="icon-shell">✓</span>
             <div>
               <strong>Audit trail</strong>
               <small>Review rule changes and confidence scores</small>
+            </div>
+          </a>
+          <a href="{% url 'tribunal_dashboard' %}" class="action-item">
+            <span class="icon-shell">⚖</span>
+            <div>
+              <strong>Tribunal</strong>
+              <small>Manage disputes and rulings</small>
             </div>
           </a>
         </div>

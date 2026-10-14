@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<section class="dashboard-shell">
+  <main class="dashboard-main">
+    <header class="dashboard-header">
+      <div>
+        <p class="eyebrow">{{ case.reference }}</p>
+        <h1>{{ case.title }}</h1>
+      </div>
+      <div class="header-actions">
+        <a href="{% url 'tribunal_dashboard' %}" class="btn btn-ghost">All cases</a>
+      </div>
+    </header>
+
+    {% if messages %}
+      <div class="panel">
+        <ul class="messages">
+          {% for message in messages %}
+            <li class="status-{{ message.tags }}">{{ message }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+
+    <div class="pricing-summary-grid">
+      <article class="pricing-summary-card">
+        <span>Status</span>
+        <strong>{{ case.get_status_display }}</strong>
+      </article>
+      <article class="pricing-summary-card">
+        <span>Decision</span>
+        <strong>{{ case.get_decision_display|default:"Pending" }}</strong>
+      </article>
+      <article class="pricing-summary-card">
+        <span>Project</span>
+        <strong>{{ case.project.name }}</strong>
+      </article>
+    </div>
+
+    <section class="panel">
+      <div class="panel-header-row">
+        <h2>Case details</h2>
+      </div>
+      <dl class="detail-list">
+        <dt>Description</dt>
+        <dd>{{ case.description|default:"—"|linebreaksbr }}</dd>
+        <dt>Raised by</dt>
+        <dd>{{ case.raised_by.email|default:"—" }}</dd>
+        <dt>Opened</dt>
+        <dd>{{ case.opened_at|date:"d M Y H:i" }}</dd>
+        {% if case.decided_at %}
+          <dt>Decided</dt>
+          <dd>{{ case.decided_at|date:"d M Y H:i" }} by {{ case.decided_by.email|default:"—" }}</dd>
+          <dt>Ruling notes</dt>
+          <dd>{{ case.decision_notes|default:"—"|linebreaksbr }}</dd>
+        {% endif %}
+      </dl>
+    </section>
+
+    {% if case.is_active %}
+      <section class="panel">
+        <div class="panel-header-row">
+          <h2>Record a ruling</h2>
+        </div>
+        <form method="post" class="item-review-form">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="decide" />
+          <label class="field">
+            <span>Decision</span>
+            <select name="decision">
+              {% for value, label in decisions %}
+                <option value="{{ value }}">{{ label }}</option>
+              {% endfor %}
+            </select>
+          </label>
+          <label class="field">
+            <span>Decision notes</span>
+            <textarea name="decision_notes" rows="4" placeholder="Summarise the ruling and reasoning."></textarea>
+          </label>
+          <div class="pricing-actions">
+            <button type="submit" class="btn btn-primary">Record ruling</button>
+          </div>
+        </form>
+        <form method="post" class="item-review-form">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="withdraw" />
+          <button type="submit" class="btn btn-danger">Withdraw case</button>
+        </form>
+      </section>
+    {% else %}
+      <section class="panel">
+        <p class="empty-state-cell">This case is closed. {% if case.decision == 'upheld' %}The linked BoQ remains frozen as the final record.{% else %}The linked project and BoQ have been unfrozen.{% endif %}</p>
+      </section>
+    {% endif %}
+  </main>
+</section>
+{% endblock %}

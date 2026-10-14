@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<section class="dashboard-shell">
+  <aside class="dashboard-sidebar">
+    <div class="sidebar-brand">
+      <span class="brand-mark">QS</span>
+      <span>AI</span>
+    </div>
+
+    <nav class="sidebar-nav" aria-label="Dashboard navigation">
+      <a href="{% url 'dashboard' %}">Overview</a>
+      <a href="{% url 'project_workflow' %}">New project</a>
+      <a href="{% url 'audit_trail' %}">Audit trail</a>
+      <a href="{% url 'tribunal_dashboard' %}" class="active">Tribunal</a>
+    </nav>
+
+    <div class="sidebar-card">
+      <p class="muted-label">Workspace</p>
+      <strong>{{ user.organization.name }}</strong>
+      <span>{{ user.organization.subscription_plan|title }} plan</span>
+    </div>
+  </aside>
+
+  <main class="dashboard-main">
+    <header class="dashboard-header">
+      <div>
+        <p class="eyebrow">Disputes</p>
+        <h1>Tribunal</h1>
+      </div>
+      <div class="header-actions">
+        <a href="{% url 'dashboard' %}" class="btn btn-ghost">Dashboard</a>
+      </div>
+    </header>
+
+    <div class="summary-grid">
+      <article class="summary-card">
+        <span>Open cases</span>
+        <strong>{{ open_count }}</strong>
+      </article>
+      <article class="summary-card">
+        <span>Decided</span>
+        <strong>{{ decided_count }}</strong>
+      </article>
+    </div>
+
+    <section class="panel">
+      <div class="panel-header-row">
+        <h2>Cases</h2>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Reference</th>
+              <th>Title</th>
+              <th>Project</th>
+              <th>Status</th>
+              <th>Decision</th>
+              <th>Raised</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for case in cases %}
+              <tr>
+                <td><a href="{% url 'tribunal_case_detail' case.id %}">{{ case.reference }}</a></td>
+                <td>{{ case.title }}</td>
+                <td>{{ case.project.name }}</td>
+                <td><span class="status-badge {% if case.is_active %}warning{% else %}success{% endif %}">{{ case.get_status_display }}</span></td>
+                <td>{{ case.get_decision_display|default:"—" }}</td>
+                <td>{{ case.opened_at|date:"d M Y" }}</td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="6" class="empty-state-cell">No tribunal cases yet. Disputes raised from a project will appear here.</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+</section>
+{% endblock %}

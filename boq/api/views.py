@@ -15,6 +15,7 @@ from boq.services.workflow import BoQWorkflowError, BoQWorkflowService
 from boq.tasks import finish_ai_boq_task
 from core.drf import TenantAPIViewMixin
 from projects.models import Project
+from pricing.services.boq_pricing_service import BoQPricingService
 
 
 def get_tenant_queryset(model_cls, request):
@@ -607,6 +608,48 @@ class BoQItemReviewDecisionView(TenantAPIViewMixin, APIView):
                 "reviewed_at": item.reviewed_at.isoformat() if item.reviewed_at else None,
                 "rejection_reason": item.rejection_reason,
                 "audit_trail": item.audit_trail,
+            },
+            status=status.HTTP_200_OK,
+        )
+
+
+class BoQPriceView(TenantAPIViewMixin, APIView):
+    """
+    Re-price a BoQ's line items through the org rate library / AI fallback and
+    refresh ``BoQ.total_amount``.
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, boq_id):
+        boq = get_tenant_instance(BoQ, request, id=boq_id)
+        if boq is None:
+            return Response(
+                {"detail": "Not found."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        if getattr(boq, "is_frozen", False):
+            return Response(
+                {"error": "Cannot price a frozen BoQ."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            summary = BoQPricingService.price_boq(boq, actor=request.user)
+        except Exception as exc:
+            return Response(
+                {"error": f"Pricing failed: {exc}"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        boq.refresh_from_db()
+        return Response(
+            {
+                "boq_id": str(boq.id),
+                "total_amount": str(boq.total_amount),
+                "items_priced": summary["items"],
+                "sources": summary["sources"],
             },
             status=status.HTTP_200_OK,
         )

@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from boq.models import BoQ, BoQSection, BoQItem, BoQStatus
 
 
@@ -30,6 +32,8 @@ def build_boq_from_engine(
         validation_summary=normalized_validation_summary,
     )
 
+    total_amount = Decimal("0")
+
     for i, section_data in enumerate(data.get("sections", [])):
         section = BoQSection.objects.create(
             boq=boq,
@@ -39,7 +43,7 @@ def build_boq_from_engine(
         )
 
         for item in section_data.get("items", []):
-            BoQItem.objects.create(
+            boq_item = BoQItem.objects.create(
                 section=section,
                 item_no=item["item_no"],
                 description=item["description"],
@@ -49,5 +53,13 @@ def build_boq_from_engine(
                 confidence_score=item.get("confidence", 0),
                 organization=project.organization,
             )
+            # BoQItem.save() has already computed ``amount = quantity * rate``.
+            total_amount += boq_item.amount
+
+    # Keep the denormalised BoQ total in sync with its line items so the
+    # pricing-review screen shows the real value instead of the default 0.
+    if boq.total_amount != total_amount:
+        boq.total_amount = total_amount
+        boq.save(update_fields=["total_amount", "updated_at"])
 
     return boq

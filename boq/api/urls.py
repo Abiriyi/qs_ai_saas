@@ -6,6 +6,7 @@ from .views import (
     BoQItemListView,
     BoQItemReviewDecisionView,
     BoQListView,
+    BoQPriceView,
     BoQReviewDecisionView,
     BoQSectionDetailView,
     BoQSectionListView,
@@ -17,6 +18,11 @@ urlpatterns = [
         "",
         BoQListView.as_view(),
         name="boq-list",
+    ),
+    path(
+        "<uuid:boq_id>/price/",
+        BoQPriceView.as_view(),
+        name="boq-price",
     ),
     path(
         "<uuid:boq_id>/sections/",

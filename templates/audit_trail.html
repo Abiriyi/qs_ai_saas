@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<section class="dashboard-shell">
+  <aside class="dashboard-sidebar">
+    <div class="sidebar-brand">
+      <span class="brand-mark">QS</span>
+      <span>AI</span>
+    </div>
+
+    <nav class="sidebar-nav" aria-label="Dashboard navigation">
+      <a href="{% url 'dashboard' %}">Overview</a>
+      <a href="{% url 'project_workflow' %}">New project</a>
+      <a href="{% url 'audit_trail' %}" class="active">Audit trail</a>
+      <a href="{% url 'tribunal_dashboard' %}">Tribunal</a>
+    </nav>
+
+    <div class="sidebar-card">
+      <p class="muted-label">Workspace</p>
+      <strong>{{ user.organization.name }}</strong>
+      <span>{{ user.organization.subscription_plan|title }} plan</span>
+    </div>
+  </aside>
+
+  <main class="dashboard-main">
+    <header class="dashboard-header">
+      <div>
+        <p class="eyebrow">Governance</p>
+        <h1>Audit trail</h1>
+      </div>
+      <div class="header-actions">
+        <a href="{% url 'dashboard' %}" class="btn btn-ghost">Dashboard</a>
+      </div>
+    </header>
+
+    <form method="get" class="panel audit-filters">
+      <label class="field">
+        <span>Search action</span>
+        <input type="search" name="q" value="{{ query }}" placeholder="e.g. approved, priced" />
+      </label>
+      <label class="field">
+        <span>Category</span>
+        <select name="category">
+          <option value="">All categories</option>
+          {% for cat in categories %}
+            <option value="{{ cat }}" {% if cat == active_category %}selected{% endif %}>{{ cat|title }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <button type="submit" class="btn btn-primary">Filter</button>
+    </form>
+
+    <section class="panel">
+      <div class="panel-header-row">
+        <h2>Recent activity</h2>
+        <span class="muted-label">{{ events|length }} event(s)</span>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>When</th>
+              <th>Action</th>
+              <th>Category</th>
+              <th>Target</th>
+              <th>Actor</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for event in events %}
+              <tr>
+                <td>{{ event.created_at|date:"d M Y H:i" }}</td>
+                <td><strong>{{ event.action }}</strong>{% if event.message %}<br /><small>{{ event.message }}</small>{% endif %}</td>
+                <td><span class="status-badge info">{{ event.category|title }}</span></td>
+                <td>{% if event.model_name %}{{ event.model_name }}<br /><small>{{ event.object_id }}</small>{% else %}-{% endif %}</td>
+                <td>{{ event.actor.email|default:"system" }}</td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="5" class="empty-state-cell">No audit events recorded yet.</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+</section>
+{% endblock %}

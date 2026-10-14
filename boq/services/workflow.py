@@ -3,6 +3,7 @@ from unittest.mock import Mock
 
 from django.utils import timezone
 
+from audit.services import AuditService
 from boq.models import BoQ, BoQItem, BoQItemReviewStatus, BoQStatus
 
 
@@ -79,6 +80,12 @@ class BoQWorkflowService:
         logger.info(
             "BoQ %s submitted for review.",
             boq.id,
+        )
+
+        AuditService.boq(
+            "submitted_for_review",
+            boq=boq,
+            message=f"BoQ {boq.id} submitted for review.",
         )
 
         return boq
@@ -216,6 +223,13 @@ class BoQWorkflowService:
             user,
         )
 
+        AuditService.boq(
+            "approved",
+            boq=boq,
+            actor=user,
+            message=f"BoQ {boq.id} approved by {user}.",
+        )
+
         return boq
 
     @staticmethod
@@ -273,6 +287,14 @@ class BoQWorkflowService:
             user,
         )
 
+        AuditService.boq(
+            "rejected",
+            boq=boq,
+            actor=user,
+            message=f"BoQ {boq.id} rejected by {user}: {reason}",
+            payload={"reason": reason},
+        )
+
         return boq
 
     @staticmethod
@@ -297,6 +319,12 @@ class BoQWorkflowService:
         logger.info(
             "BoQ %s marked as priced.",
             boq.id,
+        )
+
+        AuditService.boq(
+            "marked_priced",
+            boq=boq,
+            message=f"BoQ {boq.id} marked as priced.",
         )
 
         return boq
@@ -329,6 +357,12 @@ class BoQWorkflowService:
         logger.info(
             "BoQ %s sealed and frozen.",
             boq.id,
+        )
+
+        AuditService.boq(
+            "sealed",
+            boq=boq,
+            message=f"BoQ {boq.id} sealed and frozen.",
         )
 
         return boq
