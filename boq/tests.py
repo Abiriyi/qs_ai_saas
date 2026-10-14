@@ -260,7 +260,7 @@ class BoQAPITest(SimpleTestCase):
             response = BoQListView.as_view()(request)
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data[0]["id"], str(boq.id))
+        self.assertEqual(response.data["results"][0]["id"], str(boq.id))
         filter_mock.assert_called_once()
 
     def test_detail_view_returns_single_boq(self):

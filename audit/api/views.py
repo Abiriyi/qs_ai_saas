@@ -6,14 +6,15 @@ from rest_framework.views import APIView
 from audit.api.serializers import AuditEventSerializer
 from audit.models import AuditEvent
 from core.drf import TenantAPIViewMixin
+from core.pagination import StandardResultsSetPagination
 
 
 class AuditEventListView(TenantAPIViewMixin, APIView):
     """
     Read-only, tenant-scoped audit trail.
 
-    Supports optional ``category`` and ``action`` filters plus a ``limit``
-    query parameter (default 100, max 500).
+    Supports optional ``category``, ``action``, ``model_name`` and
+    ``object_id`` filters, plus standard ``page`` / ``page_size`` pagination.
     """
 
     permission_classes = [IsAuthenticated]
@@ -39,11 +40,13 @@ class AuditEventListView(TenantAPIViewMixin, APIView):
         if object_id:
             queryset = queryset.filter(object_id=str(object_id))
 
-        try:
-            limit = int(request.query_params.get("limit", 100))
-        except (TypeError, ValueError):
-            limit = 100
-        limit = max(1, min(limit, 500))
+        queryset = queryset.select_related("actor")
 
-        events = queryset.select_related("actor")[:limit]
-        return Response(AuditEventSerializer(events, many=True).data)
+        paginator = StandardResultsSetPagination()
+        page = paginator.paginate_queryset(queryset, request, view=self)
+        if page is not None:
+            return paginator.get_paginated_response(
+                AuditEventSerializer(page, many=True).data
+            )
+
+        return Response(AuditEventSerializer(queryset, many=True).data)

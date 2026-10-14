@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from core.drf import TenantAPIViewMixin
+from core.pagination import StandardResultsSetPagination
 from projects.models import Project
 from tribunal.api.serializers import (
     TribunalCaseSerializer,
@@ -28,6 +29,13 @@ class TribunalCaseListCreateView(TenantAPIViewMixin, APIView):
         project_id = request.query_params.get("project_id")
         if project_id:
             queryset = queryset.filter(project_id=project_id)
+
+        paginator = StandardResultsSetPagination()
+        page = paginator.paginate_queryset(queryset, request, view=self)
+        if page is not None:
+            return paginator.get_paginated_response(
+                TribunalCaseSerializer(page, many=True).data
+            )
 
         return Response(TribunalCaseSerializer(queryset, many=True).data)
 

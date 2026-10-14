@@ -413,3 +413,74 @@ class FrontendPageTests(TestCase):
         self.assertContains(response, "Review decision")
         self.assertContains(response, 'name="decision_action"')
         self.assertContains(response, 'name="decision_reason"')
+
+
+class RestFrameworkConfigTests(TestCase):
+    """Guards the global DRF defaults that harden the API."""
+
+    def test_default_permission_is_authenticated(self):
+        from django.conf import settings
+
+        classes = settings.REST_FRAMEWORK["DEFAULT_PERMISSION_CLASSES"]
+        self.assertIn(
+            "rest_framework.permissions.IsAuthenticated",
+            classes,
+        )
+
+    def test_default_pagination_is_configured(self):
+        from django.conf import settings
+
+        self.assertEqual(
+            settings.REST_FRAMEWORK["DEFAULT_PAGINATION_CLASS"],
+            "core.pagination.StandardResultsSetPagination",
+        )
+
+    def test_throttling_disabled_in_tests(self):
+        # Tests must stay deterministic; throttling state lives in Redis.
+        from django.conf import settings
+
+        self.assertEqual(settings.REST_FRAMEWORK["DEFAULT_THROTTLE_CLASSES"], [])
+
+
+class SentryScrubberTests(TestCase):
+    """The before_send scrubber must never leak secrets to Sentry."""
+
+    def _scrub(self, value):
+        from core.sentry import _scrub_value
+
+        return _scrub_value(value)
+
+    def test_redacts_known_secret_shapes_in_strings(self):
+        sample = (
+            "failed: sk-proj-ABCDEF123 and tid_TOPSECRET and "
+            "tsec_ALSOSECRET and eyJhbGci.eyJzdWIi.sig"
+        )
+        out = self._scrub(sample)
+        self.assertNotIn("sk-proj-ABCDEF123", out)
+        self.assertNotIn("tid_TOPSECRET", out)
+        self.assertNotIn("tsec_ALSOSECRET", out)
+        self.assertNotIn("eyJhbGci.eyJzdWIi.sig", out)
+
+    def test_redacts_sensitive_keys_but_keeps_others(self):
+        from core.sentry import _scrub_mapping
+
+        cleaned = _scrub_mapping(
+            {
+                "api_key": "sk-proj-LEAK",
+                "authorization": "Bearer abc",
+                "name": "keep-me",
+                "nested": {"password": "p", "count": 3},
+            }
+        )
+        self.assertEqual(cleaned["api_key"], "[Filtered]")
+        self.assertEqual(cleaned["authorization"], "[Filtered]")
+        self.assertEqual(cleaned["name"], "keep-me")
+        self.assertEqual(cleaned["nested"]["password"], "[Filtered]")
+        self.assertEqual(cleaned["nested"]["count"], 3)
+
+    def test_init_sentry_noops_without_dsn(self):
+        from core.sentry import init_sentry
+
+        # No SENTRY_DSN in the test environment -> must be a safe no-op.
+        self.assertFalse(init_sentry())
+

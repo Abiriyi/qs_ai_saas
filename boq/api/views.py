@@ -14,6 +14,8 @@ from boq.models import BoQ, BoQItem, BoQItemReviewStatus, BoQSection, BoQStatus
 from boq.services.workflow import BoQWorkflowError, BoQWorkflowService
 from boq.tasks import finish_ai_boq_task
 from core.drf import TenantAPIViewMixin
+from core.pagination import StandardResultsSetPagination
+from core.throttling import BoQGenerateThrottle, BoQPriceThrottle
 from projects.models import Project
 from pricing.services.boq_pricing_service import BoQPricingService
 
@@ -93,6 +95,14 @@ class BoQListView(TenantAPIViewMixin, APIView):
             ]
 
         serializer = BoQSerializer(queryset, many=True)
+
+        paginator = StandardResultsSetPagination()
+        page = paginator.paginate_queryset(queryset, request, view=self)
+        if page is not None:
+            return paginator.get_paginated_response(
+                BoQSerializer(page, many=True).data
+            )
+
         return Response(serializer.data)
 
     def post(self, request):
@@ -224,6 +234,7 @@ class BoQDetailView(TenantAPIViewMixin, APIView):
 
 class FinishSafeBoQView(TenantAPIViewMixin, APIView):
     permission_classes = [IsAuthenticated]
+    throttle_classes = [BoQGenerateThrottle]
 
     def post(self, request):
         text = request.data.get("text")
@@ -620,6 +631,7 @@ class BoQPriceView(TenantAPIViewMixin, APIView):
     """
 
     permission_classes = [IsAuthenticated]
+    throttle_classes = [BoQPriceThrottle]
 
     def post(self, request, boq_id):
         boq = get_tenant_instance(BoQ, request, id=boq_id)

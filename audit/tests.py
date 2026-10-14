@@ -97,7 +97,7 @@ class AuditAPITests(TestCase):
 
         response = self.client.get("/api/audit/")
         self.assertEqual(response.status_code, 200)
-        actions = {row["action"] for row in response.json()}
+        actions = {row["action"] for row in response.json()["results"]}
         self.assertIn("mine", actions)
         self.assertNotIn("theirs", actions)
 
@@ -107,7 +107,7 @@ class AuditAPITests(TestCase):
 
         response = self.client.get("/api/audit/?category=pricing")
         self.assertEqual(response.status_code, 200)
-        actions = {row["action"] for row in response.json()}
+        actions = {row["action"] for row in response.json()["results"]}
         self.assertEqual(actions, {"b"})
 
 

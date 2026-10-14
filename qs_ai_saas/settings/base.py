@@ -261,6 +261,46 @@ AUTH_USER_MODEL = "users.User"
 
 
 # --------------------------------------------------
+# DJANGO REST FRAMEWORK
+# --------------------------------------------------
+# Sensible, secure defaults for every API endpoint. Individual views may still
+# override any of these, but nothing is left implicitly permissive.
+
+REST_FRAMEWORK = {
+    # Auth: session (for the browsable UI / dashboard) + basic (for scripts).
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.SessionAuthentication",
+        "rest_framework.authentication.BasicAuthentication",
+    ],
+    # Fail closed: endpoints are private unless a view opts out explicitly.
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.IsAuthenticated",
+    ],
+    # Paginate every list endpoint by default so responses stay bounded.
+    "DEFAULT_PAGINATION_CLASS": "core.pagination.StandardResultsSetPagination",
+    "PAGE_SIZE": 25,
+    # Rate limiting. Scoped throttles (see core.throttling) protect the
+    # expensive endpoints; anon/user throttles are a baseline for everything.
+    "DEFAULT_THROTTLE_CLASSES": [
+        "rest_framework.throttling.AnonRateThrottle",
+        "rest_framework.throttling.UserRateThrottle",
+    ],
+    "DEFAULT_THROTTLE_RATES": {
+        "anon": "60/min",
+        "user": "600/min",
+        "document_upload": "20/hour",
+        "boq_generate": "60/hour",
+        "boq_price": "300/hour",
+    },
+    # Only render JSON in production-style responses; the browsable API is
+    # handy but adds overhead, so it stays available for development only via
+    # an override there.
+    "TEST_REQUEST_DEFAULT_FORMAT": "json",
+    "DATETIME_FORMAT": "iso-8601",
+}
+
+
+# --------------------------------------------------
 # REDIS CACHE
 # --------------------------------------------------
 

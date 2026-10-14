@@ -2,6 +2,12 @@ from .base import *
 
 import os
 
+# Initialise error reporting as early as possible. No-ops unless SENTRY_DSN is
+# set, so this is safe in every environment.
+from core.sentry import init_sentry
+
+init_sentry()
+
 
 DEBUG = False
 

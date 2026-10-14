@@ -14,10 +14,12 @@ from documents.tasks import process_document_task
 from django.shortcuts import get_object_or_404
 from projects.models import Project
 from core.drf import TenantAPIViewMixin
+from core.throttling import DocumentUploadThrottle
 
 
 class DocumentUploadView(TenantAPIViewMixin, APIView):
     permission_classes = [IsAuthenticated]
+    throttle_classes = [DocumentUploadThrottle]
     parser_classes = [
         MultiPartParser,
         FormParser,
