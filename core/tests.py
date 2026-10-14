@@ -484,3 +484,41 @@ class SentryScrubberTests(TestCase):
         # No SENTRY_DSN in the test environment -> must be a safe no-op.
         self.assertFalse(init_sentry())
 
+
+
+class AdminRegistrationTests(TestCase):
+    """
+    Every core model must be reachable in Django admin. The tenant-scoped
+    admin reads through ``_base_manager`` so a superuser can list records even
+    though the default manager is empty without a request tenant context.
+    """
+
+    def setUp(self):
+        self.org = Organization.objects.create(name="Admin Reg Org", type="firm")
+        self.admin_user = User.objects.create_superuser(
+            email="admin-reg@example.com",
+            organization=self.org,
+            password="strong-pass-123",
+        )
+        self.client.force_login(self.admin_user)
+
+    def test_model_changelists_render(self):
+        from django.urls import reverse
+
+        changelists = [
+            "admin:users_organization_changelist",
+            "admin:users_user_changelist",
+            "admin:projects_project_changelist",
+            "admin:documents_uploadeddocument_changelist",
+            "admin:boq_boq_changelist",
+            "admin:boq_boqsection_changelist",
+            "admin:boq_boqitem_changelist",
+            "admin:pricing_ratelibrary_changelist",
+            "admin:tribunal_tribunalcase_changelist",
+            "admin:audit_auditevent_changelist",
+        ]
+        for name in changelists:
+            with self.subTest(changelist=name):
+                response = self.client.get(reverse(name))
+                self.assertEqual(response.status_code, 200)
+

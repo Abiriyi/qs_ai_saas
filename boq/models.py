@@ -1,4 +1,5 @@
 import uuid
+from decimal import Decimal
 from django.db import models
 from django.utils import timezone
 from core.models import BaseTenantModel
@@ -159,6 +160,33 @@ class BoQ(BaseTenantModel):
 
     def __str__(self):
         return self.name
+
+    def recalculate_total(self):
+        """
+        Recompute ``total_amount`` from the persisted line-item amounts.
+
+        BoQ item amounts change through several paths (AI generation, pricing,
+        manual edits, deletions), so the denormalised total must be refreshed
+        whenever items change — otherwise the pricing-review screen shows a
+        stale figure. Uses ``_base_manager`` so it works regardless of the
+        ambient tenant context, and only writes when the value actually moves.
+        """
+        from django.db.models import Sum
+
+        total = (
+            BoQItem._base_manager.filter(
+                section__boq=self,
+                deleted_at__isnull=True,
+            )
+            .aggregate(total=Sum("amount"))
+            .get("total")
+        ) or Decimal("0")
+
+        if self.total_amount != total:
+            self.total_amount = total
+            self.save(update_fields=["total_amount", "updated_at"])
+        return total
+
 
 class BoQItem(BaseTenantModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)

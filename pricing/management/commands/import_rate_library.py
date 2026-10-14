@@ -22,7 +22,6 @@ class Command(BaseCommand):
 
         candidate_paths = [
             os.path.join(os.getcwd(), "qs_ai_project", "rate_library.csv"),
-            os.path.join(os.getcwd(), "engine", "rate_library.csv"),
         ]
 
         csv_path = next((path for path in candidate_paths if os.path.exists(path)), candidate_paths[0])

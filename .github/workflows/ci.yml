@@ -1,0 +1,80 @@
+name: CI
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+    branches: [master, main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    # System libraries required by the PDF/OCR stack at import time:
+    #   libpq5        -> psycopg (imported even though tests use SQLite)
+    #   tesseract-ocr -> pytesseract
+    #   libmagic1     -> python-magic
+    #   poppler-utils -> pdfplumber / PyMuPDF helpers
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            libpq5 \
+            tesseract-ocr \
+            libmagic1 \
+            poppler-utils
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Django system check
+        env:
+          DJANGO_SETTINGS_MODULE: qs_ai_saas.settings.test
+          # The settings module fails fast without a secret key; a throwaway
+          # value is fine for CI.
+          DJANGO_SECRET_KEY: ci-only-not-a-real-secret
+        run: python manage.py check
+
+      - name: Check for missing migrations
+        env:
+          DJANGO_SETTINGS_MODULE: qs_ai_saas.settings.test
+          DJANGO_SECRET_KEY: ci-only-not-a-real-secret
+        run: python manage.py makemigrations --check --dry-run
+
+      - name: Run tests
+        env:
+          DJANGO_SETTINGS_MODULE: qs_ai_saas.settings.test
+          DJANGO_SECRET_KEY: ci-only-not-a-real-secret
+        run: python manage.py test
+
+  docker:
+    runs-on: ubuntu-latest
+    # Build the production image on every PR so Dockerfile breakages are caught
+    # before they block a deploy. Skipped on draft PRs is not needed; the build
+    # is cached and fast after the first run.
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build image (no push)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

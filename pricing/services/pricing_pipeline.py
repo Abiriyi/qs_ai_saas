@@ -2,11 +2,7 @@ import logging
 
 from pricing.models import RateLibrary
 from pricing.services.confidence import PricingConfidenceService
-
-try:
-    from qs_ai_project.ai_pricing import get_rate_from_ai, get_rate_from_library
-except ImportError:
-    from engine.ai_pricing import get_rate_from_ai, get_rate_from_library
+from qs_ai_project.ai_pricing import get_rate_from_ai, get_rate_from_library
 
 logger = logging.getLogger(__name__)
 

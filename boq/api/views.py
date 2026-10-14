@@ -373,6 +373,7 @@ class BoQSectionDetailView(TenantAPIViewMixin, APIView):
             return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
 
         section.soft_delete()
+        boq.recalculate_total()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
@@ -427,6 +428,7 @@ class BoQItemListView(TenantAPIViewMixin, APIView):
             source_reference=request.data.get("source_reference"),
             is_ai_generated=bool(request.data.get("is_ai_generated", True)),
         )
+        boq.recalculate_total()
         return Response(BoQItemSerializer(item).data, status=status.HTTP_201_CREATED)
 
 
@@ -513,6 +515,7 @@ class BoQItemDetailView(TenantAPIViewMixin, APIView):
                 item.amount = 0
 
         item.save()
+        boq.recalculate_total()
         return Response(BoQItemSerializer(item).data)
 
     def delete(self, request, boq_id, section_id, item_id):
@@ -532,6 +535,7 @@ class BoQItemDetailView(TenantAPIViewMixin, APIView):
             return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
 
         item.soft_delete()
+        boq.recalculate_total()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 

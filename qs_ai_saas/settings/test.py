@@ -13,6 +13,16 @@ PASSWORD_HASHERS = [
 
 EMAIL_BACKEND = "django.core.mail.backends.locmem.EmailBackend"
 
+# Use an in-process cache for tests so the suite needs no running Redis. This
+# keeps CI self-contained (a GitHub Actions runner has no Redis) and makes the
+# run deterministic. Throttling is also disabled below, so the cache is only
+# exercised by direct cache usage (e.g. PricingService.store_ai_rate).
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+    }
+}
+
 # Disable rate limiting during tests: throttling state lives in the shared
 # Redis cache, which would make the suite order-dependent and flaky. No test
 # asserts on throttling, so turning it off keeps runs deterministic.

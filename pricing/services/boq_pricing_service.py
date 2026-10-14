@@ -36,7 +36,10 @@ class BoQPricingService:
         from django.db.models import Sum
 
         total = (
-            BoQItem._base_manager.filter(section__boq=boq)
+            BoQItem._base_manager.filter(
+                section__boq=boq,
+                deleted_at__isnull=True,
+            )
             .aggregate(total=Sum("amount"))
             .get("total")
         )
@@ -60,8 +63,12 @@ class BoQPricingService:
         sources: dict[str, int] = {}
         item_count = 0
 
-        for section in BoQSection._base_manager.filter(boq=boq).order_by("order"):
-            for item in BoQItem._base_manager.filter(section=section):
+        for section in BoQSection._base_manager.filter(
+            boq=boq, deleted_at__isnull=True
+        ).order_by("order"):
+            for item in BoQItem._base_manager.filter(
+                section=section, deleted_at__isnull=True
+            ):
                 element = item.description or ""
                 result = pipeline.price_item(
                     {

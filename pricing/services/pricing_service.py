@@ -4,11 +4,7 @@ from django.core.cache import cache
 
 from core.tenant import get_current_org
 from pricing.models import RateAudit, RateLibrary
-
-try:
-    from qs_ai_project.ai_pricing import get_rate_from_ai, get_rate_from_library
-except ImportError:
-    from engine.ai_pricing import get_rate_from_ai, get_rate_from_library
+from qs_ai_project.ai_pricing import get_rate_from_ai, get_rate_from_library
 
 
 class PricingService:

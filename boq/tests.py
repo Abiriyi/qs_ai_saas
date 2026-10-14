@@ -1,6 +1,8 @@
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
+from decimal import Decimal
+
 from django.test import SimpleTestCase, TestCase
 from django.conf import settings
 from rest_framework.test import APIRequestFactory
@@ -495,3 +497,117 @@ class BoQSectionItemAPITest(SimpleTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(item.description, "Concrete")
         item.save.assert_called_once()
+
+
+class BoQTotalAmountRecalculationTest(TestCase):
+    """
+    Regression tests: editing/deleting BoQ line items through the API must keep
+    ``BoQ.total_amount`` in sync (it used to go stale).
+    """
+
+    def setUp(self):
+        self.organization = Organization.objects.create(name="Total Org", type="firm")
+        self.user = User.objects.create_user(
+            email="total@example.com",
+            organization=self.organization,
+            password="strong-pass-123",
+        )
+        self.token = set_current_org(self.organization)
+        self.project = Project.objects.create(
+            organization=self.organization,
+            created_by=self.user,
+            name="Total project",
+        )
+        self.boq = BoQ.objects.create(
+            organization=self.organization,
+            project=self.project,
+            name="Estimate",
+            status="draft",
+            total_amount=Decimal("0"),
+        )
+        self.section = BoQSection.objects.create(
+            organization=self.organization,
+            boq=self.boq,
+            name="Substructure",
+            order=1,
+        )
+
+    def tearDown(self):
+        reset_current_org(self.token)
+
+    def _add_item(self, item_no, qty, rate):
+        return BoQItem.objects.create(
+            organization=self.organization,
+            section=self.section,
+            item_no=item_no,
+            description=f"Item {item_no}",
+            unit="m3",
+            quantity=Decimal(str(qty)),
+            rate=Decimal(str(rate)),
+            amount=Decimal(str(qty)) * Decimal(str(rate)),
+        )
+
+    def test_model_recalculate_total_sums_active_items(self):
+        self._add_item("A1", 10, 50)   # 500
+        self._add_item("A2", 4, 100)   # 400
+        total = self.boq.recalculate_total()
+        self.boq.refresh_from_db()
+        self.assertEqual(total, Decimal("900"))
+        self.assertEqual(self.boq.total_amount, Decimal("900"))
+
+    def test_recalculate_total_excludes_soft_deleted_items(self):
+        item = self._add_item("A1", 10, 50)  # 500
+        self.boq.recalculate_total()
+        item.soft_delete()
+        total = self.boq.recalculate_total()
+        self.boq.refresh_from_db()
+        self.assertEqual(total, Decimal("0"))
+        self.assertEqual(self.boq.total_amount, Decimal("0"))
+
+    def test_api_item_patch_updates_total(self):
+        item = self._add_item("A1", 10, 50)  # 500
+        self.boq.recalculate_total()
+
+        factory = APIRequestFactory()
+        request = factory.patch(
+            f"/api/boq/{self.boq.id}/sections/{self.section.id}/items/{item.id}/",
+            {"quantity": "20"},
+            format="json",
+        )
+        request.user = self.user
+
+        response = BoQItemDetailView.as_view()(
+            request,
+            boq_id=str(self.boq.id),
+            section_id=str(self.section.id),
+            item_id=str(item.id),
+        )
+        self.assertEqual(response.status_code, 200)
+
+        self.boq.refresh_from_db()
+        # quantity changed 10 -> 20, so amount 500 -> 1000.
+        self.assertEqual(self.boq.total_amount, Decimal("1000"))
+
+    def test_api_item_delete_updates_total(self):
+        item = self._add_item("A1", 10, 50)  # 500
+        self._add_item("A2", 2, 25)          # 50
+        self.boq.recalculate_total()
+        self.assertEqual(self.boq.total_amount, Decimal("550"))
+
+        factory = APIRequestFactory()
+        request = factory.delete(
+            f"/api/boq/{self.boq.id}/sections/{self.section.id}/items/{item.id}/"
+        )
+        request.user = self.user
+
+        response = BoQItemDetailView.as_view()(
+            request,
+            boq_id=str(self.boq.id),
+            section_id=str(self.section.id),
+            item_id=str(item.id),
+        )
+        self.assertEqual(response.status_code, 204)
+
+        self.boq.refresh_from_db()
+        self.assertEqual(self.boq.total_amount, Decimal("50"))
+
