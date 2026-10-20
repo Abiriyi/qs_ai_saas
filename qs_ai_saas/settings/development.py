@@ -7,7 +7,8 @@ ALLOWED_HOSTS = [
     "127.0.0.1",
     "localhost",
     "testserver",
-    '92.4.143.111'
+    '92.4.143.111',
+    'code.casblog.app'
 ]
 
 
