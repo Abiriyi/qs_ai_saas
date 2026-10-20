@@ -21,17 +21,29 @@ class PricingPipeline:
             rate_value = float(rate.base_rate)
             confidence = PricingConfidenceService.calculate_confidence(source)
         else:
-            source = "ai_generated"
             rate_value = self._generate_ai_rate(item)
-            confidence = PricingConfidenceService.calculate_confidence(
-                source,
-                ai_similarity=0.60,
-            )
+
+            if rate_value is None:
+                # No rate anywhere (org library, CSV library, or AI). Returning
+                # None for BOTH rate and confidence means "could not price", so
+                # the caller leaves the item's existing generation-time rate and
+                # confidence untouched and flags it for review instead of
+                # silently collapsing the estimate total to zero.
+                source = "unmatched"
+                rate_value = None
+                confidence = None
+            else:
+                source = "ai_generated"
+                confidence = PricingConfidenceService.calculate_confidence(
+                    source,
+                    ai_similarity=0.60,
+                )
 
         pricing_result = {
             "rate": rate_value,
             "source": source,
             "confidence": confidence,
+            "needs_review": source == "unmatched",
         }
 
         tenant_id = getattr(getattr(self.project, "organization", None), "id", None)
@@ -92,5 +104,6 @@ class PricingPipeline:
         if ai_rate is not None:
             return float(ai_rate)
 
-        return 0.0
-        
+        # Nothing found. Return None to signal "unpriced" (distinct from a
+        # genuine zero rate) so callers don't overwrite a valid rate with 0.
+        return None

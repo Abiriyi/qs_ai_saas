@@ -82,6 +82,11 @@ class BoQPricingService:
                 source = result.get("source", "unknown")
                 confidence = result.get("confidence")
 
+                # An "unmatched" result returns rate=None and confidence=None,
+                # so both fields below are skipped and the item's existing
+                # generation-time rate/confidence are preserved. It is still
+                # counted under sources["unmatched"] and surfaced as
+                # needs_review so a QS knows which lines lack a library rate.
                 update_fields = []
                 if rate is not None:
                     item.rate = Decimal(str(rate))
@@ -98,29 +103,36 @@ class BoQPricingService:
                 item_count += 1
 
         total = cls.recalculate_total(boq)
+        needs_review = sources.get("unmatched", 0)
 
         AuditService.pricing(
             "boq_priced",
             boq=boq,
             actor=actor,
-            message=f"Priced {item_count} items across {len(sources)} rate source(s).",
+            message=(
+                f"Priced {item_count} item(s) across {len(sources)} rate source(s)"
+                + (f"; {needs_review} need manual review." if needs_review else ".")
+            ),
             payload={
                 "total": str(total),
                 "items": item_count,
                 "sources": sources,
+                "needs_review": needs_review,
             },
         )
 
         logger.info(
-            "Priced BoQ %s: %d items, total=%s, sources=%s",
+            "Priced BoQ %s: %d items, total=%s, sources=%s, needs_review=%d",
             boq.id,
             item_count,
             total,
             sources,
+            needs_review,
         )
 
         return {
             "total": str(total),
             "items": item_count,
             "sources": sources,
+            "needs_review": needs_review,
         }

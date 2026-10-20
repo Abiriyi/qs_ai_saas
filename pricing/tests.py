@@ -1,5 +1,7 @@
 from decimal import Decimal
 
+from unittest.mock import patch
+
 from django.test import SimpleTestCase, TestCase
 
 from boq.models import BoQ, BoQItem, BoQSection
@@ -116,4 +118,104 @@ class BoQTotalAmountTests(TestCase):
         self.assertTrue(
             AuditEvent.objects.filter(action="boq_priced", category="pricing").exists()
         )
+
+
+class PricingZeroRateRegressionTests(TestCase):
+    """
+    Regression: when no rate can be found (library + AI both miss), pricing
+    must NOT zero out an existing valid rate. The item's original rate must be
+    preserved and flagged ``unmatched`` / ``needs_review`` for manual review.
+    """
+
+    def setUp(self):
+        self.organization = Organization.objects.create(name="Zero Org", type="firm")
+        self.user = User.objects.create_user(
+            email="zero@example.com",
+            organization=self.organization,
+            password="strong-pass-123",
+        )
+        self.token = set_current_org(self.organization)
+        self.project = Project.objects.create(
+            organization=self.organization,
+            created_by=self.user,
+            name="Zero project",
+        )
+        self.boq = BoQ.objects.create(
+            organization=self.organization,
+            project=self.project,
+            name="Estimate",
+            status="draft",
+        )
+        self.section = BoQSection.objects.create(
+            organization=self.organization,
+            boq=self.boq,
+            name="Substructure",
+            order=1,
+        )
+
+    def tearDown(self):
+        reset_current_org(self.token)
+
+    def test_price_item_returns_none_and_needs_review_when_no_rate_found(self):
+        # Force both the CSV library and the AI lookup to miss.
+        pipeline = PricingPipeline(self.project)
+        with (
+            patch(
+                "pricing.services.pricing_pipeline.get_rate_from_library",
+                return_value=None,
+            ),
+            patch(
+                "pricing.services.pricing_pipeline.get_rate_from_ai",
+                return_value=None,
+            ),
+        ):
+            result = pipeline.price_item(
+                {
+                    "element": "Mystery Widget",
+                    "description": "Mystery Widget",
+                    "unit": "ea",
+                }
+            )
+
+        # Not a zero rate -- "could not price".
+        self.assertIsNone(result["rate"])
+        self.assertEqual(result["source"], "unmatched")
+        self.assertTrue(result["needs_review"])
+
+    def test_price_boq_preserves_existing_rate_when_no_rate_found(self):
+        # An item with a valid pre-existing rate (e.g. from AI generation).
+        BoQItem.objects.create(
+            organization=self.organization,
+            section=self.section,
+            item_no="Z1",
+            description="Mystery Widget",
+            unit="ea",
+            quantity=Decimal("5"),
+            rate=Decimal("7000"),
+            amount=Decimal("35000"),
+        )
+        self.boq.recalculate_total()
+        self.boq.refresh_from_db()
+        self.assertEqual(self.boq.total_amount, Decimal("35000"))
+
+        with (
+            patch(
+                "pricing.services.pricing_pipeline.get_rate_from_library",
+                return_value=None,
+            ),
+            patch(
+                "pricing.services.pricing_pipeline.get_rate_from_ai",
+                return_value=None,
+            ),
+        ):
+            summary = BoQPricingService.price_boq(self.boq, actor=self.user)
+
+        item = BoQItem._base_manager.get(item_no="Z1")
+        self.boq.refresh_from_db()
+
+        # The original rate must survive -- no zeroing out.
+        self.assertEqual(item.rate, Decimal("7000"))
+        self.assertEqual(self.boq.total_amount, Decimal("35000"))
+        self.assertEqual(summary["sources"].get("unmatched"), 1)
+        self.assertEqual(summary["needs_review"], 1)
 

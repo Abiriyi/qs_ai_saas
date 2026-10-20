@@ -666,6 +666,7 @@ class BoQPriceView(TenantAPIViewMixin, APIView):
                 "total_amount": str(boq.total_amount),
                 "items_priced": summary["items"],
                 "sources": summary["sources"],
+                "needs_review": summary.get("needs_review", 0),
             },
             status=status.HTTP_200_OK,
         )
