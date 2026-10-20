@@ -522,3 +522,153 @@ class AdminRegistrationTests(TestCase):
                 response = self.client.get(reverse(name))
                 self.assertEqual(response.status_code, 200)
 
+
+
+class LoginThrottleTests(TestCase):
+    """The login form must be rate-limited to resist brute-force attempts."""
+
+    def setUp(self):
+        # Cache is locmem in tests; clear it so counters don't leak across tests.
+        from django.core.cache import cache
+
+        cache.clear()
+
+    def test_login_is_throttled_after_burst_of_attempts(self):
+        from core.ratelimit import LOGIN_PER_IP_LIMIT
+
+        url = "/login/"
+        payload = {
+            "login_submit": "1",
+            "login-username": "victim@example.com",
+            "login-password": "wrong-password",
+        }
+
+        # A few failures below the limit still render the form (200).
+        for _ in range(LOGIN_PER_IP_LIMIT):
+            response = self.client.post(url, payload)
+        self.assertEqual(response.status_code, 429)
+
+    def test_login_below_limit_is_not_throttled(self):
+        # The email-scoped limit is the binding one for a single account, so
+        # a handful of failures just under it must still render the form.
+        from core.ratelimit import LOGIN_PER_EMAIL_LIMIT
+
+        url = "/login/"
+        payload = {
+            "login_submit": "1",
+            "login-username": "ok@example.com",
+            "login-password": "wrong",
+        }
+        for _ in range(LOGIN_PER_EMAIL_LIMIT - 1):
+            response = self.client.post(url, payload)
+        self.assertEqual(response.status_code, 200)
+
+    def test_successful_login_still_works(self):
+        organization = Organization.objects.create(name="Login QS", type="firm")
+        User.objects.create_user(
+            email="real@example.com",
+            organization=organization,
+            password="strong-pass-123",
+        )
+        response = self.client.post(
+            "/login/",
+            {
+                "login_submit": "1",
+                "login-username": "real@example.com",
+                "login-password": "strong-pass-123",
+            },
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertIn("/dashboard/", response["Location"])
+
+
+class PasswordResetTests(TestCase):
+    """Full password-reset flow: request -> email -> confirm -> sign in."""
+
+    def setUp(self):
+        from django.core.cache import cache
+
+        cache.clear()
+        self.organization = Organization.objects.create(name="Reset QS", type="firm")
+        self.user = User.objects.create_user(
+            email="reset@example.com",
+            organization=self.organization,
+            password="old-pass-123",
+        )
+
+    def test_reset_request_sends_email(self):
+        from django.core import mail
+
+        response = self.client.post(
+            "/password-reset/",
+            {"email": self.user.email},
+            follow=True,
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertIn(self.user.email, mail.outbox[0].to)
+
+    def test_reset_flow_changes_password_and_allows_signin(self):
+        from django.core import mail
+        from django.urls import reverse
+        from django.utils.http import urlsafe_base64_encode
+        from django.utils.encoding import force_bytes
+        from django.contrib.auth.tokens import default_token_generator
+
+        response = self.client.post(
+            "/password-reset/",
+            {"email": self.user.email},
+            follow=True,
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(mail.outbox), 1)
+
+        # Build the reset link the same way the emailed link does.
+        uid = urlsafe_base64_encode(force_bytes(self.user.pk))
+        token = default_token_generator.make_token(self.user)
+        confirm_url = reverse("password_reset_confirm", kwargs={"uidb64": uid, "token": token})
+
+        # Django's confirm flow is two-step: GET the link, which stores the
+        # token in session and 302-redirects to a tokenless ".../set-password/"
+        # URL. Follow that redirect to reach the real form.
+        response = self.client.get(confirm_url, follow=True)
+        self.assertEqual(response.status_code, 200)
+
+        # The final URL after following is the tokenless set-password endpoint.
+        set_password_url = response.request["PATH_INFO"]
+
+        # POST the new password to the session-backed set-password URL.
+        response = self.client.post(
+            set_password_url,
+            {"new_password1": "brand-new-pass-456", "new_password2": "brand-new-pass-456"},
+            follow=True,
+        )
+        self.assertEqual(response.status_code, 200)
+
+        self.user.refresh_from_db()
+        self.assertTrue(self.user.check_password("brand-new-pass-456"))
+
+        # The old password must no longer work; the new one signs in.
+        self.assertFalse(self.user.check_password("old-pass-123"))
+        signin = self.client.post(
+            "/login/",
+            {
+                "login_submit": "1",
+                "login-username": "reset@example.com",
+                "login-password": "brand-new-pass-456",
+            },
+        )
+        self.assertEqual(signin.status_code, 302)
+
+    def test_unknown_email_does_not_leak(self):
+        from django.core import mail
+
+        response = self.client.post(
+            "/password-reset/",
+            {"email": "nobody@example.com"},
+            follow=True,
+        )
+        self.assertEqual(response.status_code, 200)
+        # Same generic success page, no email sent.
+        self.assertEqual(len(mail.outbox), 0)
+

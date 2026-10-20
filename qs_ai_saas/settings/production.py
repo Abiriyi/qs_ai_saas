@@ -54,3 +54,25 @@ WHITENOISE_MANIFEST_STRICT = False
 WHITENOISE_KEEP_ONLY_HASHED_FILES = False
 
 LOGGING["root"]["level"] = "ERROR"
+
+# ---------------------------------------------------------------------------
+# Email (password reset, notifications)
+# ---------------------------------------------------------------------------
+# SMTP is configured via environment so the provider (Postmark, SES, Mailgun,
+# SendGrid, ...) can be swapped without a code change. If EMAIL_HOST is not
+# set we fall back to console output so the app never crashes on boot.
+EMAIL_HOST = os.getenv("EMAIL_HOST", "")
+if EMAIL_HOST:
+    EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+    EMAIL_PORT = int(os.getenv("EMAIL_PORT", "587"))
+    EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "")
+    EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "")
+    EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", "true").lower() in ("1", "true", "yes")
+    EMAIL_TIMEOUT = int(os.getenv("EMAIL_TIMEOUT", "10"))
+else:
+    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+
+DEFAULT_FROM_EMAIL = os.getenv(
+    "DEFAULT_FROM_EMAIL",
+    "QS AI <no-reply@qs-ai.example>",
+)

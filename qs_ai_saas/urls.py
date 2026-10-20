@@ -15,6 +15,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
+from django.contrib.auth import views as auth_views
 from django.urls import path, include
 
 from audit.views import audit_trail
@@ -25,6 +26,41 @@ urlpatterns = [
     path('', home, name='home'),
     path('healthz/', healthz, name='healthz'),
     path('login/', auth_page, name='login'),
+
+    # Password reset. Django's built-in views handle token generation,
+    # single-use links and expiry; we supply app-styled templates.
+    path(
+        "password-reset/",
+        auth_views.PasswordResetView.as_view(
+            template_name="password_reset_form.html",
+            email_template_name="registration/password_reset_email.html",
+            success_url="/password-reset/done/",
+        ),
+        name="password_reset",
+    ),
+    path(
+        "password-reset/done/",
+        auth_views.PasswordResetDoneView.as_view(
+            template_name="password_reset_done.html",
+        ),
+        name="password_reset_done",
+    ),
+    path(
+        "password-reset/<uidb64>/<token>/",
+        auth_views.PasswordResetConfirmView.as_view(
+            template_name="password_reset_confirm.html",
+            success_url="/password-reset/complete/",
+        ),
+        name="password_reset_confirm",
+    ),
+    path(
+        "password-reset/complete/",
+        auth_views.PasswordResetCompleteView.as_view(
+            template_name="password_reset_complete.html",
+        ),
+        name="password_reset_complete",
+    ),
+
     path('dashboard/', dashboard, name='dashboard'),
     path('projects/new/', project_workflow, name='project_workflow'),
     path('projects/<uuid:pk>/', project_detail, name='project_detail'),

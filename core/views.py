@@ -7,6 +7,16 @@ from django.shortcuts import get_object_or_404, redirect, render
 from boq.models import BoQ, BoQItem, BoQItemReviewStatus
 from boq.services.workflow import BoQWorkflowError, BoQWorkflowService
 from core.forms import OrganizationSignupForm, ProjectIntakeForm, UserLoginForm
+from core.ratelimit import (
+    LOGIN_PER_EMAIL_LIMIT,
+    LOGIN_PER_EMAIL_WINDOW,
+    LOGIN_PER_IP_LIMIT,
+    LOGIN_PER_IP_WINDOW,
+    SIGNUP_PER_IP_LIMIT,
+    SIGNUP_PER_IP_WINDOW,
+    check_rate_limit,
+    get_client_ip,
+)
 from projects.models import Project
 
 
@@ -62,7 +72,47 @@ def auth_page(request):
     login_form = UserLoginForm(request, data=request.POST or None, prefix="login")
     signup_form = OrganizationSignupForm(request.POST or None, prefix="signup")
 
+    client_ip = get_client_ip(request)
+
     if request.method == "POST" and "login_submit" in request.POST:
+        # Throttle sign-in attempts by source IP and by the submitted email so
+        # a single attacker IP (or a targeted account) can't brute-force a
+        # password. Both counters are incremented on every attempt.
+        email = (request.POST.get("login-username") or "").strip().lower()
+
+        ip_ok, ip_retry = check_rate_limit(
+            f"login-ip:{client_ip}",
+            LOGIN_PER_IP_LIMIT,
+            LOGIN_PER_IP_WINDOW,
+        )
+        email_ok, email_retry = (True, 0)
+        if email:
+            email_ok, email_retry = check_rate_limit(
+                f"login-email:{email}",
+                LOGIN_PER_EMAIL_LIMIT,
+                LOGIN_PER_EMAIL_WINDOW,
+            )
+
+        if not (ip_ok and email_ok):
+            retry = max(ip_retry, email_retry)
+            messages.error(
+                request,
+                f"Too many sign-in attempts. Please wait {retry // 60 or 1} "
+                f"minute(s) and try again.",
+            )
+            return render(
+                request,
+                "auth.html",
+                {
+                    "page_title": "Sign in | QS AI",
+                    "mode": mode,
+                    "login_form": login_form,
+                    "signup_form": signup_form,
+                    "throttled": True,
+                },
+                status=429,
+            )
+
         if login_form.is_valid():
             user = login_form.get_user()
             login(request, user)
@@ -70,6 +120,31 @@ def auth_page(request):
             return redirect("dashboard")
 
     if request.method == "POST" and "signup_submit" in request.POST:
+        # Throttle workspace creation by IP to discourage mass signups.
+        signup_ok, signup_retry = check_rate_limit(
+            f"signup-ip:{client_ip}",
+            SIGNUP_PER_IP_LIMIT,
+            SIGNUP_PER_IP_WINDOW,
+        )
+        if not signup_ok:
+            messages.error(
+                request,
+                "Too many accounts created from this address. "
+                "Please try again later.",
+            )
+            return render(
+                request,
+                "auth.html",
+                {
+                    "page_title": "Sign in | QS AI",
+                    "mode": mode,
+                    "login_form": login_form,
+                    "signup_form": signup_form,
+                    "throttled": True,
+                },
+                status=429,
+            )
+
         if signup_form.is_valid():
             user = signup_form.save()
             login(request, user)
