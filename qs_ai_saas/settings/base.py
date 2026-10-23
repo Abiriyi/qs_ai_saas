@@ -237,9 +237,12 @@ MEDIA_ROOT = BASE_DIR / "media"
 # DEFAULT PK
 # --------------------------------------------------
 
+# Media uploads use local filesystem storage by default so development and the
+# test suite work offline without cloud credentials. Production overrides this
+# to Tigris (S3-compatible) object storage in settings/production.py.
 STORAGES = {
     "default": {
-        "BACKEND": "storages.backends.s3.S3Storage",
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
     },
     "staticfiles": {
         "BACKEND": (

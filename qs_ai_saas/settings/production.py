@@ -48,6 +48,10 @@ STORAGES["staticfiles"]["BACKEND"] = (
     "whitenoise.storage.CompressedManifestStaticFilesStorage"
 )
 
+# In production, media uploads go to Tigris (S3-compatible) object storage via
+# django-storages. The AWS_* / TIGRIS_* settings are inherited from base.py.
+STORAGES["default"]["BACKEND"] = "storages.backends.s3.S3Storage"
+
 # Keep manifests tolerant so a single missing optional asset does not crash
 # ``collectstatic`` (and therefore the deploy).
 WHITENOISE_MANIFEST_STRICT = False
