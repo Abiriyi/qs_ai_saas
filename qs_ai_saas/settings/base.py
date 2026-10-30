@@ -409,3 +409,14 @@ AWS_QUERYSTRING_AUTH = False
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4.1")
+
+# --------------------------------------------------
+# EMAIL (password reset, notifications)
+# --------------------------------------------------
+# A default from address is required by Django's password-reset views and
+# send_mail. Individual environments can override via EMAIL_BACKEND / SMTP
+# settings in their own settings module.
+DEFAULT_FROM_EMAIL = os.getenv(
+    "DEFAULT_FROM_EMAIL",
+    "QS AI <no-reply@qs-ai.example>",
+)
