@@ -26,6 +26,7 @@ urlpatterns = [
     path('', home, name='home'),
     path('healthz/', healthz, name='healthz'),
     path('login/', auth_page, name='login'),
+    path('logout/', auth_views.LogoutView.as_view(next_page='home'), name='logout'),
 
     # Password reset. Django's built-in views handle token generation,
     # single-use links and expiry; we supply app-styled templates.
