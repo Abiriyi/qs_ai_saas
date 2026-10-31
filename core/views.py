@@ -212,14 +212,23 @@ def dashboard(request):
     )
 
 
-@login_required(login_url="login")
 def project_workflow(request):
+    is_ajax = request.headers.get("x-requested-with") == "XMLHttpRequest"
+
+    if not request.user.is_authenticated:
+        if is_ajax:
+            return JsonResponse(
+                {"error": "You must be signed in to create a project."},
+                status=401,
+            )
+        return redirect("login")
+
     form = ProjectIntakeForm(request.POST or None, request.FILES or None)
 
     if request.method == "POST":
         if form.is_valid():
             project = form.save(request.user)
-            if request.headers.get("x-requested-with") == "XMLHttpRequest":
+            if is_ajax:
                 return JsonResponse(
                     {
                         "success": True,
@@ -229,6 +238,15 @@ def project_workflow(request):
                 )
             messages.success(request, f"Project '{project.name}' created.")
             return redirect("dashboard")
+
+        if is_ajax:
+            errors = {}
+            for field, messages_list in form.errors.items():
+                errors[field] = messages_list
+            return JsonResponse(
+                {"error": "Please correct the errors below.", "errors": errors},
+                status=400,
+            )
 
     return render(
         request,

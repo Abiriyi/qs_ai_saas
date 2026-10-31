@@ -37,6 +37,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const metadata = new FormData(workflowForm);
     metadata.delete('file');
 
+    async function parseJsonOrText(response) {
+      const contentType = response.headers.get('content-type') || '';
+      if (contentType.includes('application/json')) {
+        return response.json();
+      }
+      const text = await response.text();
+      throw new Error(text || `Server returned ${response.status}.`);
+    }
+
     try {
       const projectResponse = await fetch(workflowForm.action || window.location.href, {
         method: 'POST',
@@ -49,8 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
 
       if (!projectResponse.ok) {
-        const errorText = await projectResponse.text();
-        throw new Error(errorText || 'Unable to create the project.');
+        throw await parseJsonOrText(projectResponse);
       }
 
       const projectData = await projectResponse.json();
@@ -69,8 +77,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
 
       if (!uploadResponse.ok) {
-        const errorData = await uploadResponse.json().catch(() => ({}));
-        throw new Error(errorData.error || 'The document upload failed.');
+        throw await parseJsonOrText(uploadResponse);
       }
 
       showWorkflowStatus(`Project created. Your file is being processed for ${projectData.project_name}.`);
