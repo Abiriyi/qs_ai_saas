@@ -28,7 +28,7 @@
       </article>
       <article class="detail-summary-item">
         <span>BoQ</span>
-        <strong>{% if boq_summary %}{{ boq_summary.status|title }}{% else %}Pending{% endif %}</strong>
+        <strong><a href="{% url 'project_pricing_review' project.id %}" class="summary-link">{% if boq_summary %}{{ boq_summary.status|title }}{% else %}Pending{% endif %}</a></strong>
       </article>
     </div>
 
@@ -76,7 +76,7 @@
 
         <div class="mini-card">
           <p class="muted-label">Next step</p>
-          <strong>Review uploaded documents</strong>
+          <strong><a href="{% url 'project_pricing_review' project.id %}" class="summary-link">Review uploaded documents</a></strong>
           <span>Run AI extraction and BoQ generation</span>
         </div>
       </aside>
@@ -91,13 +91,15 @@
         {% if documents %}
           <div class="document-list">
             {% for document in documents %}
-              <div class="document-item">
-                <div class="document-meta">
-                  <strong>{{ document.original_filename }}</strong>
-                  <small>{{ document.uploaded_at|date:"d M Y, H:i" }}</small>
+              <a href="{{ document.file.url }}" target="_blank" class="document-item-link">
+                <div class="document-item">
+                  <div class="document-meta">
+                    <strong>{{ document.original_filename }}</strong>
+                    <small>{{ document.uploaded_at|date:"d M Y, H:i" }}</small>
+                  </div>
+                  <span class="status-badge {% if document.status == 'processed' %}success{% elif document.status == 'pending' %}warning{% else %}info{% endif %}">{{ document.status|title }}</span>
                 </div>
-                <span class="status-badge {% if document.status == 'processed' %}success{% elif document.status == 'pending' %}warning{% else %}info{% endif %}">{{ document.status|title }}</span>
-              </div>
+              </a>
             {% endfor %}
           </div>
         {% else %}
@@ -114,7 +116,7 @@
           <div class="activity-list">
             <div class="activity-item">
               <div class="activity-meta">
-                <strong>{{ boq_summary.name }}</strong>
+                <strong><a href="{% url 'project_pricing_review' project.id %}" class="summary-link">{{ boq_summary.name }}</a></strong>
                 <small>{{ boq_summary.status|title }}</small>
               </div>
               <span class="status-badge success">£{{ boq_summary.total_amount }}</span>

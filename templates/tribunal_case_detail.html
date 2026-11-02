@@ -36,7 +36,7 @@
       </article>
       <article class="pricing-summary-card">
         <span>Project</span>
-        <strong>{{ case.project.name }}</strong>
+        <strong><a href="{% url 'project_detail' case.project.id %}" class="summary-link">{{ case.project.name }}</a></strong>
       </article>
     </div>
 

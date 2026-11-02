@@ -38,11 +38,11 @@
     <div class="summary-grid">
       <article class="summary-card">
         <span>Open cases</span>
-        <strong>{{ open_count }}</strong>
+        <strong><a href="{% url 'tribunal_dashboard' %}" class="summary-link">{{ open_count }}</a></strong>
       </article>
       <article class="summary-card">
         <span>Decided</span>
-        <strong>{{ decided_count }}</strong>
+        <strong><a href="{% url 'tribunal_dashboard' %}" class="summary-link">{{ decided_count }}</a></strong>
       </article>
     </div>
 
@@ -67,8 +67,8 @@
             {% for case in cases %}
               <tr>
                 <td><a href="{% url 'tribunal_case_detail' case.id %}">{{ case.reference }}</a></td>
-                <td>{{ case.title }}</td>
-                <td>{{ case.project.name }}</td>
+                <td><a href="{% url 'tribunal_case_detail' case.id %}">{{ case.title }}</a></td>
+                <td><a href="{% url 'project_detail' case.project.id %}">{{ case.project.name }}</a></td>
                 <td><span class="status-badge {% if case.is_active %}warning{% else %}success{% endif %}">{{ case.get_status_display }}</span></td>
                 <td>{{ case.get_decision_display|default:"—" }}</td>
                 <td>{{ case.opened_at|date:"d M Y" }}</td>
