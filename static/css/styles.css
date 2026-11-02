@@ -1205,3 +1205,26 @@ th {
     grid-template-columns: 1fr;
   }
 }
+
+/* Dashboard actions */
+.text-center {
+  text-align: center;
+}
+
+.btn-sm {
+  padding: 0.5rem 0.9rem;
+  font-size: 0.85rem;
+}
+
+.summary-card-link {
+  display: block;
+}
+
+.summary-card-link .summary-card:hover {
+  border-color: rgba(96, 165, 250, 0.45);
+  background: rgba(15, 29, 48, 0.92);
+}
+
+.summary-card-link .summary-card:hover strong {
+  color: var(--text);
+}
