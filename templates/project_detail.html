@@ -14,6 +14,10 @@
         <a href="{% url 'dashboard' %}" class="btn btn-ghost">Back to dashboard</a>
         <a href="{% url 'project_workflow' %}" class="btn btn-primary">New project</a>
         <a href="{% url 'project_pricing_review' project.id %}" class="btn btn-secondary">Pricing review</a>
+        <form method="post" action="{% url 'delete_project' project.id %}" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this project? This cannot be undone and will remove all its documents and BoQs.');">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-danger">Delete project</button>
+        </form>
       </div>
     </header>
 
@@ -123,7 +127,10 @@
             </div>
           </div>
         {% else %}
-          <span class="project-detail-empty">No BoQ has been generated for this project yet.</span>
+          <form method="post" action="{% url 'generate_boq' project.id %}" class="stacked-form">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-primary full-width">Generate BoQ from documents</button>
+          </form>
         {% endif %}
       </section>
     </div>

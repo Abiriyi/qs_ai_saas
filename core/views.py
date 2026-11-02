@@ -5,7 +5,9 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 
 from boq.models import BoQ, BoQItem, BoQItemReviewStatus
+from boq.services.generation_service import BoQGenerationService
 from boq.services.workflow import BoQWorkflowError, BoQWorkflowService
+from boq.tasks import finish_ai_boq_task
 from core.forms import OrganizationSignupForm, ProjectIntakeForm, UserLoginForm
 from core.ratelimit import (
     LOGIN_PER_EMAIL_LIMIT,
@@ -288,6 +290,76 @@ def project_detail(request, pk):
             "boq_summary": boq_summary,
         },
     )
+
+
+@login_required(login_url="login")
+def generate_boq(request, pk):
+    """Generate a BoQ from the project's processed uploaded documents."""
+    project = get_object_or_404(
+        Project.objects.filter(organization=request.user.organization),
+        pk=pk,
+    )
+
+    if request.method != "POST":
+        return redirect("project_detail", pk=project.pk)
+
+    documents = project.documents.filter(status="processed")
+    if not documents.exists():
+        messages.error(
+            request,
+            "No processed documents found. Please wait for document processing to complete before generating a BoQ.",
+        )
+        return redirect("project_detail", pk=project.pk)
+
+    text_parts = []
+    for doc in documents:
+        if doc.extracted_text:
+            text_parts.append(
+                f"--- Document: {doc.original_filename} ---\n{doc.extracted_text}"
+            )
+
+    if not text_parts:
+        messages.error(
+            request,
+            "No extracted text available from the uploaded documents. Please try again after processing completes.",
+        )
+        return redirect("project_detail", pk=project.pk)
+
+    text = "\n\n".join(text_parts)
+
+    try:
+        task = finish_ai_boq_task.delay(
+            text=text,
+            project_id=str(project.id),
+            user_id=str(request.user.id),
+            org_id=str(request.user.organization_id),
+        )
+        messages.success(
+            request,
+            f"BoQ generation has been queued (task {task.id}). "
+            "Refresh this page shortly — the BoQ will appear in the BoQ status section once complete.",
+        )
+    except Exception as exc:
+        messages.error(request, f"BoQ generation could not be queued: {exc}")
+
+    return redirect("project_detail", pk=project.pk)
+
+
+@login_required(login_url="login")
+def delete_project(request, pk):
+    """Delete a project and all its related documents and BoQs."""
+    project = get_object_or_404(
+        Project.objects.filter(organization=request.user.organization),
+        pk=pk,
+    )
+
+    if request.method != "POST":
+        return redirect("project_detail", pk=project.pk)
+
+    project_name = project.name
+    project.delete()  # CASCADE deletes related documents and BoQs
+    messages.success(request, f"Project '{project_name}' has been deleted.")
+    return redirect("dashboard")
 
 
 @login_required(login_url="login")
