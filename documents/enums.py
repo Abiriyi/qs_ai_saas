@@ -13,6 +13,8 @@ class DocumentStatus(models.TextChoices):
 
     PRICING = "pricing", "Pricing"
 
+    PROCESSED = "processed", "Processed"
+
     REVIEW_PENDING = (
         "review_pending",
         "Review Pending",
