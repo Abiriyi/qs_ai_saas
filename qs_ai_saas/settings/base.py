@@ -410,6 +410,18 @@ AWS_QUERYSTRING_AUTH = False
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4.1")
 
+# --- Groq (OpenAI-compatible, free tier) -------------------------------------
+# Groq uses the same OpenAI Python client via a custom base URL.
+# Get a free API key at https://console.groq.com/
+GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
+GROQ_BASE_URL = os.getenv(
+    "GROQ_BASE_URL", "https://api.groq.com/openai/v1"
+)
+GROQ_MODEL = os.getenv("GROQ_MODEL", "llama-3.1-8b-instant")
+
+# AI provider selection: "groq" or "openai" (default: openai)
+AI_PROVIDER = os.getenv("AI_PROVIDER", "openai")
+
 # --------------------------------------------------
 # EMAIL (password reset, notifications)
 # --------------------------------------------------

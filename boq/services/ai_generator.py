@@ -12,9 +12,32 @@ logger = logging.getLogger(__name__)
 class BoQAIGenerator:
 
     def __init__(self):
-        self.client = OpenAI(
-            api_key=settings.OPENAI_API_KEY
-        )
+        provider = getattr(settings, "AI_PROVIDER", "openai")
+
+        if provider == "groq":
+            api_key = getattr(settings, "GROQ_API_KEY", "")
+            if not api_key:
+                raise RuntimeError(
+                    "AI_PROVIDER is 'groq' but GROQ_API_KEY is not set. "
+                    "Get a free key at https://console.groq.com/ or set "
+                    "AI_PROVIDER=openai."
+                )
+            self.client = OpenAI(
+                base_url=getattr(
+                    settings, "GROQ_BASE_URL", "https://api.groq.com/openai/v1"
+                ),
+                api_key=api_key,
+            )
+            self.model = getattr(settings, "GROQ_MODEL", "llama-3.1-8b-instant")
+        else:
+            api_key = getattr(settings, "OPENAI_API_KEY", "")
+            if not api_key:
+                raise RuntimeError(
+                    "OPENAI_API_KEY is not set. Set AI_PROVIDER=groq with a "
+                    "Groq key, or provide OPENAI_API_KEY."
+                )
+            self.client = OpenAI(api_key=api_key)
+            self.model = getattr(settings, "OPENAI_MODEL", "gpt-4.1")
 
     def generate(self, text: str):
 
@@ -24,11 +47,8 @@ You are an expert Quantity Surveyor.
 Your task is to convert construction documents into a structured Bill of Quantities.
 
 Return ONLY valid JSON.
-
 Do not include markdown.
-
 Do not include explanations.
-
 Do not wrap the JSON in code fences.
 
 The JSON MUST follow exactly this schema:
@@ -55,26 +75,26 @@ The JSON MUST follow exactly this schema:
         try:
 
             response = self.client.responses.create(
-                model=settings.OPENAI_MODEL,
+                model=self.model,
                 input=[
                     {
-                        "role": "system",
-                        "content": SYSTEM_PROMPT,
+                            "role": "system",
+                            "content": SYSTEM_PROMPT,
                     },
                     {
-                        "role": "user",
-                        "content": text,
+                            "role": "user",
+                            "content": text,
                     },
                 ],
             )
 
-            logger.info("OpenAI response:")
+            logger.info("AI response:")
             logger.info(response.output_text)
 
         except Exception as exc:
 
             raise RuntimeError(
-                f"OpenAI request failed: {exc}"
+                f"AI request failed: {exc}"
             ) from exc
 
         try:
@@ -95,4 +115,4 @@ The JSON MUST follow exactly this schema:
                 "AI response missing 'sections'."
             )
 
-        return data       
+        return data
