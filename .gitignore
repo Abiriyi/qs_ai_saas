@@ -5,7 +5,7 @@ __pycache__/
 *.sqlite3
 .env
 .env.*
-!.env.example
+.env.example
 .saasNotes
 
 # Database dumps often contain user data / secrets — never commit these.

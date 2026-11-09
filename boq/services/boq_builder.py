@@ -48,8 +48,8 @@ def build_boq_from_engine(
                 item_no=item["item_no"],
                 description=item["description"],
                 unit=item["unit"],
-                quantity=item["quantity"],
-                rate=item["rate"],
+                quantity=Decimal(str(item["quantity"])),
+                rate=Decimal(str(item["rate"])),
                 confidence_score=item.get("confidence", 0),
                 organization=project.organization,
             )

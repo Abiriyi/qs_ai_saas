@@ -74,22 +74,25 @@ The JSON MUST follow exactly this schema:
 
         try:
 
-            response = self.client.responses.create(
+            # Use chat.completions (supported by both OpenAI and Groq).
+            # Groq does not support the newer /responses endpoint.
+            response = self.client.chat.completions.create(
                 model=self.model,
-                input=[
+                messages=[
                     {
-                            "role": "system",
-                            "content": SYSTEM_PROMPT,
+                        "role": "system",
+                        "content": SYSTEM_PROMPT,
                     },
                     {
-                            "role": "user",
-                            "content": text,
+                        "role": "user",
+                        "content": text,
                     },
                 ],
             )
 
+            content = response.choices[0].message.content
             logger.info("AI response:")
-            logger.info(response.output_text)
+            logger.info(content)
 
         except Exception as exc:
 
@@ -99,9 +102,7 @@ The JSON MUST follow exactly this schema:
 
         try:
 
-            data = json.loads(
-                response.output_text
-            )
+            data = json.loads(content)
 
         except json.JSONDecodeError as exc:
 
