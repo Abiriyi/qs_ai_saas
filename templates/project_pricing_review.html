@@ -58,6 +58,7 @@
                   <thead>
                     <tr>
                       <th>Item</th>
+                      <th>Description</th>
                       <th>Unit</th>
                       <th>Qty</th>
                       <th>Rate</th>
@@ -70,11 +71,9 @@
                     {% for item in section.items.all %}
                       <tr>
                         <td>
-                          <div class="item-title-block">
-                            <strong>{{ item.item_no }}</strong>
-                            <span>{{ item.description }}</span>
-                          </div>
+                          <strong>{{ item.item_no }}</strong>
                         </td>
+                        <td>{{ item.description }}</td>
                         <td>{{ item.unit }}</td>
                         <td>{{ item.quantity }}</td>
                         <td>£{{ item.rate }}</td>

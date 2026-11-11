@@ -88,9 +88,9 @@ ITEM RULES:
 - Group items under the appropriate TRADE SECTION, not by room name
 - Each section should have a letter prefix (A, B, C, etc.) followed by a period
 - Item numbers should follow the format: SectionLetter.ItemNumber (e.g., C.1, C.2, C.3)
-- Description should describe the WORK TRADE (e.g., "Excavation for foundation trenches", "Concrete blinding 50mm thick", "Floor tiles 400x400mm")
+- Description should describe the WORK TRADE with materials specification (e.g., "Excavation for foundation trenches (footings), average depth 1.5m", "Concrete blinding 50mm thick under floor slab, mix ratio 1:3:6 cement:sand:stones")
 - Do NOT use room names as descriptions (e.g., do NOT write "Living Room" or "Kitchen")
-- Instead write trade descriptions (e.g., "Floor screeding - Living Room", "Wall tiles - Kitchen")
+- Instead write trade descriptions with specifications (e.g., "Floor screeding 50mm thick - Living Room", "Wall tiles 400x400mm - Kitchen", "Concrete strip footing 450x300mm, mix 1:2:4")
 
 EXTRACTION RULES:
 - Extract REAL quantities and rates from the document text. Do NOT use zeros.
