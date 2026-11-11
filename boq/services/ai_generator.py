@@ -70,6 +70,15 @@ The JSON MUST follow exactly this schema:
         }
     ]
 }
+
+IMPORTANT RULES:
+- Extract REAL quantities and rates from the document text. Do NOT use zeros.
+- If a quantity is not explicitly stated, estimate it from dimensions shown in the document.
+- If a rate is not available, use your construction cost knowledge to provide a realistic market rate.
+- The quantity must be greater than 0 for every item.
+- Use standard construction units like "sq m", "sq ft", "m", "kg", "item", "m3".
+- Write clear, descriptive item descriptions based on the document content.
+- Confidence should reflect how certain you are about the extracted values (0.0 to 1.0).
 """
 
         try:

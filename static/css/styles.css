@@ -1261,6 +1261,23 @@ th {
   color: var(--text-soft);
 }
 
+/* Item title block */
+.item-title-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.item-title-block strong {
+  color: var(--text);
+  font-size: 0.9rem;
+}
+
+.item-title-block span {
+  color: var(--text-soft);
+  font-size: 0.85rem;
+}
+
 /* Summary link inside cards */
 .summary-link {
   color: var(--primary);
