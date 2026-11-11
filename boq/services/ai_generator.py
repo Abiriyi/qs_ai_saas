@@ -44,7 +44,7 @@ class BoQAIGenerator:
         SYSTEM_PROMPT = """
 You are an expert Quantity Surveyor.
 
-Your task is to convert construction documents into a structured Bill of Quantities.
+Your task is to convert construction documents into a structured Bill of Quantities (BoQ) organized by TRADE SECTIONS, not by rooms.
 
 Return ONLY valid JSON.
 Do not include markdown.
@@ -56,13 +56,13 @@ The JSON MUST follow exactly this schema:
 {
     "sections":[
         {
-            "name":"",
+            "name":"A. Preliminaries",
             "items":[
                 {
-                    "item_no":"",
-                    "description":"",
-                    "unit":"",
-                    "quantity":0,
+                    "item_no":"1.1",
+                    "description":"Mobilization and demobilization",
+                    "unit":"item",
+                    "quantity":1,
                     "rate":0,
                     "confidence":0.0
                 }
@@ -71,13 +71,33 @@ The JSON MUST follow exactly this schema:
     ]
 }
 
-IMPORTANT RULES:
+TRADE SECTIONS (use these section names, organized by trade):
+- A. Preliminaries (mobilization, site setup, scaffolding, insurance)
+- B. Excavation & Earthworks (trench excavation, backfilling, disposal, compaction)
+- C. Concrete Works (blinding, structural concrete, formwork, reinforcement)
+- D. Masonry Works (blockwork, plastering, rendering, pointing)
+- E. Roofing Works (roof structure, roofing sheets/tiles, gutters, downpipes)
+- F. Flooring Works (floor screed, floor tiles, skirting)
+- G. Joinery Works (doors, windows, cabinets, wardrobes)
+- H. Plumbing & Drainage (water supply, drainage, sanitary ware, septic tank)
+- I. Electrical Works (wiring, switches, sockets, lighting, distribution board)
+- J. Painting & Decorating (undercoat, gloss, emulsion, exterior paint)
+- K. External Works (paving, fencing, landscaping, driveway)
+
+ITEM RULES:
+- Group items under the appropriate TRADE SECTION, not by room name
+- Each section should have a letter prefix (A, B, C, etc.) followed by a period
+- Item numbers should follow the format: SectionLetter.ItemNumber (e.g., C.1, C.2, C.3)
+- Description should describe the WORK TRADE (e.g., "Excavation for foundation trenches", "Concrete blinding 50mm thick", "Floor tiles 400x400mm")
+- Do NOT use room names as descriptions (e.g., do NOT write "Living Room" or "Kitchen")
+- Instead write trade descriptions (e.g., "Floor screeding - Living Room", "Wall tiles - Kitchen")
+
+EXTRACTION RULES:
 - Extract REAL quantities and rates from the document text. Do NOT use zeros.
 - If a quantity is not explicitly stated, estimate it from dimensions shown in the document.
 - If a rate is not available, use your construction cost knowledge to provide a realistic market rate.
 - The quantity must be greater than 0 for every item.
-- Use standard construction units like "sq m", "sq ft", "m", "kg", "item", "m3".
-- Write clear, descriptive item descriptions based on the document content.
+- Use standard construction units like "sq m", "sq ft", "m", "m3", "kg", "item", "no", "lm".
 - Confidence should reflect how certain you are about the extracted values (0.0 to 1.0).
 """
 
