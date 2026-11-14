@@ -4,6 +4,7 @@
 import os
 import yaml
 import logging
+from datetime import date
 
 logger = logging.getLogger(__name__)
 
@@ -15,6 +16,7 @@ def load_measurement_context(path=None):
     Load the measurement_context.yaml file.
     Returns a dict with default values for BoQ generation fallback.
     Cached after first load for performance.
+    The 'date' field is added dynamically at load time (not hardcoded in YAML).
     """
     global _CONTEXT_CACHE
 
@@ -28,7 +30,11 @@ def load_measurement_context(path=None):
     try:
         with open(path, "r") as f:
             context = yaml.safe_load(f)
-        logger.info(f"Loaded measurement context from {path}")
+
+        # Add current date dynamically (not hardcoded in YAML)
+        context["date"] = date.today().isoformat()
+
+        logger.info(f"Loaded measurement context from {path} (date: {context['date']})")
         _CONTEXT_CACHE = context
         return context
     except FileNotFoundError:
