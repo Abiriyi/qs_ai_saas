@@ -1,6 +1,7 @@
 # measurement_context.yaml
 # Default measurement context for BoQ generation fallback
-# These values are used when AI cannot extract them from drawings
+# Currency: Nigerian Naira (₦)
+# Default locations: Kaduna, Abuja, Kano, Lagos, Port-Harcourt
 
 scale: 0.01
 storey_height: 3.0
@@ -16,8 +17,20 @@ foundation:
   concrete_grade: "C25"
   mix_ratio: "1:2:4"
 
+# Currency and location settings
+currency: "NGN"
+currency_symbol: "₦"
+default_locations:
+  - "Kaduna"
+  - "Abuja"
+  - "Kano"
+  - "Lagos"
+  - "Port-Harcourt"
+default_location: "Kaduna"
+
 # Trade-based BoQ default items
 # Used as fallback when AI cannot extract items from drawings
+# All rates are in Nigerian Naira (₦) from rate_library.csv
 boq_items:
   - section: "A. Preliminaries"
     items:
@@ -25,17 +38,17 @@ boq_items:
         description: "Mobilization and demobilization of plant and equipment"
         unit: "item"
         quantity: 1
-        rate: 500.00
+        rate: 500000.00
       - item_no: "A.2"
         description: "Site setup, scaffolding and safety equipment"
         unit: "item"
         quantity: 1
-        rate: 800.00
+        rate: 300000.00
       - item_no: "A.3"
         description: "Insurance and performance bond"
         unit: "item"
         quantity: 1
-        rate: 300.00
+        rate: 400000.00
 
   - section: "B. Excavation & Earthworks"
     items:
@@ -43,22 +56,22 @@ boq_items:
         description: "Excavation for foundation trenches (footings), average depth 1.0m, width 0.69m"
         unit: "m3"
         quantity: 10
-        rate: 12.50
+        rate: 2000.00
       - item_no: "B.2"
         description: "Excavation for column bases, depth 1.0m"
         unit: "m3"
         quantity: 5
-        rate: 15.00
+        rate: 2000.00
       - item_no: "B.3"
         description: "Backfilling and compaction around foundations"
         unit: "m3"
         quantity: 8
-        rate: 8.00
+        rate: 2500.00
       - item_no: "B.4"
         description: "Disposal of excavated material off site"
         unit: "m3"
         quantity: 12
-        rate: 10.00
+        rate: 2000.00
 
   - section: "C. Concrete Works"
     items:
@@ -66,27 +79,27 @@ boq_items:
         description: "Concrete blinding 50mm thick under floor slab, mix ratio 1:3:6 cement:sand:stones"
         unit: "m2"
         quantity: 80
-        rate: 15.00
+        rate: 35000.00
       - item_no: "C.2"
         description: "Concrete strip footing 450x300mm, mix ratio 1:2:4 cement:sand:stones"
         unit: "m3"
         quantity: 15
-        rate: 95.00
+        rate: 30000.00
       - item_no: "C.3"
         description: "Concrete column bases, mix ratio 1:2:4"
         unit: "m3"
         quantity: 8
-        rate: 105.00
+        rate: 30000.00
       - item_no: "C.4"
         description: "Reinforced concrete ground floor slab 150mm thick, mix ratio 1:2:4"
         unit: "m2"
         quantity: 90
-        rate: 85.00
+        rate: 35000.00
       - item_no: "C.5"
         description: "Formwork for column bases and strip footings"
         unit: "m2"
         quantity: 60
-        rate: 25.00
+        rate: 20000.00
 
   - section: "D. Masonry Works"
     items:
@@ -94,22 +107,22 @@ boq_items:
         description: "Blockwork walls 150mm thick, cement:sand mortar 1:4"
         unit: "m2"
         quantity: 120
-        rate: 35.00
+        rate: 7000.00
       - item_no: "D.2"
         description: "Blockwork walls 225mm thick, cement:sand mortar 1:4"
         unit: "m2"
         quantity: 40
-        rate: 45.00
+        rate: 8000.00
       - item_no: "D.3"
         description: "Plastering internal walls, 12mm thick, two coats"
         unit: "m2"
         quantity: 200
-        rate: 18.00
+        rate: 12000.00
       - item_no: "D.4"
         description: "Rendering external walls, 15mm thick, two coats"
         unit: "m2"
         quantity: 80
-        rate: 22.00
+        rate: 12000.00
 
   - section: "E. Roofing Works"
     items:
@@ -117,17 +130,17 @@ boq_items:
         description: "Roof structure - timber trusses and rafters, treated softwood"
         unit: "m"
         quantity: 60
-        rate: 45.00
+        rate: 25000.00
       - item_no: "E.2"
         description: "Roofing sheets, corrugated galvanized steel, 0.55mm gauge"
         unit: "m2"
         quantity: 100
-        rate: 55.00
+        rate: 20000.00
       - item_no: "E.3"
         description: "Gutters and downpipes, PVC 100mm"
         unit: "lm"
         quantity: 40
-        rate: 30.00
+        rate: 5000.00
 
   - section: "F. Flooring Works"
     items:
@@ -135,17 +148,17 @@ boq_items:
         description: "Floor screed 50mm thick, cement:sand 1:4"
         unit: "m2"
         quantity: 90
-        rate: 22.00
+        rate: 11000.00
       - item_no: "F.2"
         description: "Floor tiles 400x400mm, ceramic, cement:sand bedding"
         unit: "m2"
         quantity: 90
-        rate: 45.00
+        rate: 15000.00
       - item_no: "F.3"
         description: "Skirting, 100x25mm hardwood, painted"
         unit: "lm"
         quantity: 60
-        rate: 12.00
+        rate: 2500.00
 
   - section: "G. Joinery Works"
     items:
@@ -153,17 +166,17 @@ boq_items:
         description: "Panelled hardwood door, 900x2100mm, complete with frame"
         unit: "no"
         quantity: 6
-        rate: 180.00
+        rate: 45000.00
       - item_no: "G.2"
         description: "Windows, aluminium framed, 1200x1200mm, glazed"
         unit: "no"
         quantity: 8
-        rate: 250.00
+        rate: 40000.00
       - item_no: "G.3"
         description: "Kitchen cabinets, hardwood, complete with worktop"
         unit: "lm"
         quantity: 5
-        rate: 350.00
+        rate: 80000.00
 
   - section: "H. Plumbing & Drainage"
     items:
@@ -171,22 +184,22 @@ boq_items:
         description: "Water supply pipes, PVC 25mm, complete with fittings"
         unit: "lm"
         quantity: 40
-        rate: 25.00
+        rate: 20000.00
       - item_no: "H.2"
         description: "Drainage pipes, PVC 100mm, complete with fittings"
         unit: "lm"
         quantity: 30
-        rate: 35.00
+        rate: 15000.00
       - item_no: "H.3"
         description: "Sanitary ware - wash hand basin, complete with taps"
         unit: "no"
         quantity: 3
-        rate: 120.00
+        rate: 50000.00
       - item_no: "H.4"
         description: "Sanitary ware - WC suite, complete with cistern"
         unit: "no"
         quantity: 3
-        rate: 200.00
+        rate: 60000.00
 
   - section: "I. Electrical Works"
     items:
@@ -194,27 +207,27 @@ boq_items:
         description: "Electrical wiring, 2.5mm² PVC copper, complete with conduits"
         unit: "lm"
         quantity: 100
-        rate: 15.00
+        rate: 5000.00
       - item_no: "I.2"
         description: "Light switches, 1-gang, complete with backbox"
         unit: "no"
         quantity: 8
-        rate: 25.00
+        rate: 4000.00
       - item_no: "I.3"
         description: "Socket outlets, 13A, 2-gang, complete with backbox"
         unit: "no"
         quantity: 10
-        rate: 35.00
+        rate: 6000.00
       - item_no: "I.4"
         description: "Light fittings, LED, complete with lamps"
         unit: "no"
         quantity: 12
-        rate: 45.00
+        rate: 8000.00
       - item_no: "I.5"
         description: "Distribution board, 8-way, complete with MCBs"
         unit: "no"
         quantity: 1
-        rate: 350.00
+        rate: 80000.00
 
   - section: "J. Painting & Decorating"
     items:
@@ -222,17 +235,17 @@ boq_items:
         description: "Undercoat and emulsion paint, internal walls, two coats"
         unit: "m2"
         quantity: 200
-        rate: 12.00
+        rate: 12000.00
       - item_no: "J.2"
         description: "Gloss paint, external walls, two coats"
         unit: "m2"
         quantity: 80
-        rate: 15.00
+        rate: 8000.00
       - item_no: "J.3"
         description: "Ceiling paint, emulsion, two coats"
         unit: "m2"
         quantity: 90
-        rate: 12.00
+        rate: 10000.00
 
   - section: "K. External Works"
     items:
@@ -240,17 +253,17 @@ boq_items:
         description: "Paving, concrete slabs 600x600mm, compacted sand bedding"
         unit: "m2"
         quantity: 50
-        rate: 40.00
+        rate: 12000.00
       - item_no: "K.2"
         description: "Fencing, concrete posts and wire mesh, 2m high"
         unit: "lm"
         quantity: 40
-        rate: 55.00
+        rate: 20000.00
       - item_no: "K.3"
         description: "Driveway, concrete 100mm thick, mix ratio 1:2:4"
         unit: "m2"
         quantity: 30
-        rate: 65.00
+        rate: 15000.00
 
 # Default confidence score when AI cannot determine confidence
 default_confidence: 0.5

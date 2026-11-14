@@ -76,8 +76,8 @@
                         <td>{{ item.description }}</td>
                         <td>{{ item.unit }}</td>
                         <td>{{ item.quantity }}</td>
-                        <td>£{{ item.rate }}</td>
-                        <td>£{{ item.amount }}</td>
+                        <td>₦{{ item.rate }}</td>
+                        <td>₦{{ item.amount }}</td>
                         <td>
                           <span class="status-pill status-{{ item.review_status|default:'draft' }}">
                             {{ item.get_review_status_display|default:"Draft" }}

@@ -9,7 +9,10 @@ from django.conf import settings
 from qs_ai_project.context_loader import (
     get_default_boq_items,
     get_default_confidence,
-    get_default_rate,
+    get_currency_symbol,
+    get_default_locations,
+    get_default_location,
+    get_rate_from_library_with_fallback,
 )
 
 logger = logging.getLogger(__name__)
@@ -52,16 +55,31 @@ def _apply_defaults(data, default_lookup):
                     f"Fallback: item {item_no} quantity set to default {item['quantity']}"
                 )
 
-            # Fix rate if zero or missing
+            # Fix rate if zero or missing - try rate library first, then YAML default
             try:
                 rate = float(item.get("rate", 0) or 0)
             except (TypeError, ValueError):
                 rate = 0
             if rate <= 0:
-                item["rate"] = default_item.get("rate", 0)
-                logger.info(
-                    f"Fallback: item {item_no} rate set to default {item['rate']}"
+                # Try rate library with element from item number prefix
+                element_prefix = item_no.split(".")[0] if item_no else ""
+                location = get_default_location()
+                lib_rate = get_rate_from_library_with_fallback(
+                    element=element_prefix,
+                    unit=item.get("unit", ""),
+                    location=location,
+                    description=item.get("description", ""),
                 )
+                if lib_rate is not None and lib_rate > 0:
+                    item["rate"] = lib_rate
+                    logger.info(
+                        f"Fallback: item {item_no} rate set from library to ₦{item['rate']:,.2f}"
+                    )
+                else:
+                    item["rate"] = default_item.get("rate", 0)
+                    logger.info(
+                        f"Fallback: item {item_no} rate set to YAML default ₦{item['rate']:,.2f}"
+                    )
 
             # Fix description if empty or looks like a room name
             desc = (item.get("description") or "").strip()
@@ -118,15 +136,23 @@ class BoQAIGenerator:
 
         # Load default measurement context for fallback
         self.default_lookup = _build_default_lookup(get_default_boq_items())
+        self.currency_symbol = get_currency_symbol()
+        self.currency_code = get_currency_code()
+        self.default_locations = get_default_locations()
+        self.default_location = get_default_location()
         if self.default_lookup:
             logger.info(
                 f"Loaded {len(self.default_lookup)} default BoQ items for fallback"
             )
+        logger.info(
+            f"Currency: {self.currency_symbol} ({self.currency_code}), "
+            f"Default location: {self.default_location}"
+        )
 
     def generate(self, text: str):
 
-        SYSTEM_PROMPT = """
-You are an expert Quantity Surveyor.
+        SYSTEM_PROMPT = f"""
+You are an expert Quantity Surveyor working in Nigeria.
 
 Your task is to convert construction documents into a structured Bill of Quantities (BoQ) organized by TRADE SECTIONS, not by rooms.
 
@@ -137,23 +163,23 @@ Do not wrap the JSON in code fences.
 
 The JSON MUST follow exactly this schema:
 
-{
+{{
     "sections":[
-        {
+        {{
             "name":"A. Preliminaries",
             "items":[
-                {
-                    "item_no":"1.1",
-                    "description":"Mobilization and demobilization",
+                {{
+                    "item_no":"A.1",
+                    "description":"Mobilization and demobilization of plant and equipment",
                     "unit":"item",
                     "quantity":1,
-                    "rate":0,
-                    "confidence":0.0
-                }
+                    "rate":500000,
+                    "confidence":0.8
+                }}
             ]
-        }
+        }}
     ]
-}
+}}
 
 TRADE SECTIONS (use these section names, organized by trade):
 - A. Preliminaries (mobilization, site setup, scaffolding, insurance)
@@ -176,11 +202,13 @@ ITEM RULES:
 - Do NOT use room names as descriptions (e.g., do NOT write "Living Room" or "Kitchen")
 - Instead write trade descriptions with specifications (e.g., "Floor screeding 50mm thick - Living Room", "Wall tiles 400x400mm - Kitchen", "Concrete strip footing 450x300mm, mix 1:2:4")
 - Include material specifications where relevant: concrete mix ratios, excavation depth, blockwork thickness, plastering coats, paint coats, etc.
+- All rates must be in Nigerian Naira (₦). Use realistic Nigerian market rates.
+- Default locations: Kaduna, Abuja, Kano, Lagos, Port-Harcourt
 
 EXTRACTION RULES:
 - Extract REAL quantities and rates from the document text. Do NOT use zeros.
 - If a quantity is not explicitly stated, estimate it from dimensions shown in the document.
-- If a rate is not available, use your construction cost knowledge to provide a realistic market rate.
+- If a rate is not available, use your construction cost knowledge to provide a realistic Nigerian market rate in Naira.
 - The quantity must be greater than 0 for every item.
 - Use standard construction units like "sq m", "sq ft", "m", "m3", "kg", "item", "no", "lm".
 - Confidence should reflect how certain you are about the extracted values (0.0 to 1.0).
