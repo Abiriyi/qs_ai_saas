@@ -189,7 +189,7 @@ def dashboard(request):
                 "status": label,
                 "status_class": css_class,
                 "last_update": project.updated_at.strftime("%d %b %Y"),
-                "value": "$0",
+                "value": "₦0",
             }
         )
 
