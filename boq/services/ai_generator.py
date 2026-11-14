@@ -6,7 +6,84 @@ import logging
 from openai import OpenAI
 from django.conf import settings
 
+from qs_ai_project.context_loader import (
+    get_default_boq_items,
+    get_default_confidence,
+    get_default_rate,
+)
+
 logger = logging.getLogger(__name__)
+
+
+def _build_default_lookup(default_items):
+    """Build a lookup dict keyed by item_no from default boq items."""
+    lookup = {}
+    for section in default_items:
+        for item in section.get("items", []):
+            lookup[item["item_no"]] = item
+    return lookup
+
+
+def _apply_defaults(data, default_lookup):
+    """
+    Replace any AI-generated items with quantity <= 0 or rate <= 0
+    with values from the default measurement context.
+    """
+    if not default_lookup:
+        return data
+
+    for section in data.get("sections", []):
+        for item in section.get("items", []):
+            item_no = item.get("item_no", "")
+            default_item = default_lookup.get(item_no)
+
+            if default_item is None:
+                continue
+
+            # Fix quantity if zero or missing
+            try:
+                qty = float(item.get("quantity", 0) or 0)
+            except (TypeError, ValueError):
+                qty = 0
+            if qty <= 0:
+                item["quantity"] = default_item.get("quantity", 0)
+                item["unit"] = default_item.get("unit", item.get("unit", ""))
+                logger.info(
+                    f"Fallback: item {item_no} quantity set to default {item['quantity']}"
+                )
+
+            # Fix rate if zero or missing
+            try:
+                rate = float(item.get("rate", 0) or 0)
+            except (TypeError, ValueError):
+                rate = 0
+            if rate <= 0:
+                item["rate"] = default_item.get("rate", 0)
+                logger.info(
+                    f"Fallback: item {item_no} rate set to default {item['rate']}"
+                )
+
+            # Fix description if empty or looks like a room name
+            desc = (item.get("description") or "").strip()
+            room_keywords = ["living room", "kitchen", "bedroom", "bathroom",
+                             "dining", "passage", "foyer", "store", "entrance"]
+            if not desc or any(rk in desc.lower() for rk in room_keywords):
+                item["description"] = default_item.get("description", item.get("description", ""))
+                logger.info(
+                    f"Fallback: item {item_no} description set to default"
+                )
+
+            # Fix confidence if zero or missing
+            try:
+                conf = float(item.get("confidence", 0) or 0)
+            except (TypeError, ValueError):
+                conf = 0
+            if conf <= 0:
+                item["confidence"] = default_item.get(
+                    "confidence", get_default_confidence()
+                )
+
+    return data
 
 
 class BoQAIGenerator:
@@ -38,6 +115,13 @@ class BoQAIGenerator:
                 )
             self.client = OpenAI(api_key=api_key)
             self.model = getattr(settings, "OPENAI_MODEL", "gpt-4.1")
+
+        # Load default measurement context for fallback
+        self.default_lookup = _build_default_lookup(get_default_boq_items())
+        if self.default_lookup:
+            logger.info(
+                f"Loaded {len(self.default_lookup)} default BoQ items for fallback"
+            )
 
     def generate(self, text: str):
 
@@ -88,9 +172,10 @@ ITEM RULES:
 - Group items under the appropriate TRADE SECTION, not by room name
 - Each section should have a letter prefix (A, B, C, etc.) followed by a period
 - Item numbers should follow the format: SectionLetter.ItemNumber (e.g., C.1, C.2, C.3)
-- Description should describe the WORK TRADE with materials specification (e.g., "Excavation for foundation trenches (footings), average depth 1.5m", "Concrete blinding 50mm thick under floor slab, mix ratio 1:3:6 cement:sand:stones")
+- Description should describe the WORK TRADE with materials specification (e.g., "Excavation for foundation trenches (footings), average depth 1.0m, width 0.69m", "Concrete blinding 50mm thick under floor slab, mix ratio 1:3:6 cement:sand:stones")
 - Do NOT use room names as descriptions (e.g., do NOT write "Living Room" or "Kitchen")
 - Instead write trade descriptions with specifications (e.g., "Floor screeding 50mm thick - Living Room", "Wall tiles 400x400mm - Kitchen", "Concrete strip footing 450x300mm, mix 1:2:4")
+- Include material specifications where relevant: concrete mix ratios, excavation depth, blockwork thickness, plastering coats, paint coats, etc.
 
 EXTRACTION RULES:
 - Extract REAL quantities and rates from the document text. Do NOT use zeros.
@@ -144,5 +229,8 @@ EXTRACTION RULES:
             raise ValueError(
                 "AI response missing 'sections'."
             )
+
+        # Apply fallback defaults for any items with zero/missing values
+        data = _apply_defaults(data, self.default_lookup)
 
         return data
