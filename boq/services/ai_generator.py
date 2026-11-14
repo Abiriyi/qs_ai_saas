@@ -10,6 +10,7 @@ from qs_ai_project.context_loader import (
     get_default_boq_items,
     get_default_confidence,
     get_currency_symbol,
+    get_currency_code,
     get_default_locations,
     get_default_location,
     get_rate_from_library_with_fallback,
