@@ -5,7 +5,8 @@
 
 ## Sections
 
-- [ ] `activeContext.md` — current stack, apps, database engine, and environment path (created).
+- [x] `activeContext.md` — current stack, apps, database engine, and environment path (created).
+- [x] Smoke test executed: 2026-11-17 12:01:33 UTC.
 - [ ] `progress.md` — this file (task tracking).
 - [ ] Add future tasks, completed changes, pending migrations, and bugs below as work proceeds.
 
