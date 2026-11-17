@@ -3,8 +3,9 @@
 ## Project Environment
 
 - Working directory (project root): `/home/ubuntu/projects/qs_ai_saas`
-- Local virtual environment: `.venv` (target: `ubuntu@ubuntu-vm:~/projects/CasBlog`)
+- Local virtual environment: `.venv` (target: `ubuntu@ubuntu-vm:~/projects/qs_ai_saas`)
 - Django settings module: `qs_ai_saas.settings.development`
+
 
 ## Technology Stack
 
