@@ -5,7 +5,8 @@ These rules apply to every task in this Django project.
 ## Virtual Environment
 
 - Always activate or target this project's local virtual environment (`.venv`).
-- Ubuntu environment path reference: `ubuntu@ubuntu-vm:~/projects/CasBlog`.
+- Local environment reference: `ubuntu@ubuntu-vm:~/projects/qs_ai_saas`.
+
 
 ## File Boundaries
 
