@@ -38,13 +38,23 @@ class AuditService:
             if org is None and actor is not None:
                 org = getattr(actor, "organization", None)
 
+            # Normalize both actor and organization to support duck-typed mocks
+            # (tests and API mock objects may expose only a pk, without a
+            # Django model instance).  Passing None avoids the Django
+            # related-descriptor ValueError that occurs when a Mock is
+            # assigned to a ForeignKey field.
+            actor_pk = getattr(actor, "pk", None) if actor is not None else None
+            org_pk = getattr(org, "pk", None) if org is not None else None
+            if org is not None and org_pk is None:
+                org = None
+
             ip_address = None
             if request is not None:
                 ip_address = request.META.get("REMOTE_ADDR")
 
             event = AuditEvent.objects.create(
-                organization=org if getattr(org, "pk", None) else None,
-                actor=actor if getattr(actor, "pk", None) else None,
+                organization=org_pk if org_pk is not None else None,
+                actor=actor_pk if actor_pk is not None else None,
                 action=str(action),
                 category=str(category or "general"),
                 model_name=str(model_name or ""),
