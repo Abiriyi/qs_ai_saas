@@ -53,8 +53,8 @@ class AuditService:
                 ip_address = request.META.get("REMOTE_ADDR")
 
             event = AuditEvent.objects.create(
-                organization=org_pk if org_pk is not None else None,
-                actor=actor_pk if actor_pk is not None else None,
+                organization=org if org is not None else None,
+                actor=actor if actor is not None else None,
                 action=str(action),
                 category=str(category or "general"),
                 model_name=str(model_name or ""),
