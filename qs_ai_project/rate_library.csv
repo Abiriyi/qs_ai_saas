@@ -1,81 +1,163 @@
 #rate_library.csv
-Element,Unit,BaseRate,Location,Year
+Element,Unit,BaseRate,Location,Year,MappedTo
 # --- PRELIMINARIES ---
-Site Establishment,Item,500000,Kaduna,2025
-Temporary Works,Item,300000,Kaduna,2025
-Site Management,Item,400000,Kaduna,2025
-
-# --- SUBSTRUCTURE WORKS ---
-Site Clearance,m2,1500,Kaduna,2025
-Excavation,m3,2000,Kaduna,2025
-Earthworks,m3,2500,Kaduna,2025
-Foundations,m3,30000,Kaduna,2025
-Basement,m3,50000,Kaduna,2025
-Ground Floor Slab,m2,35000,Kaduna,2025
-
-# --- SUPERSTRUCTURE WORKS ---
-Concrete,m3,30000,Kaduna,2025
-Reinforced Concrete,m3,40000,Kaduna,2025
-Masonry,m2,8000,Kaduna,2025
-Blockwork,m2,7000,Kaduna,2025
-Partition Walls,m2,6000,Kaduna,2025
-Steelwork,tonne,50000,Kaduna,2025
-Structural Steel,tonne,55000,Kaduna,2025
-Roof Trusses,m2,20000,Kaduna,2025
-Roof Structure,m2,25000,Kaduna,2025
-Roof Coverings,m2,20000,Kaduna,2025
-Carpentry,m2,15000,Kaduna,2025
-Joinery,m2,12000,Kaduna,2025
-Doors,No.,45000,Kaduna,2025
-Windows,No.,40000,Kaduna,2025
-Frames,m,10000,Kaduna,2025
-Skirting,m,2500,Kaduna,2025
-
-# --- FINISHES ---
-Plastering,m2,12000,Kaduna,2025
-Screeding,m2,11000,Kaduna,2025
-Tiling,m2,15000,Kaduna,2025
-Painting,m2,8000,Kaduna,2025
-Decoration,m2,10000,Kaduna,2025
-Floor Finish,m2,15000,Kaduna,2025
-Wall Finish,m2,12000,Kaduna,2025
-Ceiling Finish,m2,10000,Kaduna,2025
-
-# --- FITTINGS & FIXTURES ---
-Ironmongery,Item,5000,Kaduna,2025
-Cabinets,No.,80000,Kaduna,2025
-Wardrobes,No.,100000,Kaduna,2025
-Shelves,No.,15000,Kaduna,2025
-Sanitary Fittings,No.,60000,Kaduna,2025
-Kitchen Fittings,Set,120000,Kaduna,2025
-
-# --- MECHANICAL & ELECTRICAL WORKS ---
-Plumbing,Point,20000,Kaduna,2025
-Drainage,Point,15000,Kaduna,2025
-Sanitary Installations,Item,50000,Kaduna,2025
-HVAC,Unit,300000,Kaduna,2025
-Fire Protection,Item,100000,Kaduna,2025
-Power Supply,Panel,80000,Kaduna,2025
-Lighting,Point,5000,Kaduna,2025
-Small Power,Point,4000,Kaduna,2025
-Data,Point,6000,Kaduna,2025
-Telecom,Point,8000,Kaduna,2025
-CCTV,Camera,15000,Kaduna,2025
-Alarms,Point,20000,Kaduna,2025
-Lightning Protection,System,50000,Kaduna,2025
-
-# --- EXTERNAL WORKS ---
-Paving,m2,12000,Kaduna,2025
-Driveways,m2,15000,Kaduna,2025
-Car Parks,m2,14000,Kaduna,2025
-Boundary Walls,m2,20000,Kaduna,2025
-Gates,No.,80000,Kaduna,2025
-Landscaping,m2,1000,Kaduna,2025
-Surface Water Drainage,m,5000,Kaduna,2025
-External Services,Item,50000,Kaduna,2025
-
-# --- PROVISIONAL & PRIME COST SUMS ---
-Specialized Works,Item,1000000,Kaduna,2025
-Contingencies,Item,500000,Kaduna,2025
-
-
+Projecting Depth,Item,30000,Kaduna,2025,1.14.1.1.7.3
+Basket Pattern,Item,25000,Kaduna,2025,1.14.1.1.7.4
+Blockwork,Item,80000,Kaduna,2025,1.14.1.2
+100mm Blockwork,Item,60000,Kaduna,2025,1.14.1.2.1.1
+Width and Method,Item,25000,Kaduna,2025,1.14.1.2.1.14.1
+150mm Blockwork,Item,80000,Kaduna,2025,1.14.1.2.1.2
+225mm Blockwork,Item,100000,Kaduna,2025,1.14.1.2.1.3
+Double Skin Blockwork,Item,120000,Kaduna,2025,1.14.1.2.1.4
+Filling Around Flues,Item,10000,Kaduna,2025,1.14.1.2.10
+Filling Details,Item,15000,Kaduna,2025,1.14.1.2.10.1
+Extra Over Walls,Item,40000,Kaduna,2025,1.14.1.2.11
+Eaves Formation,Item,45000,Kaduna,2025,1.14.1.2.11.1
+Opening Perimeters,Item,50000,Kaduna,2025,1.14.1.2.12
+Special Purpose Blocks,Item,35000,Kaduna,2025,1.14.1.2.13
+Forming Cavities,Item,20000,Kaduna,2025,1.14.1.2.14
+Cavity Insulation,Item,15000,Kaduna,2025,1.14.1.2.15
+Flues Description,Item,15000,Kaduna,2025,1.14.1.2.8.1
+Flue Linings,Item,20000,Kaduna,2025,1.14.1.2.9
+Flue Lining Diameter,Item,25000,Kaduna,2025,1.14.1.2.9.1
+Flue Lining Diameter,Item,30000,Kaduna,2025,1.14.1.2.9.2
+Concrete Work,Item,15000,Kaduna,2025,1.15.1.1.10
+Concrete Work,Item,15000,Kaduna,2025,1.15.1.1.11
+Concrete Work,Item,15000,Kaduna,2025,1.15.1.1.12
+Steel Work,Item,15000,Kaduna,2025,1.15.1.1.8
+Concrete Work,Item,15000,Kaduna,2025,1.15.1.1.9
+Concrete Work,Item,50000,Kaduna,2025,1.15.1.2
+Concrete Work,Item,25000,Kaduna,2025,1.15.1.2.1
+Concrete Work,Item,30000,Kaduna,2025,1.15.1.3
+Concrete Work,Item,35000,Kaduna,2025,1.15.1.3.1
+Concrete Work,Item,40000,Kaduna,2025,1.15.1.4
+Concrete Work,Item,45000,Kaduna,2025,1.15.1.4.1
+Concrete Work,Item,50000,Kaduna,2025,1.15.1.5
+Concrete Work,Item,55000,Kaduna,2025,1.15.1.5.1
+Concrete Work,Item,60000,Kaduna,2025,1.15.1.5.2
+Concrete Work,Item,70000,Kaduna,2025,1.15.1.6
+Concrete Work,Item,75000,Kaduna,2025,1.15.1.6.1
+Concrete Work,Item,80000,Kaduna,2025,1.15.1.6.2
+Concrete Work,Item,90000,Kaduna,2025,1.15.1.7
+Formwork Crank,Item,100000,Kaduna,2025,1.15.1.7.1
+Metal Decking,Item,120000,Kaduna,2025,1.15.1.8
+Other Item,Item,250000,Kaduna,2025,1.2.3.6
+Prefabricated Buildings,Item,500000,Kaduna,2025,1.2.4
+Building Description,Item,300000,Kaduna,2025,1.2.4.1
+Louvres and Shutters,Item,42000,Kaduna,2025,1.23.5
+Louvres and Frames,Item,35000,Kaduna,2025,1.23.5.7
+Dimensioned Description,Item,28000,Kaduna,2025,1.23.5.7.1
+Glass and Glazing,Item,25000,Kaduna,2025,1.23.6
+Type of Glass,Item,30000,Kaduna,2025,1.23.6.8
+Glass Thickness,Item,35000,Kaduna,2025,1.23.6.8.1
+Louvre Blades,Item,20000,Kaduna,2025,1.23.6.9
+Glass Thickness,Item,25000,Kaduna,2025,1.23.6.9.1
+Ironmongery,Item,18000,Kaduna,2025,1.23.7
+Type of Item,Item,22000,Kaduna,2025,1.23.7.10
+Fixing Method,Item,28000,Kaduna,2025,1.23.7.10.1
+"Doors, Shutters and Hatches",Item,60000,Kaduna,2025,1.24
+Drawings,Item,30000,Kaduna,2025,1.24.0.1.5
+Floor Plans,Item,40000,Kaduna,2025,1.24.0.1.5.1
+Material Quality,Item,35000,Kaduna,2025,1.24.0.2.5.1
+Door Location,Item,25000,Kaduna,2025,1.24.0.3.5.1
+Doors and Frames,Item,55000,Kaduna,2025,1.24.1
+Set Description,Item,30000,Kaduna,2025,1.24.1.1.1
+Opening Size,Item,35000,Kaduna,2025,1.24.1.1.2
+Door Stops,Item,20000,Kaduna,2025,1.24.1.11
+Cross Section,Item,25000,Kaduna,2025,1.24.1.11.1
+Fire Stops,Item,15000,Kaduna,2025,1.24.1.12
+Cross Section,Item,20000,Kaduna,2025,1.24.1.12.1
+Dimensioned Description,Item,40000,Kaduna,2025,1.24.1.2.1
+Shutters and Hatches,Item,35000,Kaduna,2025,1.24.2
+Fire Stops,Item,18000,Kaduna,2025,1.24.2.12
+Cross Section,Item,22000,Kaduna,2025,1.24.2.12.1
+Smoke Stops,Item,16000,Kaduna,2025,1.24.2.13
+Cross Section,Item,20000,Kaduna,2025,1.24.2.13.1
+Roller Shutters,Item,45000,Kaduna,2025,1.24.2.3
+Dimensioned Description,Item,30000,Kaduna,2025,1.24.2.3.1
+Dimensioned Description,Item,35000,Kaduna,2025,1.24.2.3.2
+Dimensioned Description,Item,40000,Kaduna,2025,1.24.2.6.1
+Sliding and Folding Doors,Item,50000,Kaduna,2025,1.24.3
+Sliding Folding Partitions,Item,40000,Kaduna,2025,1.24.3.5
+Dimensioned Description,Item,30000,Kaduna,2025,1.24.3.5.1
+Dimensioned Description,Item,35000,Kaduna,2025,1.24.4.8.1
+Glass and Glazing,Item,28000,Kaduna,2025,1.24.5
+Type of Glass,Item,32000,Kaduna,2025,1.24.5.14
+Glass Thickness,Item,38000,Kaduna,2025,1.24.5.14.1
+Location Drawings,Item,200000,Kaduna,2025,1.3.0.1.5.1
+Structure Description,Item,250000,Kaduna,2025,1.3.0.2.5.1
+Demolition Level,Item,150000,Kaduna,2025,1.3.0.3.5.1
+Demolitions,Item,400000,Kaduna,2025,1.3.1
+All Structures,Item,350000,Kaduna,2025,1.3.1.1
+Building Description,Item,60000,Kaduna,2025,1.3.1.1.1
+Demolition Level,Item,80000,Kaduna,2025,1.3.1.1.2
+Shoring and Retention,Item,100000,Kaduna,2025,1.3.2
+Temporary Support,Item,50000,Kaduna,2025,1.3.2.2
+Retained Parts,Item,25000,Kaduna,2025,1.3.2.2.1
+Adjoining Buildings,Item,30000,Kaduna,2025,1.3.2.2.2
+Roads Retained,Item,20000,Kaduna,2025,1.3.2.2.3
+Other Features,Item,25000,Kaduna,2025,1.3.2.2.4
+Temporary Works,Item,40000,Kaduna,2025,1.3.2.3
+Shoring Work,Item,30000,Kaduna,2025,1.3.2.4
+Shoring Details,Item,35000,Kaduna,2025,1.3.2.4.1
+Infestation Removal,Item,25000,Kaduna,2025,1.3.2.4.3
+Material Description,Item,50000,Kaduna,2025,1.3.2.5.1
+Existing Structure Drawings,Item,150000,Kaduna,2025,1.4.0.1.5.1
+Operations Description,Item,75000,Kaduna,2025,1.4.0.2.5.1
+Minimum Information,Item,80000,Kaduna,2025,1.4.0.3.5
+Work Scope,Item,50000,Kaduna,2025,1.4.0.3.5.1
+Alteration Works,Item,300000,Kaduna,2025,1.4.1
+Works of Alteration,Item,250000,Kaduna,2025,1.4.1.1
+Dimensioned Description,Item,60000,Kaduna,2025,1.4.1.1.1
+Fittings and Fixtures,Item,300000,Kaduna,2025,1.4.1.2.1
+General Debris,Item,200000,Kaduna,2025,1.4.1.2.1.1
+Detailed Description,Item,150000,Kaduna,2025,1.4.1.2.1.2
+Detailed Description,Item,180000,Kaduna,2025,1.4.1.2.1.4.1
+Plumbing Items,Item,180000,Kaduna,2025,1.4.1.2.2
+All Installations,Item,220000,Kaduna,2025,1.4.1.2.2.1
+Electrical Installations,Item,200000,Kaduna,2025,1.4.1.2.3
+System Complete,Item,250000,Kaduna,2025,1.4.1.2.3.1
+Coverings,Item,150000,Kaduna,2025,1.4.1.2.5
+Detailed Description,Item,120000,Kaduna,2025,1.4.1.2.5.1
+Demolition Works,Item,200000,Kaduna,2025,3.00
+Alterations,Item,100000,Kaduna,2025,4.00
+Mobilization,Item,500000,Kaduna,2025,A.1
+Site Setup,Item,300000,Kaduna,2025,A.2
+Insurance,Item,400000,Kaduna,2025,A.3
+Excavation,m3,2000,Kaduna,2025,B.1
+Column Base Excavation,m3,2000,Kaduna,2025,B.2
+Backfilling,m3,2500,Kaduna,2025,B.3
+Demolition,Item,200000,Kaduna,2025,B.4
+Ground Floor Slab,m2,35000,Kaduna,2025,C.1
+Concrete Excavation,m3,30000,Kaduna,2025,C.2
+Concrete Fill,m3,30000,Kaduna,2025,C.3
+Concrete Slab,m2,35000,Kaduna,2025,C.4
+Concrete Finishing,m2,20000,Kaduna,2025,C.5
+Blockwork,m2,7000,Kaduna,2025,D.1
+Brickwork,m2,8000,Kaduna,2025,D.2
+Blockwork Work,m2,12000,Kaduna,2025,D.3
+Blockwork Work,m2,12000,Kaduna,2025,D.4
+Roof Trusses,m,60000,Kaduna,2025,E.1
+Roof Structure,m2,100000,Kaduna,2025,E.2
+Roof Coverings,lm,40000,Kaduna,2025,E.3
+Screeding,m2,11000,Kaduna,2025,F.1
+Tiling,m2,15000,Kaduna,2025,F.2
+Tile Bonding,lm,8000,Kaduna,2025,F.3
+Door Stops,Item,20000,Kaduna,2025,G.1
+Shutters,Item,35000,Kaduna,2025,G.2
+Roof Coverings,lm,40000,Kaduna,2025,G.3
+Water Supply Pipes,lm,20000,Kaduna,2025,H.1
+Drainage Pipes,lm,15000,Kaduna,2025,H.2
+Sanitary Ware,No,50000,Kaduna,2025,H.3
+WC Suite,No,60000,Kaduna,2025,H.4
+Electrical Wiring,lm,5000,Kaduna,2025,I.1
+Light Switches,No,4000,Kaduna,2025,I.2
+Socket Outlets,No,6000,Kaduna,2025,I.3
+Light Fittings,No,8000,Kaduna,2025,I.4
+Distribution Board,No,80000,Kaduna,2025,I.5
+Undercoat and Emulsion,m2,12000,Kaduna,2025,J.1
+Gloss Paint,m2,8000,Kaduna,2025,J.2
+Ceiling Paint,m2,10000,Kaduna,2025,J.3
+Paving,m2,12000,Kaduna,2025,K.1
+Fencing,lm,20000,Kaduna,2025,K.2
+Driveway,m2,15000,Kaduna,2025,K.3
