@@ -1,163 +1,163 @@
 #rate_library.csv
 Element,Unit,BaseRate,Location,Year,MappedTo
 # --- PRELIMINARIES ---
-Projecting Depth,Item,30000,Kaduna,2025,1.14.1.1.7.3
-Basket Pattern,Item,25000,Kaduna,2025,1.14.1.1.7.4
-Blockwork,Item,80000,Kaduna,2025,1.14.1.2
-100mm Blockwork,Item,60000,Kaduna,2025,1.14.1.2.1.1
-Width and Method,Item,25000,Kaduna,2025,1.14.1.2.1.14.1
-150mm Blockwork,Item,80000,Kaduna,2025,1.14.1.2.1.2
-225mm Blockwork,Item,100000,Kaduna,2025,1.14.1.2.1.3
-Double Skin Blockwork,Item,120000,Kaduna,2025,1.14.1.2.1.4
-Filling Around Flues,Item,10000,Kaduna,2025,1.14.1.2.10
-Filling Details,Item,15000,Kaduna,2025,1.14.1.2.10.1
-Extra Over Walls,Item,40000,Kaduna,2025,1.14.1.2.11
-Eaves Formation,Item,45000,Kaduna,2025,1.14.1.2.11.1
-Opening Perimeters,Item,50000,Kaduna,2025,1.14.1.2.12
-Special Purpose Blocks,Item,35000,Kaduna,2025,1.14.1.2.13
-Forming Cavities,Item,20000,Kaduna,2025,1.14.1.2.14
-Cavity Insulation,Item,15000,Kaduna,2025,1.14.1.2.15
-Flues Description,Item,15000,Kaduna,2025,1.14.1.2.8.1
-Flue Linings,Item,20000,Kaduna,2025,1.14.1.2.9
-Flue Lining Diameter,Item,25000,Kaduna,2025,1.14.1.2.9.1
-Flue Lining Diameter,Item,30000,Kaduna,2025,1.14.1.2.9.2
-Concrete Work,Item,15000,Kaduna,2025,1.15.1.1.10
-Concrete Work,Item,15000,Kaduna,2025,1.15.1.1.11
-Concrete Work,Item,15000,Kaduna,2025,1.15.1.1.12
-Steel Work,Item,15000,Kaduna,2025,1.15.1.1.8
-Concrete Work,Item,15000,Kaduna,2025,1.15.1.1.9
-Concrete Work,Item,50000,Kaduna,2025,1.15.1.2
-Concrete Work,Item,25000,Kaduna,2025,1.15.1.2.1
-Concrete Work,Item,30000,Kaduna,2025,1.15.1.3
-Concrete Work,Item,35000,Kaduna,2025,1.15.1.3.1
-Concrete Work,Item,40000,Kaduna,2025,1.15.1.4
-Concrete Work,Item,45000,Kaduna,2025,1.15.1.4.1
-Concrete Work,Item,50000,Kaduna,2025,1.15.1.5
-Concrete Work,Item,55000,Kaduna,2025,1.15.1.5.1
-Concrete Work,Item,60000,Kaduna,2025,1.15.1.5.2
-Concrete Work,Item,70000,Kaduna,2025,1.15.1.6
-Concrete Work,Item,75000,Kaduna,2025,1.15.1.6.1
-Concrete Work,Item,80000,Kaduna,2025,1.15.1.6.2
-Concrete Work,Item,90000,Kaduna,2025,1.15.1.7
-Formwork Crank,Item,100000,Kaduna,2025,1.15.1.7.1
-Metal Decking,Item,120000,Kaduna,2025,1.15.1.8
-Other Item,Item,250000,Kaduna,2025,1.2.3.6
-Prefabricated Buildings,Item,500000,Kaduna,2025,1.2.4
-Building Description,Item,300000,Kaduna,2025,1.2.4.1
-Louvres and Shutters,Item,42000,Kaduna,2025,1.23.5
-Louvres and Frames,Item,35000,Kaduna,2025,1.23.5.7
-Dimensioned Description,Item,28000,Kaduna,2025,1.23.5.7.1
-Glass and Glazing,Item,25000,Kaduna,2025,1.23.6
-Type of Glass,Item,30000,Kaduna,2025,1.23.6.8
-Glass Thickness,Item,35000,Kaduna,2025,1.23.6.8.1
-Louvre Blades,Item,20000,Kaduna,2025,1.23.6.9
-Glass Thickness,Item,25000,Kaduna,2025,1.23.6.9.1
-Ironmongery,Item,18000,Kaduna,2025,1.23.7
-Type of Item,Item,22000,Kaduna,2025,1.23.7.10
-Fixing Method,Item,28000,Kaduna,2025,1.23.7.10.1
-"Doors, Shutters and Hatches",Item,60000,Kaduna,2025,1.24
-Drawings,Item,30000,Kaduna,2025,1.24.0.1.5
-Floor Plans,Item,40000,Kaduna,2025,1.24.0.1.5.1
-Material Quality,Item,35000,Kaduna,2025,1.24.0.2.5.1
-Door Location,Item,25000,Kaduna,2025,1.24.0.3.5.1
-Doors and Frames,Item,55000,Kaduna,2025,1.24.1
-Set Description,Item,30000,Kaduna,2025,1.24.1.1.1
-Opening Size,Item,35000,Kaduna,2025,1.24.1.1.2
-Door Stops,Item,20000,Kaduna,2025,1.24.1.11
-Cross Section,Item,25000,Kaduna,2025,1.24.1.11.1
-Fire Stops,Item,15000,Kaduna,2025,1.24.1.12
-Cross Section,Item,20000,Kaduna,2025,1.24.1.12.1
-Dimensioned Description,Item,40000,Kaduna,2025,1.24.1.2.1
-Shutters and Hatches,Item,35000,Kaduna,2025,1.24.2
-Fire Stops,Item,18000,Kaduna,2025,1.24.2.12
-Cross Section,Item,22000,Kaduna,2025,1.24.2.12.1
-Smoke Stops,Item,16000,Kaduna,2025,1.24.2.13
-Cross Section,Item,20000,Kaduna,2025,1.24.2.13.1
-Roller Shutters,Item,45000,Kaduna,2025,1.24.2.3
-Dimensioned Description,Item,30000,Kaduna,2025,1.24.2.3.1
-Dimensioned Description,Item,35000,Kaduna,2025,1.24.2.3.2
-Dimensioned Description,Item,40000,Kaduna,2025,1.24.2.6.1
-Sliding and Folding Doors,Item,50000,Kaduna,2025,1.24.3
-Sliding Folding Partitions,Item,40000,Kaduna,2025,1.24.3.5
-Dimensioned Description,Item,30000,Kaduna,2025,1.24.3.5.1
-Dimensioned Description,Item,35000,Kaduna,2025,1.24.4.8.1
-Glass and Glazing,Item,28000,Kaduna,2025,1.24.5
-Type of Glass,Item,32000,Kaduna,2025,1.24.5.14
-Glass Thickness,Item,38000,Kaduna,2025,1.24.5.14.1
-Location Drawings,Item,200000,Kaduna,2025,1.3.0.1.5.1
-Structure Description,Item,250000,Kaduna,2025,1.3.0.2.5.1
-Demolition Level,Item,150000,Kaduna,2025,1.3.0.3.5.1
-Demolitions,Item,400000,Kaduna,2025,1.3.1
-All Structures,Item,350000,Kaduna,2025,1.3.1.1
-Building Description,Item,60000,Kaduna,2025,1.3.1.1.1
-Demolition Level,Item,80000,Kaduna,2025,1.3.1.1.2
-Shoring and Retention,Item,100000,Kaduna,2025,1.3.2
-Temporary Support,Item,50000,Kaduna,2025,1.3.2.2
-Retained Parts,Item,25000,Kaduna,2025,1.3.2.2.1
-Adjoining Buildings,Item,30000,Kaduna,2025,1.3.2.2.2
-Roads Retained,Item,20000,Kaduna,2025,1.3.2.2.3
-Other Features,Item,25000,Kaduna,2025,1.3.2.2.4
-Temporary Works,Item,40000,Kaduna,2025,1.3.2.3
-Shoring Work,Item,30000,Kaduna,2025,1.3.2.4
-Shoring Details,Item,35000,Kaduna,2025,1.3.2.4.1
-Infestation Removal,Item,25000,Kaduna,2025,1.3.2.4.3
-Material Description,Item,50000,Kaduna,2025,1.3.2.5.1
-Existing Structure Drawings,Item,150000,Kaduna,2025,1.4.0.1.5.1
-Operations Description,Item,75000,Kaduna,2025,1.4.0.2.5.1
-Minimum Information,Item,80000,Kaduna,2025,1.4.0.3.5
-Work Scope,Item,50000,Kaduna,2025,1.4.0.3.5.1
-Alteration Works,Item,300000,Kaduna,2025,1.4.1
-Works of Alteration,Item,250000,Kaduna,2025,1.4.1.1
-Dimensioned Description,Item,60000,Kaduna,2025,1.4.1.1.1
-Fittings and Fixtures,Item,300000,Kaduna,2025,1.4.1.2.1
-General Debris,Item,200000,Kaduna,2025,1.4.1.2.1.1
-Detailed Description,Item,150000,Kaduna,2025,1.4.1.2.1.2
-Detailed Description,Item,180000,Kaduna,2025,1.4.1.2.1.4.1
-Plumbing Items,Item,180000,Kaduna,2025,1.4.1.2.2
-All Installations,Item,220000,Kaduna,2025,1.4.1.2.2.1
-Electrical Installations,Item,200000,Kaduna,2025,1.4.1.2.3
-System Complete,Item,250000,Kaduna,2025,1.4.1.2.3.1
-Coverings,Item,150000,Kaduna,2025,1.4.1.2.5
-Detailed Description,Item,120000,Kaduna,2025,1.4.1.2.5.1
-Demolition Works,Item,200000,Kaduna,2025,3.00
-Alterations,Item,100000,Kaduna,2025,4.00
-Mobilization,Item,500000,Kaduna,2025,A.1
-Site Setup,Item,300000,Kaduna,2025,A.2
-Insurance,Item,400000,Kaduna,2025,A.3
-Excavation,m3,2000,Kaduna,2025,B.1
-Column Base Excavation,m3,2000,Kaduna,2025,B.2
-Backfilling,m3,2500,Kaduna,2025,B.3
-Demolition,Item,200000,Kaduna,2025,B.4
-Ground Floor Slab,m2,35000,Kaduna,2025,C.1
-Concrete Excavation,m3,30000,Kaduna,2025,C.2
-Concrete Fill,m3,30000,Kaduna,2025,C.3
-Concrete Slab,m2,35000,Kaduna,2025,C.4
-Concrete Finishing,m2,20000,Kaduna,2025,C.5
-Blockwork,m2,7000,Kaduna,2025,D.1
-Brickwork,m2,8000,Kaduna,2025,D.2
-Blockwork Work,m2,12000,Kaduna,2025,D.3
-Blockwork Work,m2,12000,Kaduna,2025,D.4
-Roof Trusses,m,60000,Kaduna,2025,E.1
-Roof Structure,m2,100000,Kaduna,2025,E.2
-Roof Coverings,lm,40000,Kaduna,2025,E.3
-Screeding,m2,11000,Kaduna,2025,F.1
-Tiling,m2,15000,Kaduna,2025,F.2
-Tile Bonding,lm,8000,Kaduna,2025,F.3
-Door Stops,Item,20000,Kaduna,2025,G.1
-Shutters,Item,35000,Kaduna,2025,G.2
-Roof Coverings,lm,40000,Kaduna,2025,G.3
-Water Supply Pipes,lm,20000,Kaduna,2025,H.1
-Drainage Pipes,lm,15000,Kaduna,2025,H.2
-Sanitary Ware,No,50000,Kaduna,2025,H.3
-WC Suite,No,60000,Kaduna,2025,H.4
-Electrical Wiring,lm,5000,Kaduna,2025,I.1
-Light Switches,No,4000,Kaduna,2025,I.2
-Socket Outlets,No,6000,Kaduna,2025,I.3
-Light Fittings,No,8000,Kaduna,2025,I.4
-Distribution Board,No,80000,Kaduna,2025,I.5
-Undercoat and Emulsion,m2,12000,Kaduna,2025,J.1
-Gloss Paint,m2,8000,Kaduna,2025,J.2
-Ceiling Paint,m2,10000,Kaduna,2025,J.3
-Paving,m2,12000,Kaduna,2025,K.1
-Fencing,lm,20000,Kaduna,2025,K.2
-Driveway,m2,15000,Kaduna,2025,K.3
+Projecting Depth,Item,32400,Kaduna,2026,1.14.1.1.7.3
+Basket Pattern,Item,27000,Kaduna,2026,1.14.1.1.7.4
+Blockwork,Item,86400,Kaduna,2026,1.14.1.2
+100mm Blockwork,Item,64800,Kaduna,2026,1.14.1.2.1.1
+Width and Method,Item,27000,Kaduna,2026,1.14.1.2.1.14.1
+150mm Blockwork,Item,86400,Kaduna,2026,1.14.1.2.1.2
+225mm Blockwork,Item,108000,Kaduna,2026,1.14.1.2.1.3
+Double Skin Blockwork,Item,129600,Kaduna,2026,1.14.1.2.1.4
+Filling Around Flues,Item,10800,Kaduna,2026,1.14.1.2.10
+Filling Details,Item,16200,Kaduna,2026,1.14.1.2.10.1
+Extra Over Walls,Item,43200,Kaduna,2026,1.14.1.2.11
+Eaves Formation,Item,48600,Kaduna,2026,1.14.1.2.11.1
+Opening Perimeters,Item,54000,Kaduna,2026,1.14.1.2.12
+Special Purpose Blocks,Item,37800,Kaduna,2026,1.14.1.2.13
+Forming Cavities,Item,21600,Kaduna,2026,1.14.1.2.14
+Cavity Insulation,Item,16200,Kaduna,2026,1.14.1.2.15
+Flues Description,Item,16200,Kaduna,2026,1.14.1.2.8.1
+Flue Linings,Item,21600,Kaduna,2026,1.14.1.2.9
+Flue Lining Diameter,Item,27000,Kaduna,2026,1.14.1.2.9.1
+Flue Lining Diameter,Item,32400,Kaduna,2026,1.14.1.2.9.2
+Concrete Work,Item,16200,Kaduna,2026,1.15.1.1.10
+Concrete Work,Item,16200,Kaduna,2026,1.15.1.1.11
+Concrete Work,Item,16200,Kaduna,2026,1.15.1.1.12
+Steel Work,Item,16200,Kaduna,2026,1.15.1.1.8
+Concrete Work,Item,16200,Kaduna,2026,1.15.1.1.9
+Concrete Work,Item,54000,Kaduna,2026,1.15.1.2
+Concrete Work,Item,27000,Kaduna,2026,1.15.1.2.1
+Concrete Work,Item,32400,Kaduna,2026,1.15.1.3
+Concrete Work,Item,37800,Kaduna,2026,1.15.1.3.1
+Concrete Work,Item,43200,Kaduna,2026,1.15.1.4
+Concrete Work,Item,48600,Kaduna,2026,1.15.1.4.1
+Concrete Work,Item,54000,Kaduna,2026,1.15.1.5
+Concrete Work,Item,59400,Kaduna,2026,1.15.1.5.1
+Concrete Work,Item,64800,Kaduna,2026,1.15.1.5.2
+Concrete Work,Item,75600,Kaduna,2026,1.15.1.6
+Concrete Work,Item,81000,Kaduna,2026,1.15.1.6.1
+Concrete Work,Item,86400,Kaduna,2026,1.15.1.6.2
+Concrete Work,Item,97200,Kaduna,2026,1.15.1.7
+Formwork Crank,Item,108000,Kaduna,2026,1.15.1.7.1
+Metal Decking,Item,129600,Kaduna,2026,1.15.1.8
+Other Item,Item,270000,Kaduna,2026,1.2.3.6
+Prefabricated Buildings,Item,540000,Kaduna,2026,1.2.4
+Building Description,Item,324000,Kaduna,2026,1.2.4.1
+Louvres and Shutters,Item,45400,Kaduna,2026,1.23.5
+Louvres and Frames,Item,37800,Kaduna,2026,1.23.5.7
+Dimensioned Description,Item,30200,Kaduna,2026,1.23.5.7.1
+Glass and Glazing,Item,27000,Kaduna,2026,1.23.6
+Type of Glass,Item,32400,Kaduna,2026,1.23.6.8
+Glass Thickness,Item,37800,Kaduna,2026,1.23.6.8.1
+Louvre Blades,Item,21600,Kaduna,2026,1.23.6.9
+Glass Thickness,Item,27000,Kaduna,2026,1.23.6.9.1
+Ironmongery,Item,19400,Kaduna,2026,1.23.7
+Type of Item,Item,23800,Kaduna,2026,1.23.7.10
+Fixing Method,Item,30200,Kaduna,2026,1.23.7.10.1
+"Doors, Shutters and Hatches",Item,64800,Kaduna,2026,1.24
+Drawings,Item,32400,Kaduna,2026,1.24.0.1.5
+Floor Plans,Item,43200,Kaduna,2026,1.24.0.1.5.1
+Material Quality,Item,37800,Kaduna,2026,1.24.0.2.5.1
+Door Location,Item,27000,Kaduna,2026,1.24.0.3.5.1
+Doors and Frames,Item,59400,Kaduna,2026,1.24.1
+Set Description,Item,32400,Kaduna,2026,1.24.1.1.1
+Opening Size,Item,37800,Kaduna,2026,1.24.1.1.2
+Door Stops,Item,21600,Kaduna,2026,1.24.1.11
+Cross Section,Item,27000,Kaduna,2026,1.24.1.11.1
+Fire Stops,Item,16200,Kaduna,2026,1.24.1.12
+Cross Section,Item,21600,Kaduna,2026,1.24.1.12.1
+Dimensioned Description,Item,43200,Kaduna,2026,1.24.1.2.1
+Shutters and Hatches,Item,37800,Kaduna,2026,1.24.2
+Fire Stops,Item,19400,Kaduna,2026,1.24.2.12
+Cross Section,Item,23800,Kaduna,2026,1.24.2.12.1
+Smoke Stops,Item,17300,Kaduna,2026,1.24.2.13
+Cross Section,Item,21600,Kaduna,2026,1.24.2.13.1
+Roller Shutters,Item,48600,Kaduna,2026,1.24.2.3
+Dimensioned Description,Item,32400,Kaduna,2026,1.24.2.3.1
+Dimensioned Description,Item,37800,Kaduna,2026,1.24.2.3.2
+Dimensioned Description,Item,43200,Kaduna,2026,1.24.2.6.1
+Sliding and Folding Doors,Item,54000,Kaduna,2026,1.24.3
+Sliding Folding Partitions,Item,43200,Kaduna,2026,1.24.3.5
+Dimensioned Description,Item,32400,Kaduna,2026,1.24.3.5.1
+Dimensioned Description,Item,37800,Kaduna,2026,1.24.4.8.1
+Glass and Glazing,Item,30200,Kaduna,2026,1.24.5
+Type of Glass,Item,34600,Kaduna,2026,1.24.5.14
+Glass Thickness,Item,41000,Kaduna,2026,1.24.5.14.1
+Location Drawings,Item,216000,Kaduna,2026,1.3.0.1.5.1
+Structure Description,Item,270000,Kaduna,2026,1.3.0.2.5.1
+Demolition Level,Item,162000,Kaduna,2026,1.3.0.3.5.1
+Demolitions,Item,432000,Kaduna,2026,1.3.1
+All Structures,Item,378000,Kaduna,2026,1.3.1.1
+Building Description,Item,64800,Kaduna,2026,1.3.1.1.1
+Demolition Level,Item,86400,Kaduna,2026,1.3.1.1.2
+Shoring and Retention,Item,108000,Kaduna,2026,1.3.2
+Temporary Support,Item,54000,Kaduna,2026,1.3.2.2
+Retained Parts,Item,27000,Kaduna,2026,1.3.2.2.1
+Adjoining Buildings,Item,32400,Kaduna,2026,1.3.2.2.2
+Roads Retained,Item,21600,Kaduna,2026,1.3.2.2.3
+Other Features,Item,27000,Kaduna,2026,1.3.2.2.4
+Temporary Works,Item,43200,Kaduna,2026,1.3.2.3
+Shoring Work,Item,32400,Kaduna,2026,1.3.2.4
+Shoring Details,Item,37800,Kaduna,2026,1.3.2.4.1
+Infestation Removal,Item,27000,Kaduna,2026,1.3.2.4.3
+Material Description,Item,54000,Kaduna,2026,1.3.2.5.1
+Existing Structure Drawings,Item,162000,Kaduna,2026,1.4.0.1.5.1
+Operations Description,Item,81000,Kaduna,2026,1.4.0.2.5.1
+Minimum Information,Item,86400,Kaduna,2026,1.4.0.3.5
+Work Scope,Item,54000,Kaduna,2026,1.4.0.3.5.1
+Alteration Works,Item,324000,Kaduna,2026,1.4.1
+Works of Alteration,Item,270000,Kaduna,2026,1.4.1.1
+Dimensioned Description,Item,64800,Kaduna,2026,1.4.1.1.1
+Fittings and Fixtures,Item,324000,Kaduna,2026,1.4.1.2.1
+General Debris,Item,216000,Kaduna,2026,1.4.1.2.1.1
+Detailed Description,Item,162000,Kaduna,2026,1.4.1.2.1.2
+Detailed Description,Item,194400,Kaduna,2026,1.4.1.2.1.4.1
+Plumbing Items,Item,194400,Kaduna,2026,1.4.1.2.2
+All Installations,Item,237600,Kaduna,2026,1.4.1.2.2.1
+Electrical Installations,Item,216000,Kaduna,2026,1.4.1.2.3
+System Complete,Item,270000,Kaduna,2026,1.4.1.2.3.1
+Coverings,Item,162000,Kaduna,2026,1.4.1.2.5
+Detailed Description,Item,129600,Kaduna,2026,1.4.1.2.5.1
+Demolition Works,Item,216000,Kaduna,2026,3.00
+Alterations,Item,108000,Kaduna,2026,4.00
+Mobilization,Item,540000,Kaduna,2026,A.1
+Site Setup,Item,324000,Kaduna,2026,A.2
+Insurance,Item,432000,Kaduna,2026,A.3
+Excavation,m3,2200,Kaduna,2026,B.1
+Column Base Excavation,m3,2200,Kaduna,2026,B.2
+Backfilling,m3,2700,Kaduna,2026,B.3
+Demolition,Item,216000,Kaduna,2026,B.4
+Ground Floor Slab,m2,37800,Kaduna,2026,C.1
+Concrete Excavation,m3,32400,Kaduna,2026,C.2
+Concrete Fill,m3,32400,Kaduna,2026,C.3
+Concrete Slab,m2,37800,Kaduna,2026,C.4
+Concrete Finishing,m2,21600,Kaduna,2026,C.5
+Blockwork,m2,7600,Kaduna,2026,D.1
+Brickwork,m2,8600,Kaduna,2026,D.2
+Blockwork Work,m2,13000,Kaduna,2026,D.3
+Blockwork Work,m2,13000,Kaduna,2026,D.4
+Roof Trusses,m,64800,Kaduna,2026,E.1
+Roof Structure,m2,108000,Kaduna,2026,E.2
+Roof Coverings,lm,43200,Kaduna,2026,E.3
+Screeding,m2,11900,Kaduna,2026,F.1
+Tiling,m2,16200,Kaduna,2026,F.2
+Tile Bonding,lm,8600,Kaduna,2026,F.3
+Door Stops,Item,21600,Kaduna,2026,G.1
+Shutters,Item,37800,Kaduna,2026,G.2
+Roof Coverings,lm,43200,Kaduna,2026,G.3
+Water Supply Pipes,lm,21600,Kaduna,2026,H.1
+Drainage Pipes,lm,16200,Kaduna,2026,H.2
+Sanitary Ware,No,54000,Kaduna,2026,H.3
+WC Suite,No,64800,Kaduna,2026,H.4
+Electrical Wiring,lm,5400,Kaduna,2026,I.1
+Light Switches,No,4300,Kaduna,2026,I.2
+Socket Outlets,No,6500,Kaduna,2026,I.3
+Light Fittings,No,8600,Kaduna,2026,I.4
+Distribution Board,No,86400,Kaduna,2026,I.5
+Undercoat and Emulsion,m2,13000,Kaduna,2026,J.1
+Gloss Paint,m2,8600,Kaduna,2026,J.2
+Ceiling Paint,m2,10800,Kaduna,2026,J.3
+Paving,m2,13000,Kaduna,2026,K.1
+Fencing,lm,21600,Kaduna,2026,K.2
+Driveway,m2,16200,Kaduna,2026,K.3
