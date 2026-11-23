@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
@@ -19,6 +21,9 @@ from core.ratelimit import (
     check_rate_limit,
     get_client_ip,
 )
+from documents.enums import DocumentStatus
+from documents.models import UploadedDocument
+from documents.tasks import process_document_task
 from projects.models import Project
 
 
@@ -230,6 +235,22 @@ def project_workflow(request):
     if request.method == "POST":
         if form.is_valid():
             project = form.save(request.user)
+
+            # Handle all uploaded files (multiple via browser's multiple attr).
+            # form.save() no longer processes files; we do it here via getlist
+            # so every selected file is captured.
+            for uploaded_file in request.FILES.getlist("file"):
+                document = UploadedDocument.objects.create(
+                    organization=user.organization,
+                    project=project,
+                    file=uploaded_file,
+                    original_filename=uploaded_file.name,
+                    status=DocumentStatus.PENDING,
+                )
+                process_document_task.delay(
+                    str(document.id), org_id=str(document.organization_id)
+                )
+
             if is_ajax:
                 return JsonResponse(
                     {
@@ -266,6 +287,35 @@ def project_detail(request, pk):
         Project.objects.filter(organization=request.user.organization),
         pk=pk,
     )
+
+    # Handle additional drawing uploads from the project detail page.
+    if request.method == "POST" and request.FILES.getlist("file"):
+        uploaded_files = request.FILES.getlist("file")
+        created = []
+        for uploaded_file in uploaded_files:
+            if Path(uploaded_file.name).suffix.lower() != ".pdf":
+                messages.error(
+                    request,
+                    f"Only PDF files are allowed ({uploaded_file.name}).",
+                )
+                continue
+            document = UploadedDocument.objects.create(
+                organization=request.user.organization,
+                project=project,
+                file=uploaded_file,
+                original_filename=uploaded_file.name,
+                status=DocumentStatus.PENDING,
+            )
+            process_document_task.delay(
+                str(document.id), org_id=str(document.organization_id)
+            )
+            created.append(document.original_filename)
+        if created:
+            messages.success(
+                request,
+                f"Uploaded {len(created)} file(s): {', '.join(created)}.",
+            )
+        return redirect("project_detail", pk=project.pk)
 
     status_map = {
         "draft": ("Draft", "warning"),

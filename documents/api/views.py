@@ -26,8 +26,8 @@ class DocumentUploadView(TenantAPIViewMixin, APIView):
     ]
 
     def post(self, request):
-        uploaded_file = request.FILES.get("file")
-        if not uploaded_file:
+        uploaded_files = request.FILES.getlist("file")
+        if not uploaded_files:
             return Response(
                 {"error": "file is required"},
                 status=status.HTTP_400_BAD_REQUEST,
@@ -38,24 +38,6 @@ class DocumentUploadView(TenantAPIViewMixin, APIView):
             "DOCUMENT_MAX_UPLOAD_SIZE",
             25 * 1024 * 1024,
         )
-        if uploaded_file.size > max_upload_size:
-            return Response(
-                {"error": "file exceeds the maximum allowed size"},
-                status=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
-            )
-
-        if Path(uploaded_file.name).suffix.lower() != ".pdf":
-            return Response(
-                {"error": "only PDF files are allowed"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        if b"%PDF-" not in uploaded_file.read(1024):
-            return Response(
-                {"error": "uploaded file is not a valid PDF"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        uploaded_file.seek(0)
 
         project_id = request.data.get("project_id")
         if not project_id:
@@ -79,21 +61,44 @@ class DocumentUploadView(TenantAPIViewMixin, APIView):
             id=project_id,
         )
 
-        doc = UploadedDocument.objects.create(
-            organization=project.organization,
-            project=project,
-            original_filename=uploaded_file.name,
-            file=uploaded_file,
-        )
+        created_docs = []
+        for uploaded_file in uploaded_files:
+            if uploaded_file.size > max_upload_size:
+                return Response(
+                    {"error": f"file '{uploaded_file.name}' exceeds the maximum allowed size"},
+                    status=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+                )
 
-        process_document_task.delay(
-            str(doc.id),
-            org_id=str(doc.organization_id),
-        )
+            if Path(uploaded_file.name).suffix.lower() != ".pdf":
+                return Response(
+                    {"error": f"only PDF files are allowed ({uploaded_file.name})"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            if b"%PDF-" not in uploaded_file.read(1024):
+                return Response(
+                    {"error": f"uploaded file is not a valid PDF ({uploaded_file.name})"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            uploaded_file.seek(0)
+
+            doc = UploadedDocument.objects.create(
+                organization=project.organization,
+                project=project,
+                original_filename=uploaded_file.name,
+                file=uploaded_file,
+            )
+
+            process_document_task.delay(
+                str(doc.id),
+                org_id=str(doc.organization_id),
+            )
+
+            created_docs.append(str(doc.id))
 
         return Response(
             {
-                "document_id": str(doc.id),
+                "document_ids": created_docs,
                 "status": "uploaded",
             },
             status=status.HTTP_202_ACCEPTED,

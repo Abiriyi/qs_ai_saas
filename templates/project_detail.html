@@ -92,6 +92,20 @@
           <h2>Uploaded documents</h2>
         </div>
 
+        <form method="post" enctype="multipart/form-data" class="stacked-form">
+          {% csrf_token %}
+          <div class="field-row two-col">
+            <label class="field">
+              <span>Add drawings</span>
+              <div class="upload-dropzone">
+                <input type="file" name="file" multiple accept=".pdf" />
+                <span>Upload PDF drawings or documents</span>
+              </div>
+            </label>
+          </div>
+          <button type="submit" class="btn btn-primary full-width">Upload drawings</button>
+        </form>
+
         {% if documents %}
           <div class="document-list">
             {% for document in documents %}

@@ -51,10 +51,16 @@
           <label class="field">
             <span>{{ form.file.label }}</span>
             <div class="upload-dropzone">
-              {{ form.file }}
-              <span>Upload PDFs, drawings, or spreadsheets</span>
+              <input
+                type="file"
+                name="{{ form.file.html_name }}"
+                multiple
+                accept=".pdf"
+              />
+              <span>Upload one or more PDF drawings or documents</span>
             </div>
             {{ form.file.errors }}
+            {{ form.file.help_text }}
           </label>
 
           <label class="field">

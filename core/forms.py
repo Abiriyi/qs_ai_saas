@@ -145,7 +145,8 @@ class ProjectIntakeForm(forms.Form):
     )
     file = forms.FileField(
         required=False,
-        label="Project file",
+        label="Project drawings / files",
+        help_text="Upload one or more PDF drawings or documents for this project.",
     )
 
     def save(self, user):
@@ -162,15 +163,8 @@ class ProjectIntakeForm(forms.Form):
             description=project_description,
         )
 
-        uploaded_file = self.cleaned_data.get("file")
-        if uploaded_file:
-            document = UploadedDocument.objects.create(
-                organization=user.organization,
-                project=project,
-                file=uploaded_file,
-                original_filename=uploaded_file.name,
-                status=DocumentStatus.PENDING,
-            )
-            process_document_task.delay(str(document.id), org_id=str(document.organization_id))
-
+        # Note: file uploads are handled in the view via request.FILES.getlist()
+        # so that multiple files selected via the browser's multiple attribute
+        # are all captured. This form field provides the HTML input and basic
+        # validation; the view loops over request.FILES.getlist("file").
         return project

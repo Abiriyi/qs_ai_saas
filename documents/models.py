@@ -6,7 +6,24 @@ from core.models import BaseTenantModel
 from documents.enums import DocumentStatus
 from projects.models import Project
 
+
+def project_upload_path(instance, filename):
+    """Store each project's drawings in a dedicated folder.
+
+    Files are placed under ``media/uploads/projects/<project_id>/<filename>``
+    so every project has its own isolated directory.
+    """
+    project_id = instance.project_id if instance.project_id else "unassigned"
+    return f"uploads/projects/{project_id}/{filename}"
+
+
 class UploadedDocument(BaseTenantModel):
+
+    DOCUMENT_TYPE_CHOICES = [
+        ("drawing", "Drawing"),
+        ("specification", "Specification"),
+        ("other", "Other"),
+    ]
 
     id = models.UUIDField(
         primary_key=True,
@@ -15,7 +32,13 @@ class UploadedDocument(BaseTenantModel):
     )
 
     file = models.FileField(
-        upload_to="uploaded_documents/"
+        upload_to=project_upload_path
+    )
+
+    document_type = models.CharField(
+        max_length=50,
+        choices=DOCUMENT_TYPE_CHOICES,
+        default="drawing",
     )
 
     project = models.ForeignKey(
