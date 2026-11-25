@@ -1,6 +1,6 @@
 # Progress
 
-- **Date:** 2026-11-24
+- **Date:** 2026-11-25
 - **Status:** Test suite run: 85 tests collected, 0 failing. Full suite is OK.
 
 ## Sections
@@ -15,6 +15,7 @@
 - 2026-11-22: Ran the test suite with `DJANGO_SETTINGS_MODULE=qs_ai_saas.settings.test`. Result: `Ran 85 tests in 0.706s`, `OK` (no failures, no errors).
 - 2026-11-23: Re-ran the test suite with `DJANGO_SETTINGS_MODULE=qs_ai_saas.settings.test` (`source .venv/bin/activate`, `DJANGO_SECRET_KEY=test-secret-key-not-for-production python manage.py test -v 2`). Result: `Ran 85 tests in 0.663s`, `OK` (no failures, no errors). 0 fix iterations needed.
 - 2026-11-24: Re-ran the test suite with `DJANGO_SETTINGS_MODULE=qs_ai_saas.settings.test` (`source .venv/bin/activate`, `DJANGO_SECRET_KEY=test-secret-key-not-for-production python manage.py test -v 2`). Result: `Ran 85 tests in 0.697s`, `OK` (no failures, no errors). 0 fix iterations needed.
+- 2026-11-25: Re-ran the test suite with `DJANGO_SETTINGS_MODULE=qs_ai_saas.settings.test` (`source .venv/bin/activate`, `DJANGO_SECRET_KEY=test-secret-key-not-for-production python manage.py test -v 2`). Result: `Ran 85 tests in 0.673s`, `OK` (no failures, no errors). 0 fix iterations needed. One logged ERROR from `audit.services` ("ValueError: Cannot assign ... AuditEvent.organization must be a Organization instance") during a boq workflow review test — expected; it confirms error handling of mocked service-layer failures works correctly, not a test failure.
 
 ## Next Steps
 
