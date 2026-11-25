@@ -143,11 +143,6 @@ class ProjectIntakeForm(forms.Form):
         initial="residential",
         label="Project type",
     )
-    file = forms.FileField(
-        required=False,
-        label="Project drawings / files",
-        help_text="Upload one or more PDF drawings or documents for this project.",
-    )
 
     def save(self, user):
         project_description = self.cleaned_data.get("description") or (

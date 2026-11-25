@@ -236,21 +236,6 @@ def project_workflow(request):
         if form.is_valid():
             project = form.save(request.user)
 
-            # Handle all uploaded files (multiple via browser's multiple attr).
-            # form.save() no longer processes files; we do it here via getlist
-            # so every selected file is captured.
-            for uploaded_file in request.FILES.getlist("file"):
-                document = UploadedDocument.objects.create(
-                    organization=user.organization,
-                    project=project,
-                    file=uploaded_file,
-                    original_filename=uploaded_file.name,
-                    status=DocumentStatus.PENDING,
-                )
-                process_document_task.delay(
-                    str(document.id), org_id=str(document.organization_id)
-                )
-
             if is_ajax:
                 return JsonResponse(
                     {
