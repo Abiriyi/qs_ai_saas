@@ -63,7 +63,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const projectData = await projectResponse.json();
       const uploadData = new FormData();
-      uploadData.append('file', fileInput.files[0]);
+      for (const file of fileInput.files) {
+        uploadData.append('file', file);
+      }
       uploadData.append('project_id', projectData.project_id);
 
       const uploadResponse = await fetch('/api/documents/upload/', {
@@ -80,7 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
         throw await parseJsonOrText(uploadResponse);
       }
 
-      showWorkflowStatus(`Project created. Your file is being processed for ${projectData.project_name}.`);
+      showWorkflowStatus(`Project created. Your ${fileInput.files.length} file(s) are being processed for ${projectData.project_name}.`);
       window.setTimeout(() => {
         window.location.href = '/dashboard/';
       }, 1200);

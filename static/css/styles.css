@@ -917,6 +917,36 @@ th {
   max-width: 100%;
 }
 
+.browse-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.7rem 1.2rem;
+  border: 1px solid rgba(96, 165, 250, 0.4);
+  border-radius: 0.9rem;
+  background: rgba(96, 165, 250, 0.1);
+  color: var(--primary);
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.browse-btn:hover {
+  background: rgba(96, 165, 250, 0.2);
+  border-color: var(--primary);
+}
+
+.browse-btn input {
+  display: none;
+}
+
+.upload-hint {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--text-soft);
+}
+
 .mini-card {
   display: grid;
   gap: 0.35rem;
