@@ -21,22 +21,22 @@ class PricingPipeline:
             rate_value = float(rate.base_rate)
             confidence = PricingConfidenceService.calculate_confidence(source)
         else:
-            rate_value = self._generate_ai_rate(item)
+            rate_value, source = self._generate_ai_rate(item)
 
             if rate_value is None:
-                # No rate anywhere (org library, CSV library, or AI). Returning
-                # None for BOTH rate and confidence means "could not price", so
-                # the caller leaves the item's existing generation-time rate and
-                # confidence untouched and flags it for review instead of
-                # silently collapsing the estimate total to zero.
+                # No rate anywhere (org library, AI, or CSV library backup).
+                # Returning None for BOTH rate and confidence means "could not
+                # price", so the caller leaves the item's existing
+                # generation-time rate and confidence untouched and flags it
+                # for review instead of silently collapsing the estimate total
+                # to zero.
                 source = "unmatched"
                 rate_value = None
                 confidence = None
             else:
-                source = "ai_generated"
                 confidence = PricingConfidenceService.calculate_confidence(
                     source,
-                    ai_similarity=0.60,
+                    ai_similarity=0.60 if source == "ai_generated" else 0.0,
                 )
 
         pricing_result = {
@@ -91,19 +91,30 @@ class PricingPipeline:
         return queryset.order_by("-updated_at").first()
 
     def _generate_ai_rate(self, item):
+        """
+        Price an item using AI as the primary source, with the CSV rate
+        library (rate_library.csv) as a backup only when AI cannot price
+        the item.
+
+        Returns a tuple of (rate_value, source) where source is one of:
+        ``"ai_generated"``, ``"library_fallback"``, or ``(None, None)`` when
+        neither source could price the item.
+        """
         element = item.get("element") or item.get("description") or ""
         description = item.get("description") or element
         unit = item.get("unit") or ""
         location = item.get("location") or "Kaduna"
 
-        library_rate = get_rate_from_library(element, description=description, unit=unit, location=location)
-        if library_rate is not None:
-            return float(library_rate)
-
+        # AI pricing is the primary source.
         ai_rate = get_rate_from_ai(element, description, unit, location)
         if ai_rate is not None:
-            return float(ai_rate)
+            return float(ai_rate), "ai_generated"
+
+        # Fall back to the CSV rate library only when AI could not price the item.
+        library_rate = get_rate_from_library(element, description=description, unit=unit, location=location)
+        if library_rate is not None:
+            return float(library_rate), "library_fallback"
 
         # Nothing found. Return None to signal "unpriced" (distinct from a
         # genuine zero rate) so callers don't overwrite a valid rate with 0.
-        return None
+        return None, None

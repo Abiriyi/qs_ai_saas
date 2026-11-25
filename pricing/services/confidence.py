@@ -21,6 +21,9 @@ class PricingConfidenceService:
         elif rate_source == "ai_generated":
             score += 0.50
 
+        elif rate_source == "library_fallback":
+            score += 0.85
+
         if historical_match:
             score += 0.10
 

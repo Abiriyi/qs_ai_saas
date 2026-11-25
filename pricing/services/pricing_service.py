@@ -33,13 +33,15 @@ class PricingService:
         if rate_obj is not None and rate_obj.base_rate is not None:
             return float(rate_obj.base_rate)
 
-        library_rate = get_rate_from_library(element, description=description, unit=unit, location=location)
-        if library_rate is not None:
-            return float(library_rate)
-
+        # AI pricing is the primary source; the CSV rate library serves only
+        # as a backup when AI cannot price the item.
         ai_rate = get_rate_from_ai(element, description, unit, location)
         if ai_rate is not None:
             return float(ai_rate)
+
+        library_rate = get_rate_from_library(element, description=description, unit=unit, location=location)
+        if library_rate is not None:
+            return float(library_rate)
 
         return None
 

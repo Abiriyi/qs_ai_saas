@@ -8,7 +8,7 @@ was left at its default of ``0`` so the pricing-review screen always showed
 ``£0.00``. This service closes both gaps:
 
 * it re-prices every item through :class:`PricingPipeline` (org rate library →
-  CSV rate library → AI fallback), and
+  AI pricing → CSV rate library backup), and
 * it recalculates ``BoQ.total_amount`` as the sum of item amounts.
 """
 
