@@ -77,6 +77,17 @@ class UploadedDocument(BaseTenantModel):
         auto_now=True
     )
 
+    @property
+    def badge_class(self):
+        """Return the CSS badge class for the document's status."""
+        return {
+            "processed": "success",
+            "review_pending": "success",
+            "pending": "warning",
+            "processing": "info",
+            "failed": "danger",
+        }.get(self.status, "info")
+
     class Meta:
 
         ordering = ["-uploaded_at"]

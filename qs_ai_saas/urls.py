@@ -21,7 +21,18 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 from audit.views import audit_trail
-from core.views import auth_page, dashboard, delete_project, generate_boq, healthz, home, project_detail, project_pricing_review, project_workflow
+from core.views import (
+    auth_page,
+    dashboard,
+    delete_project,
+    generate_boq,
+    healthz,
+    home,
+    project_detail,
+    project_pricing_review,
+    project_workflow,
+    retry_document,
+)
 from tribunal.views import tribunal_case_detail, tribunal_dashboard
 
 urlpatterns = [
@@ -68,6 +79,11 @@ urlpatterns = [
     path('projects/new/', project_workflow, name='project_workflow'),
     path('projects/<uuid:pk>/', project_detail, name='project_detail'),
     path('projects/<uuid:pk>/generate-boq/', generate_boq, name='generate_boq'),
+    path(
+        'projects/<uuid:pk>/documents/<uuid:document_id>/retry/',
+        retry_document,
+        name='retry_document',
+    ),
     path('projects/<uuid:pk>/delete/', delete_project, name='delete_project'),
     path('projects/<uuid:pk>/pricing/', project_pricing_review, name='project_pricing_review'),
     path('audit/', audit_trail, name='audit_trail'),

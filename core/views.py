@@ -381,6 +381,50 @@ def generate_boq(request, pk):
 
 
 @login_required(login_url="login")
+def retry_document(request, pk, document_id):
+    """Re-queue a failed or stuck document for processing."""
+    project = get_object_or_404(
+        Project.objects.filter(organization=request.user.organization),
+        pk=pk,
+    )
+    document = get_object_or_404(
+        UploadedDocument.objects.filter(
+            organization=request.user.organization, project=project
+        ),
+        pk=document_id,
+    )
+
+    if request.method != "POST":
+        return redirect("project_detail", pk=project.pk)
+
+    # Only failed or stuck-processing documents can be retried.
+    if document.status not in {
+        DocumentStatus.FAILED,
+        DocumentStatus.PROCESSING,
+    }:
+        messages.error(
+            request,
+            f"'{document.original_filename}' is already {document.status|title}. "
+            f"No action needed.",
+        )
+        return redirect("project_detail", pk=project.pk)
+
+    document.status = DocumentStatus.PENDING
+    document.processing_error = ""
+    document.save(
+        update_fields=["status", "processing_error", "updated_at"]
+    )
+    process_document_task.delay(
+        str(document.id), org_id=str(document.organization_id)
+    )
+    messages.success(
+        request,
+        f"Re-queued '{document.original_filename}' for processing.",
+    )
+    return redirect("project_detail", pk=project.pk)
+
+
+@login_required(login_url="login")
 def delete_project(request, pk):
     """Delete a project and all its related documents and BoQs."""
     project = get_object_or_404(

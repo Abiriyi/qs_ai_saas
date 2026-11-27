@@ -695,6 +695,18 @@ th {
   color: #93c5fd;
 }
 
+.status-badge.danger {
+  background: rgba(248, 113, 113, 0.12);
+  color: #fca5a5;
+}
+
+.error-text {
+  color: #fca5a5;
+  font-size: 0.68rem;
+  margin-top: 0.2rem;
+  display: block;
+}
+
 .quick-actions {
   margin-top: 1rem;
 }

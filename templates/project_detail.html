@@ -118,8 +118,17 @@
                   <div class="document-meta">
                     <strong>{{ document.original_filename }}</strong>
                     <small>{{ document.uploaded_at|date:"d M Y, H:i" }}</small>
+                    {% if document.processing_error %}
+                      <br/><small class="error-text">{{ document.processing_error|truncatechars:120 }}</small>
+                    {% endif %}
                   </div>
-                  <span class="status-badge {% if document.status == 'processed' %}success{% elif document.status == 'pending' %}warning{% else %}info{% endif %}">{{ document.status|title }}</span>
+                  <span class="status-badge {{ document.badge_class }}">{{ document.status|title }}</span>
+                  {% if document.status == 'failed' or document.status == 'processing' %}
+                    <form method="post" action="{% url 'retry_document' project.id document.id %}" style="display: inline;" onsubmit="return confirm('Re-queue {{ document.original_filename }} for processing?');">
+                      {% csrf_token %}
+                      <button type="submit" class="btn btn-sm btn-ghost">Retry</button>
+                    </form>
+                  {% endif %}
                 </div>
               </a>
             {% endfor %}
