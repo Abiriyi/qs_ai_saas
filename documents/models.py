@@ -2,6 +2,10 @@
 
 import uuid
 from django.db import models
+from django.db.models.signals import post_delete
+from django.dispatch import receiver
+from django.core.files.storage import default_storage
+
 from core.models import BaseTenantModel
 from documents.enums import DocumentStatus
 from projects.models import Project
@@ -91,3 +95,14 @@ class UploadedDocument(BaseTenantModel):
     class Meta:
 
         ordering = ["-uploaded_at"]
+
+
+@receiver(post_delete, sender=UploadedDocument)
+def delete_document_file_on_delete(sender, instance, **kwargs):
+    """
+    Delete the actual PDF file from storage when an UploadedDocument record
+    is deleted. This prevents orphaned files from accumulating in the media
+    directory when documents or projects are removed.
+    """
+    if instance.file and default_storage.exists(instance.file.name):
+        default_storage.delete(instance.file.name)

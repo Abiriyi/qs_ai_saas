@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from django.core.files.storage import default_storage
 from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
@@ -426,7 +427,12 @@ def retry_document(request, pk, document_id):
 
 @login_required(login_url="login")
 def delete_project(request, pk):
-    """Delete a project and all its related documents and BoQs."""
+    """Delete a project and all its related documents and BoQs.
+
+    Deletes the actual PDF files from storage for every associated document
+    before cascading the database delete, so no orphaned files are left behind
+    in the media directory.
+    """
     project = get_object_or_404(
         Project.objects.filter(organization=request.user.organization),
         pk=pk,
@@ -436,6 +442,14 @@ def delete_project(request, pk):
         return redirect("project_detail", pk=project.pk)
 
     project_name = project.name
+
+    # Delete the actual PDF files from storage before the project cascade
+    # delete removes the document records. This ensures no orphaned files
+    # remain in the media directory.
+    for document in project.documents.all():
+        if document.file and default_storage.exists(document.file.name):
+            default_storage.delete(document.file.name)
+
     project.delete()  # CASCADE deletes related documents and BoQs
     messages.success(request, f"Project '{project_name}' has been deleted.")
     return redirect("dashboard")
