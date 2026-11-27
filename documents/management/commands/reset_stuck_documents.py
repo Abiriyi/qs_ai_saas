@@ -18,10 +18,10 @@ class Command(BaseCommand):
         parser.add_argument(
             "--minutes",
             type=int,
-            default=30,
+            default=10,
             help=(
                 "Minutes a document must remain in PROCESSING before it is "
-                "considered stuck and reset to PENDING. Default: 30."
+                "considered stuck and reset to PENDING. Default: 10."
             ),
         )
         parser.add_argument(
