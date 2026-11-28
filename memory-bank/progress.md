@@ -20,7 +20,7 @@
 - 2026-11-27: Re-ran the test suite with `DJANGO_SETTINGS_MODULE=qs_ai_saas.settings.test` (`source .venv/bin/activate`, `DJANGO_SECRET_KEY=test-secret-key-not-for-production python manage.py test -v 2`). Result: `Ran 85 tests in 3.054s`, `OK` (no failures, no errors). 0 fix iterations needed. Expected logged ERRORs: `audit.services` ValueError ("Cannot assign ... AuditEvent.organization must be a Organization instance") during a boq workflow review test, and OpenAI `gpt-3.5-turbo` deprecation 404 in the pricing pipeline — both come from mocked service-layer failure paths and confirm error handling works correctly; no actual test failures occurred.
 
 ## Next Steps
-
+- 2026-11-28: Re-ran the test suite with `DJANGO_SETTINGS_MODULE=qs_ai_saas.settings.test` (`source .venv/bin/activate`, `DJANGO_SECRET_KEY=test-secret-key-not-for-production python manage.py test -v 2`). Result: `Ran 85 tests in 2.669s`, `OK` (no failures, no errors). 0 fix iterations needed. Expected logged ERRORs: `audit.services` ValueError ("Cannot assign ... AuditEvent.organization must be a Organization instance") during a boq workflow review test, and OpenAI `gpt-3.5-turbo` deprecation 404 in the pricing pipeline — both come from mocked service-layer failure paths and confirm error handling works correctly; no actual test failures occurred.
 - No further test iterations needed — all 85 tests pass.
 
 ## Notes
